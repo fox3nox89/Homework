@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mathe Infinity 10.2</title>
+    <title>Mathe Legends 13.0</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
@@ -15,7 +15,9 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700;800&family=Patrick+Hand&display=swap');
         
-        body { font-family: 'Fredoka', sans-serif; background-color: #f0f9ff; color: #1e293b; user-select: none; }
+        :root { --bg-color: #f0f9ff; --primary: #3b82f6; --text: #1e293b; }
+        
+        body { font-family: 'Fredoka', sans-serif; background-color: var(--bg-color); color: var(--text); user-select: none; }
         .nunito { font-family: 'Nunito', sans-serif; }
         .handwritten { font-family: 'Patrick Hand', cursive; }
         
@@ -27,103 +29,105 @@
             text-align: center; border-radius: 8px; outline: none;
             transition: all 0.2s; box-shadow: 2px 2px 0px rgba(0,0,0,0.05);
         }
-        .grid-cell:focus { border-color: #3b82f6; transform: scale(1.1); z-index: 10; }
+        .grid-cell:focus { border-color: var(--primary); transform: scale(1.1); z-index: 10; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
         .grid-cell.readonly { background: transparent; border-color: transparent; box-shadow: none; font-weight: bold; cursor: default; }
         .grid-cell.carry { height: 30px; width: 45px; font-size: 1.2rem; color: #ef4444; border: 1px dashed #fca5a5; background: #fff1f2; margin-bottom: 2px; }
 
-        .pop-in { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        /* Shop Cards */
+        .item-card { transition: all 0.2s; position: relative; overflow: hidden; }
+        .item-card:active { transform: scale(0.95); }
+        .rarity-common { border-color: #cbd5e1; }
+        .rarity-rare { border-color: #3b82f6; background: linear-gradient(to bottom right, #eff6ff, #dbeafe); }
+        .rarity-epic { border-color: #a855f7; background: linear-gradient(to bottom right, #faf5ff, #f3e8ff); }
+        .rarity-legendary { border-color: #eab308; background: linear-gradient(to bottom right, #fefce8, #fef9c3); box-shadow: 0 0 15px rgba(234, 179, 8, 0.3); }
+        
+        .pop-in { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
-        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
-
+        
         .star-filled { color: #fbbf24; filter: drop-shadow(0 0 2px orange); }
         .star-empty { color: #e2e8f0; }
-        .highlight-step { background-color: #fef08a !important; border-color: #eab308 !important; transform: scale(1.15); z-index: 20; box-shadow: 0 0 15px rgba(234, 179, 8, 0.6); }
-        
-        /* Loading Screen */
-        #loading { position: fixed; top:0; left:0; width:100%; height:100%; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.5s; }
     </style>
 </head>
 <body class="min-h-screen">
-    
-    <div id="loading">
-        <div class="text-4xl mb-4">🚀</div>
-        <div class="text-2xl font-bold text-blue-600 animate-bounce">Lade Mathe Universum...</div>
-    </div>
     <div id="root"></div>
 
     <script type="text/babel">
-        // Sicherheits-Check: Wenn nach 2 Sekunden nichts passiert, Ladescreen weg
-        setTimeout(() => {
-            const l = document.getElementById('loading');
-            if(l) l.style.display = 'none';
-        }, 2000);
-
-        // Fehlertoleranz: Wir loggen nur in die Konsole, statt abzustürzen
-        window.onerror = function(msg, url, line) {
-            console.error("Fehler abgefangen:", msg);
-            // Wir lassen das Spiel weiterlaufen, statt den Screen zu löschen
-            return false; 
-        };
-
         const { useState, useEffect, useRef } = React;
 
-        // --- KONSTANTEN ---
-        const LEVELS = [0, 100, 300, 600, 1000, 1500, 2200, 3000, 4000, 5000, 10000];
+        // --- GROSSE DATENBANK ---
+        const LEVELS = [0, 200, 500, 1000, 2000, 4000, 7000, 12000, 20000, 35000, 50000, 100000];
+        
         const AVATARS = [
-            { id: 'bear', icon: '🐻', name: 'Bruno', cost: 0 },
-            { id: 'fox', icon: '🦊', name: 'Foxy', cost: 100 },
-            { id: 'robot', icon: '🤖', name: 'Robo', cost: 300 },
-            { id: 'alien', icon: '👽', name: 'Zorg', cost: 500 },
-            { id: 'king', icon: '👑', name: 'King', cost: 1000 }
+            // Starter (Kostenlos)
+            { id: 'bear', icon: '🐻', name: 'Bruno', cost: 0, rarity: 'common' },
+            { id: 'cat', icon: '🐱', name: 'Mimi', cost: 50, rarity: 'common' },
+            { id: 'dog', icon: '🐶', name: 'Bello', cost: 50, rarity: 'common' },
+            
+            // Rare (Cool)
+            { id: 'fox', icon: '🦊', name: 'Foxy', cost: 250, rarity: 'rare' },
+            { id: 'panda', icon: '🐼', name: 'Pando', cost: 300, rarity: 'rare' },
+            { id: 'tiger', icon: '🐯', name: 'Tigra', cost: 500, rarity: 'rare' },
+            { id: 'lion', icon: '🦁', name: 'Leo', cost: 600, rarity: 'rare' },
+            
+            // Epic (Teuer)
+            { id: 'robot', icon: '🤖', name: 'Robo X', cost: 1500, rarity: 'epic' },
+            { id: 'alien', icon: '👽', name: 'Zorg', cost: 2000, rarity: 'epic' },
+            { id: 'ghost', icon: '👻', name: 'Spooky', cost: 2500, rarity: 'epic' },
+            { id: 'ninja', icon: '🥷', name: 'Shadow', cost: 3000, rarity: 'epic' },
+            
+            // Legendary (Status Symbole)
+            { id: 'unicorn', icon: '🦄', name: 'Sparkle', cost: 8000, rarity: 'legendary' },
+            { id: 'dragon', icon: '🐲', name: 'Drago', cost: 12000, rarity: 'legendary' },
+            { id: 'king', icon: '👑', name: 'King', cost: 25000, rarity: 'legendary' },
+            { id: 'diamond', icon: '💎', name: 'Richie', cost: 50000, rarity: 'legendary' }
+        ];
+
+        const THEMES = [
+            { id: 'default', name: 'Standard', cost: 0, bg: '#f0f9ff' },
+            { id: 'dark', name: 'Nachtmodus', cost: 500, bg: '#1e293b', text: '#f8fafc' },
+            { id: 'pink', name: 'Candy Welt', cost: 1000, bg: '#fdf2f8' },
+            { id: 'green', name: 'Dschungel', cost: 1000, bg: '#f0fdf4' },
+            { id: 'gold', name: 'Luxus', cost: 5000, bg: '#fffbeb' },
         ];
 
         // --- HELPER ---
         const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
         const formatCH = (n) => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'");
         
-        const safeConfetti = () => {
-            if (window.confetti) window.confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        const playSound = (type) => {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            const ctx = new AudioContext();
+            const osc = ctx.createOscillator(); const gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            const now = ctx.currentTime;
+            
+            if (type === 'correct') {
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(600, now); osc.frequency.linearRampToValueAtTime(1000, now + 0.1);
+                gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now + 0.4);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now); osc.frequency.linearRampToValueAtTime(100, now + 0.2);
+                gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now + 0.3);
+            } else if (type === 'cash') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(1200, now); osc.frequency.exponentialRampToValueAtTime(2000, now + 0.2);
+                gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now + 0.4);
+            }
+            osc.start(now); osc.stop(now + 0.4);
         };
 
         const speak = (text) => {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
                 let clean = text.replace(/'/g, '').replace(/(\d)\.(\d)/g, '$1 Komma $2').replace(/(\d)\./g, '$1 ').replace(/\+/g, ' plus ').replace(/-/g, ' minus ').replace(/·/g, ' mal ').replace(/:/g, ' geteilt durch ').replace(/Fr\./g, ' Franken ').replace(/Rp\./g, ' Rappen ').replace(/=/g, ' gleich ');
-                const msg = new SpeechSynthesisUtterance(clean);
-                msg.lang = 'de-DE'; msg.rate = 0.95;
+                const msg = new SpeechSynthesisUtterance(clean); msg.lang = 'de-DE'; msg.rate = 0.95;
+                const voices = window.speechSynthesis.getVoices();
+                const v = voices.find(v => v.lang === 'de-DE' && (v.name.includes('Google') || v.name.includes('Premium')));
+                if (v) msg.voice = v;
                 window.speechSynthesis.speak(msg);
             }
         };
 
         // --- COMPONENTS ---
-        const GeometryShape = ({ type }) => {
-            const canvasRef = useRef(null);
-            useEffect(() => {
-                const cvs = canvasRef.current; const ctx = cvs.getContext('2d');
-                ctx.clearRect(0,0,200,200); ctx.lineWidth = 4; ctx.strokeStyle = '#3b82f6'; ctx.fillStyle = '#dbeafe';
-                ctx.beginPath();
-                if (type === 'quadrat') ctx.rect(50, 50, 100, 100);
-                else if (type === 'rechteck') ctx.rect(30, 60, 140, 80);
-                else if (type === 'kreis') ctx.arc(100, 100, 60, 0, 2*Math.PI);
-                else if (type === 'dreieck') { ctx.moveTo(100, 40); ctx.lineTo(160, 150); ctx.lineTo(40, 150); ctx.closePath(); }
-                ctx.fill(); ctx.stroke();
-            }, [type]);
-            return <canvas ref={canvasRef} width={200} height={200} className="mx-auto" />;
-        };
-
-        const Clock = ({ h, m }) => {
-            const mDeg = m * 6; const hDeg = h * 30 + m * 0.5;
-            return (
-                <div className="relative w-32 h-32 rounded-full border-4 border-slate-700 bg-white shadow-lg mx-auto my-4">
-                    {[...Array(12)].map((_, i) => <div key={i} className="absolute w-1 h-2 bg-slate-400 left-1/2 top-1 origin-bottom transform -translate-x-1/2" style={{transform: `rotate(${i*30}deg) translateY(2px)`}}></div>)}
-                    <div className="absolute w-1 h-10 bg-slate-800 left-1/2 top-1/2 origin-bottom transform -translate-x-1/2 -translate-y-full rounded" style={{transform: `translateX(-50%) rotate(${hDeg}deg) translateY(-50%)`}}></div>
-                    <div className="absolute w-0.5 h-12 bg-red-500 left-1/2 top-1/2 origin-bottom transform -translate-x-1/2 -translate-y-full rounded" style={{transform: `translateX(-50%) rotate(${mDeg}deg) translateY(-50%)`}}></div>
-                    <div className="absolute w-2 h-2 bg-slate-800 rounded-full left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
-                </div>
-            );
-        };
-
         const VisualTeacher = ({ type, a, b, onClose }) => {
             const sA = a.toString().split('').map(Number); const sB = b.toString().split('').map(Number);
             const cols = Math.max(sA.length, sB.length) + 1;
@@ -138,31 +142,45 @@
                     const sum = va + vb + c; const digit = sum % 10; const nextC = Math.floor(sum / 10);
                     if (i===0 && sum===0) continue;
                     let txt = `Einer: ${va} plus ${vb}`; if (c > 0) txt += ` plus ${c} (Behalte)`; txt += ` gibt ${sum}.`;
+                    if (nextC > 0) txt += ` Schreibe ${digit}, behalte ${nextC}.`; else txt += ` Schreibe ${digit}.`;
                     steps.push({ col: i, text: txt, carry: nextC, res: digit }); c = nextC;
                 } else { 
                     let lower = vb + c; let upper = va; let nextC = 0;
                     if (i===0 && lower===0 && upper===0) continue;
-                    let txt = lower > upper ? `Von ${lower} bis ${upper+10}. Schreibe ${upper+10-lower}, behalte 1.` : `Von ${lower} bis ${upper} sind ${upper-lower}. Schreibe ${upper-lower}.`;
+                    let txt = "";
+                    if (lower > upper) {
+                        txt = `Von ${lower} bis ${upper+10}. Das sind ${upper+10-lower}. Schreibe ${upper+10-lower}, behalte 1.`;
+                        nextC = 1;
+                    } else {
+                        txt = `Von ${lower} bis ${upper} sind ${upper-lower}. Schreibe ${upper-lower}.`;
+                        nextC = 0;
+                    }
                     steps.push({ col: i, text: txt, carry: nextC, res: (upper>=lower ? upper-lower : (upper+10)-lower) }); c = nextC;
                 }
             }
             const cur = steps[step]; const finished = step >= steps.length;
             useEffect(() => { if(cur && !finished) speak(cur.text); }, [step]);
+
             return (
-                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-3xl p-6 w-full max-w-lg shadow-2xl pop-in relative border-4 border-yellow-400">
-                        <div className="bg-blue-50 p-4 rounded-xl border border-blue-200 mb-6 min-h-[80px] flex items-center justify-center text-center font-medium text-slate-700">{finished ? "Alles klar? Jetzt du!" : cur.text}</div>
-                        <div className="flex justify-center mb-6 font-mono text-3xl">
+                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+                    <div className="bg-white p-6 rounded-3xl w-full max-w-md shadow-2xl border-4 border-yellow-400 pop-in relative text-center">
+                         <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 font-bold hover:text-red-500 text-2xl">×</button>
+                        <h2 className="font-bold text-xl text-yellow-600 mb-4 uppercase tracking-wider">👨‍🏫 Lehrer Modus</h2>
+                        <div className="bg-blue-50 p-4 rounded-xl mb-6 min-h-[80px] flex items-center justify-center font-bold text-slate-700 text-lg">{step>=steps.length ? "Alles klar? Jetzt du!" : cur?.text}</div>
+                        
+                        <div className="flex justify-center mb-6">
                             <div className="grid gap-1 justify-center" style={{gridTemplateColumns: `repeat(${cols}, 40px)`}}>
-                                {type==='add' && Array(cols).fill(0).map((_,i) => <div key={'c'+i} className="h-8 flex items-end justify-center text-red-500 text-sm">{step>0 && steps[step-1] && steps[step-1].col===i+1 && steps[step-1].carry>0 ? steps[step-1].carry : ''}</div>)}
-                                {pA.map((val,i) => <div key={'a'+i} className={`flex justify-center ${!finished && cur.col===i ? 'bg-yellow-200 rounded' : ''}`}>{val!==undefined?val:''}</div>)}
-                                {pB.map((val,i) => <div key={'b'+i} className={`flex justify-center relative ${!finished && cur.col===i ? 'bg-yellow-200 rounded' : ''}`}>{i===0 && <span className="absolute -left-6 font-bold text-slate-400">{type==='add'?'+':'-'}</span>}{val!==undefined?val:''}</div>)}
-                                {type==='sub' && Array(cols).fill(0).map((_,i) => <div key={'c'+i} className="h-8 flex items-start justify-center text-red-500 text-sm">{step>0 && steps[step-1] && steps[step-1].col===i+1 && steps[step-1].carry>0 ? steps[step-1].carry : ''}</div>)}
-                                <div className="col-span-full h-1 bg-slate-800 rounded"></div>
-                                {Array(cols).fill(0).map((_,i) => { const s = steps.find(x=>x.col===i); const show = s && step>steps.indexOf(s); return <div key={'r'+i} className="flex justify-center text-blue-600 font-bold">{finished && s ? s.res : (show ? s.res : '')}</div> })}
+                                {type==='add' && Array(cols).fill(0).map((_,i) => <div key={'c'+i} className="h-8 flex items-end justify-center text-red-500 text-sm font-bold">{step>0 && steps[step-1] && steps[step-1].col===i+1 && steps[step-1].carry>0 ? steps[step-1].carry : ''}</div>)}
+                                {pA.map((val,i) => <div key={'a'+i} className={`flex justify-center text-2xl font-bold ${cur && cur.col===i ? 'text-blue-600 bg-blue-50 rounded' : 'text-slate-400'}`}>{val!==undefined?val:''}</div>)}
+                                {pB.map((val,i) => <div key={'b'+i} className={`flex justify-center text-2xl font-bold relative ${cur && cur.col===i ? 'text-blue-600 bg-blue-50 rounded' : 'text-slate-400'}`}>{i===0 && <span className="absolute -left-6 text-slate-400">{type==='add'?'+':'-'}</span>}{val!==undefined?val:''}</div>)}
+                                {type==='sub' && Array(cols).fill(0).map((_,i) => <div key={'c'+i} className="h-8 flex items-start justify-center text-red-500 text-sm font-bold">{step>0 && steps[step-1] && steps[step-1].col===i+1 && steps[step-1].carry>0 ? steps[step-1].carry : ''}</div>)}
+                                <div className="col-span-full h-0.5 bg-slate-400 rounded"></div>
+                                {Array(cols).fill(0).map((_,i) => { const s = steps.find(x=>x.col===i); const show = s && step>steps.indexOf(s); return <div key={'r'+i} className="flex justify-center text-green-600 font-bold text-2xl">{show ? s.res : ''}</div> })}
                             </div>
                         </div>
-                        <div className="flex justify-end">{!finished ? <button onClick={()=>setStep(s=>s+1)} className="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold">Weiter ▶</button> : <button onClick={onClose} className="bg-green-500 text-white px-6 py-2 rounded-xl font-bold">Verstanden!</button>}</div>
+                        <button onClick={step>=steps.length ? onClose : ()=>setStep(s=>s+1)} className="w-full bg-blue-600 text-white py-3 rounded-xl text-lg shadow-lg active:scale-95 font-bold">
+                            {step>=steps.length ? "Verstanden!" : "Weiter ▶"}
+                        </button>
                     </div>
                 </div>
             );
@@ -172,139 +190,207 @@
             const sA = a.toString().split('').map(Number); const sB = b.toString().split('').map(Number);
             const cols = Math.max(sA.length, sB.length) + 1;
             const [res, setRes] = useState(Array(cols).fill('')); const [carry, setCarry] = useState(Array(cols).fill(''));
-            const [status, setStatus] = useState('input'); const [teacher, setTeacher] = useState(false);
-            const handleInput = (arr, setArr, i, val) => { if(!/^\d*$/.test(val)) return; const n = [...arr]; n[i] = val.slice(-1); setArr(n); setStatus('input'); };
+            const [teacher, setTeacher] = useState(false);
+            const handleInput = (arr, setArr, i, val) => { if(!/^\d*$/.test(val)) return; const n=[...arr]; n[i]=val.slice(-1); setArr(n); };
             const check = () => {
-                let correct = true; let c = 0;
-                for(let i=cols-1; i>=0; i--) {
-                    const va = sA[sA.length-(cols-i)]||0; const vb = sB[sB.length-(cols-i)]||0;
-                    let tr, tc;
-                    if(type === 'add') { const sum = va+vb+c; tr = sum%10; tc = Math.floor(sum/10); } 
-                    else { let l = vb+c; let u = va; if(l>u) { u+=10; tc=1; } else { tc=0; } tr = u-l; }
-                    if(!(i===0 && tr===0 && res[i]==='') && parseInt(res[i]||0) !== tr) correct = false;
-                    if(i>0) { const uc = parseInt(carry[i-1]||0); const nc = type==='add' ? Math.floor((va+vb+c)/10) : (vb+c>va?1:0); if(uc!==nc && !(nc===0 && carry[i-1]==='')) correct = false; c = nc; }
-                }
-                if(correct) { 
-                    setStatus('correct'); 
-                    onCorrect(); // WICHTIG: Trigger Success!
-                } else { setStatus('wrong'); }
+                const userRes = parseInt(res.join(''));
+                if (userRes === (type === 'add' ? a + b : a - b)) onCorrect(); else { playSound('wrong'); alert("Noch nicht ganz richtig."); }
             };
             return (
-                <div className={`bg-white/90 p-6 rounded-xl border-4 ${status==='wrong'?'border-red-400 shake':'border-slate-200'} shadow-xl relative inline-block`}>
-                    <button onClick={()=>setTeacher(true)} className="absolute -top-3 -right-3 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full font-bold shadow-lg border-2 border-yellow-200 animate-bounce z-10 text-sm flex gap-1 items-center"><i className="fa-solid fa-lightbulb"></i> <span>Hilfe</span></button>
+                <div className="bg-white/90 p-6 rounded-xl border-4 border-blue-200 shadow-xl inline-block relative">
                     {teacher && <VisualTeacher type={type} a={a} b={b} onClose={()=>setTeacher(false)} />}
-                    <div className="grid gap-1 justify-center" style={{gridTemplateColumns: `repeat(${cols}, 45px)`}}>
-                        {type==='add' && carry.map((v,i) => (<div key={'c'+i} className="flex justify-center items-end h-[30px]">{i<cols-1 && <input className="grid-cell carry" value={v} onChange={e=>handleInput(carry, setCarry, i, e.target.value)} placeholder="¹"/>}</div>))}
+                    <button onClick={()=>setTeacher(true)} className="absolute -top-4 -right-4 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full font-bold shadow-lg border-2 border-yellow-200 z-10 text-sm flex gap-1 items-center hover:scale-110 transition">💡 Hilfe</button>
+                    <div className="grid gap-1 justify-center mb-6" style={{gridTemplateColumns: `repeat(${cols}, 45px)`}}>
+                        {type==='add' && carry.map((v,i) => <div key={'c'+i} className="flex justify-center items-end h-[30px]">{i<cols-1 && <input className="grid-cell carry" value={v} onChange={e=>handleInput(carry, setCarry, i, e.target.value)} placeholder="¹"/>}</div>)}
                         {Array(cols).fill(0).map((_,i) => <div key={'a'+i} className="grid-cell readonly flex items-center justify-center text-2xl">{sA[sA.length-(cols-i)] ?? ''}</div>)}
-                        {Array(cols).fill(0).map((_,i) => <div key={'b'+i} className="grid-cell readonly flex items-center justify-center text-2xl relative">{i===0 && <span className="absolute -left-8 font-bold text-slate-400 text-3xl">{type==='add'?'+':'-'}</span>}{sB[sB.length-(cols-i)] ?? ''}</div>)}
-                        {type==='sub' && carry.map((v,i) => (<div key={'c'+i} className="flex justify-center items-start h-[30px]">{i<cols-1 && <input className="grid-cell carry" value={v} onChange={e=>handleInput(carry, setCarry, i, e.target.value)} placeholder="1"/>}</div>))}
-                        <div className="col-span-full h-1 bg-slate-800 rounded my-1"></div>
-                        {res.map((v,i) => <input key={'r'+i} className={`grid-cell font-bold text-blue-600 border-2 ${status==='correct'?'border-green-500 bg-green-50':''}`} value={v} onChange={e=>handleInput(res, setRes, i, e.target.value)} />)}
+                        {Array(cols).fill(0).map((_,i) => <div key={'b'+i} className="grid-cell readonly flex items-center justify-center text-2xl relative">{i===0 && <span className="absolute -left-6 font-bold text-slate-400 text-3xl">{type==='add'?'+':'-'}</span>}{sB[sB.length-(cols-i)] ?? ''}</div>)}
+                        {type==='sub' && carry.map((v,i) => <div key={'c'+i} className="flex justify-center items-start h-[30px]">{i<cols-1 && <input className="grid-cell carry" value={v} onChange={e=>handleInput(carry, setCarry, i, e.target.value)} placeholder="1"/>}</div>)}
+                        <div className="col-span-full h-1 bg-slate-800 rounded"></div>
+                        {res.map((v,i) => <input key={'r'+i} className="grid-cell font-bold text-blue-600 border-2 border-blue-200" value={v} onChange={e=>handleInput(res, setRes, i, e.target.value)} />)}
                     </div>
-                    <button onClick={check} className="mt-4 w-full bg-blue-600 text-white font-bold py-2 rounded-lg shadow hover:bg-blue-700">Prüfen</button>
+                    <button onClick={check} className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg active:scale-95 text-xl">Prüfen ✅</button>
                 </div>
             );
+        };
+        
+        const Clock = ({ h, m }) => {
+            const mDeg = m * 6; const hDeg = h * 30 + m * 0.5;
+            return (
+                <div className="relative w-40 h-40 rounded-full border-8 border-slate-700 bg-white shadow-xl mx-auto my-4">
+                    {[...Array(12)].map((_, i) => <div key={i} className="absolute w-1 h-3 bg-slate-400 left-1/2 top-1 origin-bottom transform -translate-x-1/2" style={{transform: `rotate(${i*30}deg) translateY(2px)`}}></div>)}
+                    <div className="absolute w-1.5 h-12 bg-slate-800 left-1/2 top-1/2 origin-bottom transform -translate-x-1/2 -translate-y-full rounded-full" style={{transform: `translateX(-50%) rotate(${hDeg}deg) translateY(-50%)`}}></div>
+                    <div className="absolute w-1 h-16 bg-red-500 left-1/2 top-1/2 origin-bottom transform -translate-x-1/2 -translate-y-full rounded-full" style={{transform: `translateX(-50%) rotate(${mDeg}deg) translateY(-50%)`}}></div>
+                    <div className="absolute w-3 h-3 bg-slate-800 rounded-full left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+                </div>
+            );
+        };
+        
+        const GeometryShape = ({ type }) => {
+            const canvasRef = useRef(null);
+            useEffect(() => {
+                const cvs = canvasRef.current; const ctx = cvs.getContext('2d');
+                ctx.clearRect(0,0,200,200); ctx.lineWidth = 4; ctx.strokeStyle = '#3b82f6'; ctx.fillStyle = '#dbeafe';
+                ctx.beginPath();
+                if (type === 'quadrat') ctx.rect(50, 50, 100, 100); else if (type === 'rechteck') ctx.rect(30, 60, 140, 80); else if (type === 'kreis') ctx.arc(100, 100, 60, 0, 2*Math.PI); else if (type === 'dreieck') { ctx.moveTo(100, 40); ctx.lineTo(160, 150); ctx.lineTo(40, 150); ctx.closePath(); } else if (type === 'winkel') { ctx.moveTo(150, 50); ctx.lineTo(50, 50); ctx.lineTo(50, 150); ctx.moveTo(50, 70); ctx.lineTo(70, 70); ctx.lineTo(70, 50); ctx.stroke(); ctx.beginPath(); ctx.arc(60, 60, 2, 0, 2*Math.PI); ctx.fill(); return; }
+                ctx.fill(); ctx.stroke();
+            }, [type]);
+            return <canvas ref={canvasRef} width={200} height={200} className="mx-auto drop-shadow-md" />;
         };
 
         // --- MAIN APP ---
         const App = () => {
-            const [user, setUser] = useState({ name: 'Gast', coins: 0, xp: 0, level: 1, avatar: 'bear', mastery: {} });
+            const [user, setUser] = useState({name:'Gast', coins:0, xp:0, level:1, avatar:'bear', theme:'default', stats:{total:0, correct:0, earned:0}, unlockedAvatars:['bear']});
             const [view, setView] = useState('menu');
             const [problem, setProblem] = useState(null);
             const [input, setInput] = useState('');
             const [feedback, setFeedback] = useState(null);
-            
+
             useEffect(() => { 
-                const s = localStorage.getItem('math_inf_final'); if(s) setUser(JSON.parse(s)); 
-                document.getElementById('loading').style.display = 'none'; 
+                const s = localStorage.getItem('math_v13'); 
+                if(s) setUser(JSON.parse(s)); 
             }, []);
-            const save = (u) => { setUser(u); localStorage.setItem('math_inf_final', JSON.stringify(u)); };
+            
+            const save = (u) => { setUser(u); localStorage.setItem('math_v13', JSON.stringify(u)); };
+
             const updateProgress = (correct, topic) => {
-                const u = { ...user };
-                if (correct) { u.coins += 15; u.xp += 20; if(topic) u.mastery[topic] = (u.mastery[topic] || 0) + 1; if(u.xp >= LEVELS[u.level]) { u.level++; alert("LEVEL UP! 🎉"); } }
-                else u.coins += 2;
+                const u = { ...user, stats: {...user.stats, total: user.stats.total+1} };
+                if(correct) { 
+                    const reward = 15 + Math.floor(u.level * 0.5); // Skalierung
+                    u.coins+=reward; u.xp+=20; u.stats.correct++; u.stats.earned+=reward;
+                    if(topic) u.mastery = {...u.mastery, [topic]: (u.mastery?.[topic]||0)+1};
+                    if(u.xp >= LEVELS[u.level]) { u.level++; alert("LEVEL UP! 🎉"); }
+                    if(window.confetti) window.confetti();
+                } else u.coins+=2;
                 save(u);
             };
 
             const startProblem = (t) => {
                 const r = randomInt; let p = { topic: t };
-                if (t === 'add') { const a = r(100,50000); const b = r(100,40000); p={...p, q:`${formatCH(a)} + ${formatCH(b)}`, type:'written', op:'add', a, b}; }
-                else if (t === 'sub') { const a = r(1000,90000); const b = r(100,a-100); p={...p, q:`${formatCH(a)} - ${formatCH(b)}`, type:'written', op:'sub', a, b}; }
-                else if (t === 'mul') { const a = r(2,9); const b = r(100,2000); p={...p, q:`${a} · ${b}`, a:a*b, type:'calc', hint:`Tipp: ${a} · ${Math.floor(b/100)*100} ...`}; }
-                else if (t === 'div') { const d = r(2,9); const res = r(10,200); p={...p, q:`${d*res} : ${d}`, a:res, type:'calc', hint:`Zerlege ${d*res} in einfache Stücke.`}; }
-                else if (t === '1x1') { const a = r(2,9); const b = r(2,9); p={...p, q:`${a} · ${b}`, a:a*b, type:'calc'}; }
-                else if (t === 'len') { const m = r(1,3); if(m===1) { const km=r(1,10); p={...p, q:`${km} km = ... m`, a:km*1000, type:'calc', unit:'m', hint:"1 km = 1000 m"}; } else { const cm=r(1,99); p={...p, q:`${cm} cm = ... mm`, a:cm*10, type:'calc', unit:'mm', hint:"1 cm = 10 mm"}; } }
-                else if (t === 'weight') { const m = r(1,2); if(m===1) { const t=r(1,10); p={...p, q:`${t} t = ... kg`, a:t*1000, type:'calc', unit:'kg', hint:"1 t = 1000 kg"}; } else { const kg=r(1,9); const g=r(1,999); p={...p, q:`${kg} kg ${g} g = ... g`, a:kg*1000+g, type:'calc', unit:'g', hint:"1 kg = 1000 g"}; } }
-                else if (t === 'liq') { const l=r(1,10); p={...p, q:`${l} l = ... dl`, a:l*10, type:'calc', unit:'dl', hint:"1 l = 10 dl"}; }
-                else if (t === 'time') { const h=r(1,11); const min=r(0,11)*5; p={...p, q:<Clock h={h} m={min}/>, text:"Wie spät ist es?", a:`${h}:${min.toString().padStart(2,'0')}`, type:'time', hint:"Stundenzeiger (kurz), Minutenzeiger (lang)"}; }
-                else if (t === 'money') { const p1 = (r(1, 50) + r(0,9)*0.10).toFixed(2); const g = Math.ceil(p1/10)*10; p={...p, q:`Preis: Fr. ${p1}`, text:`Du gibst Fr. ${g.toFixed(2)}. Rückgeld?`, a:(g-p1).toFixed(2), type:'calc', unit:'Fr.', hint:"Rechne: Gegeben minus Preis"}; }
-                else if (t === 'geo') { const shapes = ['quadrat','rechteck','kreis','dreieck','winkel']; const s = shapes[r(0,4)]; p={...p, type:'geo', target:s, q:"Welche Form ist das?", opts:[...shapes.filter(x=>x!==s).sort(()=>Math.random()-0.5).slice(0,3), s].sort(()=>Math.random()-0.5)}; }
-                else if (t === 'num') { const m = r(1,3); const n = r(1000,9999); if(m===1) { p={...p, q:`${formatCH(n)} + 10`, a:n+10, type:'calc'}; } else { const n1=r(100,900); const n2=r(100,900); p={...p, q:`${n1} ... ${n2}`, a:n1>n2?'>':n1<n2?'<':'=', type:'text'}; } }
-                else if (t === 'seq') { const start = r(2,20); const step = r(2,10); p={...p, q:`${start}, ${start+step}, ${start+step*2}, ...`, a:start+step*3, type:'calc', hint:`Immer plus ${step}`}; }
+                
+                // GENERATOR
+                if(t==='add') { const a=r(100,50000); const b=r(100,40000); p={...p, q:`${formatCH(a)} + ${formatCH(b)}`, type:'written', op:'add', a, b}; }
+                else if(t==='sub') { const a=r(1000,90000); const b=r(100,a-100); p={...p, q:`${formatCH(a)} - ${formatCH(b)}`, type:'written', op:'sub', a, b}; }
+                else if(t==='mul') { const a=r(2,9); const b=r(100,2000); p={...p, q:`${a} · ${b}`, a:a*b, type:'calc', hint:`Zerlege: ${a} · ${Math.floor(b/100)*100} ...`}; }
+                else if(t==='div') { const d=r(2,9); const res=r(10,200); p={...p, q:`${d*res} : ${d}`, a:res, type:'calc', hint:`Zerlege die Zahl.`}; }
+                else if(t==='money') { const p1=(r(1, 50) + r(0,9)*0.10).toFixed(2); const g=Math.ceil(p1/10)*10; p={...p, q:`Preis: Fr. ${p1}. Gegeben: Fr. ${g}.00`, a:(g-p1).toFixed(2), type:'calc', unit:'Fr.', hint:"Ergänzen!"}; }
+                else if(t==='weight') { const m=r(1,2); if(m===1){const t=r(1,10); p={...p, q:`${t} t = ... kg`, a:t*1000, type:'calc', unit:'kg'};} else{const k=r(1,10); p={...p, q:`${k} kg = ... g`, a:k*1000, type:'calc', unit:'g'};} }
+                else if(t==='len') { const m=r(1,3); if(m===1){const k=r(1,10); p={...p, q:`${k} km = ... m`, a:k*1000, type:'calc', unit:'m'};} else{const c=r(10,200); p={...p, q:`${c} cm = ... mm`, a:c*10, type:'calc', unit:'mm'};} }
+                else if(t==='liq') { const m=r(1,3); if(m===1){const l=r(1,10); p={...p, q:`${l} l = ... dl`, a:l*10, type:'calc', unit:'dl'};} else{const l=r(1,5); p={...p, q:`${l} l = ... ml`, a:l*1000, type:'calc', unit:'ml'};} }
+                else if(t==='time') { const h=r(1,11); const min=r(0,11)*5; p={...p, q:<Clock h={h} m={min}/>, text:"Wie spät ist es?", a:`${h}:${min.toString().padStart(2,'0')}`, type:'time', hint:"Digital h:mm"}; }
+                else if(t==='geo') { const shapes = ['quadrat','rechteck','kreis','dreieck','winkel']; const s = shapes[r(0,4)]; p={...p, type:'geo', target:s, q:"Welche Form ist das?", opts:[...shapes.filter(x=>x!==s).sort(()=>Math.random()-0.5).slice(0,3), s].sort(()=>Math.random()-0.5)}; }
+                
                 setProblem(p); setView('game'); setInput(''); setFeedback(null);
             };
 
-            // SUCCESS HANDLER
-            const handleWrittenSuccess = () => {
-                setFeedback('correct'); 
-                updateProgress(true, problem.topic);
-                safeConfetti();
-            };
-
+            const handleSuccess = () => { setFeedback('correct'); updateProgress(true, problem.topic); playSound('correct'); };
             const checkSimple = (val) => {
                 const userVal = val ? val : input.replace(',','.');
                 const sol = problem.a ? problem.a.toString() : problem.target;
                 let correct = false;
                 if (problem.type === 'time') { if (userVal == sol || userVal == '0'+sol) correct = true; }
                 else if (userVal.toLowerCase() == sol.toLowerCase()) correct = true;
-                if (correct) handleWrittenSuccess(); else { setFeedback('wrong'); updateProgress(false, problem.topic); }
+
+                if (correct) { handleSuccess(); }
+                else { setFeedback('wrong'); playSound('wrong'); updateProgress(false, problem.topic); }
             };
 
-            const Stars = ({ topic }) => { const m = user.mastery[topic] || 0; return <div className="flex gap-1">{[...Array(3)].map((_,i) => <span key={i} className={i<(m>50?3:m>20?2:m>5?1:0) ? "star-filled" : "star-empty"}>★</span>)}</div> };
+            const Stars = ({t}) => { const m = (user.mastery && user.mastery[t]) || 0; return <div className="flex text-xs gap-0.5">{[...Array(3)].map((_,i)=><i key={i} className={`fa-solid fa-star ${i<(m>30?3:m>10?2:m>2?1:0)?'text-yellow-400':'text-slate-300'}`}></i>)}</div>; };
 
-            if (view === 'menu') return (
-                <div className="min-h-screen p-4 max-w-4xl mx-auto">
-                    <header className="bg-white p-4 rounded-3xl shadow-sm mb-6 flex justify-between items-center">
-                        <div className="flex items-center gap-3">
-                            <div className="text-4xl bg-blue-50 p-2 rounded-xl">{AVATARS.find(a=>a.id===user.avatar)?.icon}</div>
-                            <div><div className="font-bold text-lg">{user.name}</div><div className="text-xs text-slate-400 font-bold">Lvl {user.level}</div></div>
+            if(view==='menu') return (
+                <div className="p-4 max-w-3xl mx-auto pb-20">
+                    <header className="glass-panel p-4 mb-8 flex justify-between items-center bg-white rounded-2xl shadow">
+                        <div className="flex items-center gap-4 cursor-pointer" onClick={()=>setView('profile')}>
+                            <div className="text-5xl bg-blue-50 p-2 rounded-2xl shadow-sm">{AVATARS.find(a=>a.id===user.avatar)?.icon}</div>
+                            <div>
+                                <div className="font-black text-xl text-slate-800">{user.name}</div>
+                                <div className="text-sm text-slate-500 font-bold">Level {user.level}</div>
+                            </div>
                         </div>
-                        <div className="flex gap-3"><a href="index.html" className="bg-slate-100 text-slate-500 px-4 py-2 rounded-xl font-bold hover:bg-slate-200 transition">🏠 Zentrale</a><button onClick={()=>setView('shop')} className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-xl font-bold flex items-center gap-2 shadow-sm hover:scale-105 transition"><span>{user.coins}</span> 💰 Shop</button></div>
+                        <div className="flex gap-3">
+                            <a href="index.html" className="bg-slate-100 text-slate-500 px-4 py-3 rounded-xl font-bold hover:bg-slate-200 transition flex items-center gap-2"><i className="fa-solid fa-house"></i></a>
+                            <button onClick={()=>setView('shop')} className="bg-yellow-100 text-yellow-800 px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-sm hover:scale-105 transition"><span>{user.coins}</span> 💰</button>
+                        </div>
                     </header>
-                    <div className="space-y-6">
-                        {[{t:'Schriftlich', items:[{id:'add',l:'Plus',i:'➕',c:'blue'},{id:'sub',l:'Minus',i:'➖',c:'red'}]},{t:'Kopfrechnen', items:[{id:'1x1',l:'1x1',i:'⚡',c:'yellow'},{id:'mul',l:'Mal',i:'✖️',c:'purple'},{id:'div',l:'Geteilt',i:'➗',c:'pink'}]},{t:'Grössen', items:[{id:'len',l:'Längen',i:'📏',c:'teal'},{id:'weight',l:'Gewichte',i:'⚖️',c:'orange'},{id:'liq',l:'Hohlmasse',i:'🥛',c:'cyan'},{id:'time',l:'Zeit',i:'⏱️',c:'indigo'}]},{t:'Zahlen', items:[{id:'num',l:'Zahlenraum',i:'💯',c:'gray'},{id:'seq',l:'Folgen',i:'🔢',c:'emerald'},{id:'money',l:'Geld',i:'💰',c:'yellow'},{id:'geo',l:'Geometrie',i:'📐',c:'green'}]}].map((sec, idx) => (
-                            <section key={idx}><h2 className="font-bold text-slate-400 text-xs uppercase tracking-widest mb-3 ml-2">{sec.t}</h2><div className="grid grid-cols-2 gap-3">{sec.items.map(b => (<button key={b.id} onClick={()=>startProblem(b.id)} className={`bg-white p-4 rounded-2xl shadow-sm border-l-8 border-${b.c}-500 hover:shadow-lg transition active:scale-95 text-left`}><div className="flex justify-between items-start mb-2"><span className="text-3xl">{b.i}</span><Stars topic={b.id} /></div><div className="font-bold text-slate-700">{b.l}</div></button>))}</div></section>
-                        ))}
+                    
+                    <div className="space-y-8">
+                        <section>
+                            <h2 className="font-black text-slate-400 text-sm uppercase tracking-widest mb-4 ml-2">Grundrechenarten</h2>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {[{id:'add',n:'Schriftlich Plus',sub:'Bis 100k',c:'blue'},{id:'sub',n:'Schriftlich Minus',sub:'Ergänzen',c:'red'},{id:'mul',n:'Mal-Rechnen',sub:'Halbschriftlich',c:'purple'},{id:'div',n:'Geteilt-Rechnen',sub:'Zerlegen',c:'pink'}].map(x=>(
+                                    <button key={x.id} onClick={()=>startProblem(x.id)} className={`glass-panel p-5 text-left flex justify-between items-center hover:scale-[1.02] transition bg-white rounded-xl shadow-sm border-l-8 border-${x.c}-500`}>
+                                        <div><div className={`font-bold text-lg text-slate-700 group-hover:text-${x.c}-600`}>{x.n}</div><div className="text-sm text-slate-400">{x.sub}</div></div>
+                                        <Stars t={x.id}/>
+                                    </button>
+                                ))}
+                            </div>
+                        </section>
+
+                        <section>
+                            <h2 className="font-black text-slate-400 text-sm uppercase tracking-widest mb-4 ml-2">Grössen & Sachrechnen</h2>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                {[{id:'money',n:'Geld',i:'💰'},{id:'len',n:'Längen',i:'📏'},{id:'weight',n:'Gewicht',i:'⚖️'},{id:'liq',n:'Hohlmasse',i:'🥛'},{id:'time',n:'Zeit',i:'⏱️'},{id:'geo',n:'Geometrie',i:'📐'}].map(x=>(
+                                    <button key={x.id} onClick={()=>startProblem(x.id)} className="glass-panel p-4 text-center hover:scale-105 transition bg-white rounded-xl shadow-sm"><div className="text-3xl mb-2">{x.i}</div><div className="font-bold text-slate-700">{x.n}</div></button>
+                                ))}
+                            </div>
+                        </section>
                     </div>
                 </div>
             );
 
             if (view === 'shop') return (
                 <div className="min-h-screen bg-yellow-50 p-4">
-                    <div className="max-w-2xl mx-auto">
-                        <div className="flex justify-between items-center mb-6"><button onClick={()=>setView('menu')} className="font-bold text-slate-500">◀ Zurück</button><div className="font-bold text-xl text-yellow-600">{user.coins} 💰</div></div>
-                        <div className="grid grid-cols-4 gap-3 mb-8">{AVATARS.map(a => { const owned = (user.unlockedAvatars || ['bear']).includes(a.id); return <button key={a.id} disabled={!owned && user.coins<a.cost} onClick={()=>{ if(!owned) { save({...user, coins:user.coins-a.cost, unlockedAvatars:[...(user.unlockedAvatars||['bear']), a.id], avatar:a.id}); safeConfetti(); } else save({...user, avatar:a.id}); }} className={`bg-white p-3 rounded-xl flex flex-col items-center shadow-sm ${!owned ? 'opacity-50' : user.avatar===a.id ? 'ring-4 ring-green-400' : ''}`}><span className="text-4xl mb-2">{a.icon}</span>{!owned && <span className="text-xs font-bold bg-yellow-100 px-2 rounded text-yellow-800">{a.cost}</span>}</button>})}</div>
+                    <div className="max-w-3xl mx-auto">
+                        <div className="flex justify-between items-center mb-8"><button onClick={()=>setView('menu')} className="bg-white px-4 py-2 rounded-xl font-bold text-slate-600 shadow-sm">◀ Zurück</button><div className="font-black text-2xl text-yellow-600 bg-white px-6 py-2 rounded-xl shadow-sm">{user.coins} 💰</div></div>
+                        <h1 className="text-4xl font-black text-slate-800 mb-8 text-center">Avatar Shop</h1>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            {AVATARS.map(a => {
+                                const owned = (user.unlockedAvatars || ['bear']).includes(a.id);
+                                const selected = user.avatar === a.id;
+                                return <button key={a.id} disabled={!owned && user.coins<a.cost} onClick={()=>{ if(!owned) { save({...user, coins:user.coins-a.cost, unlockedAvatars:[...(user.unlockedAvatars||['bear']), a.id], avatar:a.id}); playSound('cash'); safeConfetti(); } else save({...user, avatar:a.id}); }} className={`bg-white p-6 rounded-3xl flex flex-col items-center shadow-sm item-card border-4 ${selected ? 'border-green-400 bg-green-50' : `rarity-${a.rarity}`} ${!owned && user.coins<a.cost ? 'opacity-50 grayscale' : ''}`}><div className="text-6xl mb-4">{a.icon}</div><div className="font-bold text-lg text-slate-700">{a.name}</div><div className={`font-bold text-sm mt-2 px-3 py-1 rounded-full ${owned ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-800'}`}>{owned ? 'Besitz' : `${a.cost} 💰`}</div></button>
+                            })}
+                        </div>
+                    </div>
+                </div>
+            );
+
+            if (view === 'profile') return (
+                <div className="min-h-screen bg-slate-100 p-4 flex items-center justify-center">
+                    <div className="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md text-center">
+                        <h2 className="text-3xl font-black text-slate-800 mb-6">Statistik</h2>
+                        <div className="grid grid-cols-2 gap-4 mb-8">
+                            <div className="bg-blue-50 p-4 rounded-2xl"><div className="text-3xl font-bold text-blue-600">{user.stats?.total || 0}</div><div className="text-xs text-slate-500 uppercase font-bold">Gelöst</div></div>
+                            <div className="bg-green-50 p-4 rounded-2xl"><div className="text-3xl font-bold text-green-600">{user.stats?.earned || 0}</div><div className="text-xs text-slate-500 uppercase font-bold">Verdient</div></div>
+                        </div>
+                        <h3 className="font-bold text-slate-400 mb-4 uppercase text-sm">Trophäen Sammlung</h3>
+                        <div className="flex gap-2 justify-center flex-wrap mb-8">
+                             {(user.stats?.total > 10) && <span className="text-4xl" title="Anfänger">🥉</span>}
+                             {(user.stats?.total > 50) && <span className="text-4xl" title="Fleissig">🥈</span>}
+                             {(user.stats?.total > 100) && <span className="text-4xl" title="Profi">🥇</span>}
+                             {(user.stats?.total > 500) && <span className="text-4xl" title="Legende">🏆</span>}
+                             {(!user.stats?.total || user.stats.total <= 10) && <span className="text-slate-300 italic text-sm">Löse mehr Aufgaben...</span>}
+                        </div>
+                        <button onClick={()=>setView('menu')} className="btn-primary w-full py-3 rounded-xl shadow-lg">Cool!</button>
                     </div>
                 </div>
             );
 
             if (view === 'game') return (
                 <div className="min-h-screen flex flex-col items-center justify-center p-4">
-                    <div className="w-full max-w-lg bg-white rounded-3xl shadow-xl p-6 relative pop-in">
-                        <button onClick={()=>setView('menu')} className="absolute top-4 left-4 text-slate-300 hover:text-slate-500 font-bold">✕</button>
-                        {!feedback && (problem.type === 'calc' || problem.type === 'time' || problem.type === 'written') ? <button onClick={()=>{ if(problem.hint) alert(problem.hint); }} className="absolute top-4 right-4 text-yellow-500 hover:text-yellow-600 font-bold bg-yellow-50 p-2 rounded-lg shadow-sm">💡</button> : null}
-                        
+                    <div className="w-full max-w-lg glass-panel p-6 relative pop-in bg-white rounded-3xl">
+                        <button onClick={()=>setView('menu')} className="absolute top-4 left-4 text-slate-400 hover:text-slate-600 font-bold text-xl w-10 h-10 bg-slate-100 rounded-full shadow-sm flex items-center justify-center">✕</button>
+                        {!feedback && (problem.type === 'calc' || problem.type === 'time' || problem.type === 'written') ? <button onClick={()=>{ if(problem.hint) alert(problem.hint); }} className="absolute top-4 right-4 text-yellow-600 hover:text-yellow-700 font-bold bg-yellow-100 px-4 py-2 rounded-full shadow-sm flex items-center gap-2"><i className="fa-solid fa-lightbulb"></i> Tipp</button> : null}
                         {feedback ? (
-                            <div className="pop-in text-center mt-8">
-                                {feedback === 'correct' ? <div><div className="text-6xl mb-2">🎉</div><h3 className="text-green-600 font-bold text-xl mb-4">Richtig!</h3><button onClick={()=>startProblem(problem.topic)} className="bg-blue-600 text-white font-bold px-8 py-3 rounded-xl shadow-lg hover:bg-blue-700 active:scale-95 animate-pulse">Weiter ➜</button></div> : <div><div className="text-6xl mb-2">🧐</div><h3 className="text-red-500 font-bold mb-4">Leider falsch</h3>{problem.a && <div className="bg-red-50 p-3 rounded mb-4 text-red-800 font-mono">Lösung: {problem.a}</div>}<button onClick={()=>{setFeedback(null);setInput('')}} className="bg-slate-200 font-bold px-6 py-2 rounded-xl hover:bg-slate-300">Nochmal</button></div>}
+                            <div className="pop-in text-center py-8">
+                                {feedback === 'correct' ? <div><div className="text-8xl mb-4 animate-bounce">🏆</div><h2 className="text-4xl font-black text-slate-800 mb-2">Fantastisch!</h2><p className="text-slate-500 mb-8 font-bold">+15 Münzen</p><button onClick={()=>startProblem(problem.topic)} className="bg-blue-600 text-white px-10 py-4 rounded-2xl font-bold text-xl shadow-xl hover:shadow-2xl w-full transition transform hover:scale-105">Nächste Aufgabe ➜</button></div> : <div><div className="text-8xl mb-4">🧐</div><h2 className="text-3xl font-black text-slate-800 mb-2">Knapp daneben</h2><p className="text-slate-500 mb-8">Versuch es noch einmal!</p><button onClick={()=>{setFeedback(null);setInput('')}} className="bg-slate-200 text-slate-600 font-bold px-8 py-3 rounded-xl w-full hover:bg-slate-300">Nochmal probieren</button></div>}
                             </div>
                         ) : (
-                            problem.type === 'written' ? <div className="text-center mt-6"><WrittenCalculator type={problem.op} a={problem.a} b={problem.b} onCorrect={handleWrittenSuccess} /></div> : 
-                            <div className="text-center mt-8">
+                            problem.type === 'written' ? <div className="text-center mt-8"><h2 className="text-slate-400 font-bold text-sm uppercase tracking-widest mb-4">Schriftliches Rechnen</h2><WrittenCalculator type={problem.op} a={problem.a} b={problem.b} onCorrect={handleWrittenSuccess} /></div> : 
+                            <div className="text-center mt-10">
                                 {problem.type === 'geo' && <GeometryShape type={problem.target} />}
-                                <h2 className="text-3xl font-bold text-slate-800 mb-6 font-mono bg-slate-50 p-4 rounded-xl mt-4">{problem.q}</h2>
-                                {problem.text && <p className="mb-4 text-lg text-slate-600">{problem.text}</p>}
-                                {problem.opts ? <div className="grid grid-cols-1 gap-3">{problem.opts.map(o => <button key={o} onClick={()=>checkSimple(o)} className="bg-blue-50 text-blue-800 font-bold py-3 rounded-xl border border-blue-200 capitalize hover:bg-blue-100">{o}</button>)}</div> : <div className="flex flex-col gap-3"><div className="flex gap-2 justify-center"><input value={input} onChange={e=>setInput(e.target.value)} className="text-center text-2xl p-3 border-4 border-slate-200 rounded-xl outline-none focus:border-blue-400 w-full" autoFocus type="text" placeholder="?" />{problem.unit && <span className="flex items-center font-bold text-slate-400 text-xl">{problem.unit}</span>}</div><button onClick={()=>checkSimple()} className="bg-green-500 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-green-600 active:scale-95">Prüfen</button></div>}
+                                <h2 className="text-slate-400 font-bold text-sm uppercase tracking-widest mb-2">Deine Aufgabe</h2>
+                                <div className="text-4xl md:text-5xl font-black text-slate-800 mb-8">{problem.q}</div>
+                                {problem.text && <p className="mb-8 text-lg text-slate-500 font-medium bg-slate-50 p-4 rounded-xl border border-slate-100">{problem.text}</p>}
+                                {problem.opts ? <div className="grid grid-cols-1 gap-3">{problem.opts.map(o => <button key={o} onClick={()=>checkSimple(o)} className="bg-white text-blue-600 font-bold text-lg py-4 rounded-xl border-2 border-blue-100 hover:border-blue-500 hover:shadow-md transition capitalize">{o}</button>)}</div> : <div className="flex flex-col gap-4"><div className="flex gap-2 justify-center"><input value={input} onChange={e=>setInput(e.target.value)} className="text-center text-3xl p-4 border-4 border-blue-100 rounded-2xl outline-none focus:border-blue-500 w-full font-bold text-slate-700" autoFocus type="text" placeholder="?" />{problem.unit && <span className="flex items-center font-bold text-slate-400 text-2xl">{problem.unit}</span>}</div><button onClick={()=>checkSimple()} className="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 text-xl hover:bg-blue-700 transition">Prüfen</button></div>}
                             </div>
                         )}
                     </div>
