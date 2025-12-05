@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mathe Infinity 10.1</title>
+    <title>Mathe Infinity 10.2</title>
     
-    <!-- LIBRARIES -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
@@ -32,7 +31,6 @@
         .grid-cell.readonly { background: transparent; border-color: transparent; box-shadow: none; font-weight: bold; cursor: default; }
         .grid-cell.carry { height: 30px; width: 45px; font-size: 1.2rem; color: #ef4444; border: 1px dashed #fca5a5; background: #fff1f2; margin-bottom: 2px; }
 
-        /* Animationen */
         .pop-in { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
@@ -40,6 +38,7 @@
 
         .star-filled { color: #fbbf24; filter: drop-shadow(0 0 2px orange); }
         .star-empty { color: #e2e8f0; }
+        .highlight-step { background-color: #fef08a !important; border-color: #eab308 !important; transform: scale(1.15); z-index: 20; box-shadow: 0 0 15px rgba(234, 179, 8, 0.6); }
         
         /* Loading Screen */
         #loading { position: fixed; top:0; left:0; width:100%; height:100%; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.5s; }
@@ -54,17 +53,17 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        // Sicherheits-Check: Wenn nach 3 Sekunden nichts passiert, Ladescreen weg
+        // Sicherheits-Check: Wenn nach 2 Sekunden nichts passiert, Ladescreen weg
         setTimeout(() => {
             const l = document.getElementById('loading');
             if(l) l.style.display = 'none';
-        }, 3000);
+        }, 2000);
 
-        // Globaler Fehlerfänger
+        // Fehlertoleranz: Wir loggen nur in die Konsole, statt abzustürzen
         window.onerror = function(msg, url, line) {
-            document.getElementById('root').innerHTML = `<div style="padding:20px; color:red; text-align:center;"><h3>Oje, ein Fehler!</h3><p>${msg}</p><button onclick="localStorage.clear(); location.reload()" style="background:#eee; padding:10px; margin-top:20px; border-radius:10px;">App zurücksetzen</button></div>`;
-            const l = document.getElementById('loading');
-            if(l) l.style.display = 'none';
+            console.error("Fehler abgefangen:", msg);
+            // Wir lassen das Spiel weiterlaufen, statt den Screen zu löschen
+            return false; 
         };
 
         const { useState, useEffect, useRef } = React;
@@ -143,14 +142,7 @@
                 } else { 
                     let lower = vb + c; let upper = va; let nextC = 0;
                     if (i===0 && lower===0 && upper===0) continue;
-                    let txt = "";
-                    if (lower > upper) {
-                        txt = `Von ${lower} bis ${upper+10}. Schreibe ${upper+10-lower}, behalte 1.`;
-                        nextC = 1;
-                    } else {
-                        txt = `Von ${lower} bis ${upper} sind ${upper-lower}. Schreibe ${upper-lower}.`;
-                        nextC = 0;
-                    }
+                    let txt = lower > upper ? `Von ${lower} bis ${upper+10}. Schreibe ${upper+10-lower}, behalte 1.` : `Von ${lower} bis ${upper} sind ${upper-lower}. Schreibe ${upper-lower}.`;
                     steps.push({ col: i, text: txt, carry: nextC, res: (upper>=lower ? upper-lower : (upper+10)-lower) }); c = nextC;
                 }
             }
@@ -192,7 +184,10 @@
                     if(!(i===0 && tr===0 && res[i]==='') && parseInt(res[i]||0) !== tr) correct = false;
                     if(i>0) { const uc = parseInt(carry[i-1]||0); const nc = type==='add' ? Math.floor((va+vb+c)/10) : (vb+c>va?1:0); if(uc!==nc && !(nc===0 && carry[i-1]==='')) correct = false; c = nc; }
                 }
-                if(correct) { setStatus('correct'); onCorrect(); } else { setStatus('wrong'); }
+                if(correct) { 
+                    setStatus('correct'); 
+                    onCorrect(); // WICHTIG: Trigger Success!
+                } else { setStatus('wrong'); }
             };
             return (
                 <div className={`bg-white/90 p-6 rounded-xl border-4 ${status==='wrong'?'border-red-400 shake':'border-slate-200'} shadow-xl relative inline-block`}>
@@ -220,12 +215,9 @@
             const [feedback, setFeedback] = useState(null);
             
             useEffect(() => { 
-                try {
-                    const s = localStorage.getItem('math_inf_final'); if(s) setUser(JSON.parse(s)); 
-                } catch(e) {}
+                const s = localStorage.getItem('math_inf_final'); if(s) setUser(JSON.parse(s)); 
                 document.getElementById('loading').style.display = 'none'; 
             }, []);
-            
             const save = (u) => { setUser(u); localStorage.setItem('math_inf_final', JSON.stringify(u)); };
             const updateProgress = (correct, topic) => {
                 const u = { ...user };
@@ -252,9 +244,9 @@
                 setProblem(p); setView('game'); setInput(''); setFeedback(null);
             };
 
-            // CALLBACK für WrittenCalculator (DER WICHTIGE FIX!)
-            const handleSuccess = () => {
-                setFeedback('correct');
+            // SUCCESS HANDLER
+            const handleWrittenSuccess = () => {
+                setFeedback('correct'); 
                 updateProgress(true, problem.topic);
                 safeConfetti();
             };
@@ -265,7 +257,7 @@
                 let correct = false;
                 if (problem.type === 'time') { if (userVal == sol || userVal == '0'+sol) correct = true; }
                 else if (userVal.toLowerCase() == sol.toLowerCase()) correct = true;
-                if (correct) handleSuccess(); else { setFeedback('wrong'); updateProgress(false, problem.topic); }
+                if (correct) handleWrittenSuccess(); else { setFeedback('wrong'); updateProgress(false, problem.topic); }
             };
 
             const Stars = ({ topic }) => { const m = user.mastery[topic] || 0; return <div className="flex gap-1">{[...Array(3)].map((_,i) => <span key={i} className={i<(m>50?3:m>20?2:m>5?1:0) ? "star-filled" : "star-empty"}>★</span>)}</div> };
@@ -280,7 +272,7 @@
                         <div className="flex gap-3"><a href="index.html" className="bg-slate-100 text-slate-500 px-4 py-2 rounded-xl font-bold hover:bg-slate-200 transition">🏠 Zentrale</a><button onClick={()=>setView('shop')} className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-xl font-bold flex items-center gap-2 shadow-sm hover:scale-105 transition"><span>{user.coins}</span> 💰 Shop</button></div>
                     </header>
                     <div className="space-y-6">
-                        {[{t:'Schriftlich', items:[{id:'add',l:'Plus',i:'➕',c:'blue'},{id:'sub',l:'Minus',i:'➖',c:'red'}]},{t:'Kopfrechnen', items:[{id:'1x1',l:'1x1',i:'⚡',c:'yellow'},{id:'mul',l:'Mal',i:'✖️',c:'purple'},{id:'div',l:'Geteilt',i:'➗',c:'pink'}]},{t:'Grössen', items:[{id:'len',l:'Längen',i:'📏',c:'teal'},{id:'weight',l:'Gewichte',i:'⚖️',c:'orange'},{id:'liq',l:'Hohlmasse',i:'🥛',c:'cyan'},{id:'time',l:'Zeit',i:'⏱️',c:'indigo'}]},{t:'Zahlen', items:[{id:'num',l:'Zahlenraum',i:'💯',c:'gray'},{id:'money',l:'Geld',i:'💰',c:'yellow'},{id:'geo',l:'Geometrie',i:'📐',c:'green'}]}].map((sec, idx) => (
+                        {[{t:'Schriftlich', items:[{id:'add',l:'Plus',i:'➕',c:'blue'},{id:'sub',l:'Minus',i:'➖',c:'red'}]},{t:'Kopfrechnen', items:[{id:'1x1',l:'1x1',i:'⚡',c:'yellow'},{id:'mul',l:'Mal',i:'✖️',c:'purple'},{id:'div',l:'Geteilt',i:'➗',c:'pink'}]},{t:'Grössen', items:[{id:'len',l:'Längen',i:'📏',c:'teal'},{id:'weight',l:'Gewichte',i:'⚖️',c:'orange'},{id:'liq',l:'Hohlmasse',i:'🥛',c:'cyan'},{id:'time',l:'Zeit',i:'⏱️',c:'indigo'}]},{t:'Zahlen', items:[{id:'num',l:'Zahlenraum',i:'💯',c:'gray'},{id:'seq',l:'Folgen',i:'🔢',c:'emerald'},{id:'money',l:'Geld',i:'💰',c:'yellow'},{id:'geo',l:'Geometrie',i:'📐',c:'green'}]}].map((sec, idx) => (
                             <section key={idx}><h2 className="font-bold text-slate-400 text-xs uppercase tracking-widest mb-3 ml-2">{sec.t}</h2><div className="grid grid-cols-2 gap-3">{sec.items.map(b => (<button key={b.id} onClick={()=>startProblem(b.id)} className={`bg-white p-4 rounded-2xl shadow-sm border-l-8 border-${b.c}-500 hover:shadow-lg transition active:scale-95 text-left`}><div className="flex justify-between items-start mb-2"><span className="text-3xl">{b.i}</span><Stars topic={b.id} /></div><div className="font-bold text-slate-700">{b.l}</div></button>))}</div></section>
                         ))}
                     </div>
@@ -307,7 +299,7 @@
                                 {feedback === 'correct' ? <div><div className="text-6xl mb-2">🎉</div><h3 className="text-green-600 font-bold text-xl mb-4">Richtig!</h3><button onClick={()=>startProblem(problem.topic)} className="bg-blue-600 text-white font-bold px-8 py-3 rounded-xl shadow-lg hover:bg-blue-700 active:scale-95 animate-pulse">Weiter ➜</button></div> : <div><div className="text-6xl mb-2">🧐</div><h3 className="text-red-500 font-bold mb-4">Leider falsch</h3>{problem.a && <div className="bg-red-50 p-3 rounded mb-4 text-red-800 font-mono">Lösung: {problem.a}</div>}<button onClick={()=>{setFeedback(null);setInput('')}} className="bg-slate-200 font-bold px-6 py-2 rounded-xl hover:bg-slate-300">Nochmal</button></div>}
                             </div>
                         ) : (
-                            problem.type === 'written' ? <div className="text-center mt-6"><WrittenCalculator type={problem.op} a={problem.a} b={problem.b} onCorrect={handleSuccess} /></div> : 
+                            problem.type === 'written' ? <div className="text-center mt-6"><WrittenCalculator type={problem.op} a={problem.a} b={problem.b} onCorrect={handleWrittenSuccess} /></div> : 
                             <div className="text-center mt-8">
                                 {problem.type === 'geo' && <GeometryShape type={problem.target} />}
                                 <h2 className="text-3xl font-bold text-slate-800 mb-6 font-mono bg-slate-50 p-4 rounded-xl mt-4">{problem.q}</h2>
