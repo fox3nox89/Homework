@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="de-CH">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mathe Infinity</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700;800&family=Patrick+Hand&display=swap');
+        
+        :root { --bg-color: #f0f9ff; --primary: #3b82f6; --text: #1e293b; }
+        
+        body { 
+            font-family: 'Fredoka', sans-serif; 
+            background-color: var(--bg-color); 
+            color: var(--text); 
+            user-select: none; 
+            -webkit-tap-highlight-color: transparent;
+            transition: background-color 0.5s;
+        }
+        .nunito { font-family: 'Nunito', sans-serif; }
+        .handwritten { font-family: 'Patrick Hand', cursive; }
+        
+        /* Grid Input Felder (Heft-Look) */
+        .grid-cell {
+            width: 45px; height: 55px;
+            border: 2px solid #cbd5e1; background: white; color: #334155;
+            font-family: 'Patrick Hand', cursive; font-size: 1.8rem;
+            text-align: center; border-radius: 8px; outline: none;
+            transition: all 0.2s; box-shadow: 2px 2px 0px rgba(0,0,0,0.05);
+        }
+        .grid-cell:focus { border-color: var(--primary); transform: scale(1.1); z-index: 10; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .grid-cell.readonly { background: transparent; border-color: transparent; box-shadow: none; font-weight: bold; cursor: default; }
+        .grid-cell.carry { 
+            height: 30px; width: 45px; font-size: 1.2rem; color: #ef4444; 
+            border: 1px dashed #fca5a5; background: #fff1f2; margin-bottom: 2px;
+        }
+
+        /* Teacher Mode Highlights */
+        .highlight-step { background-color: #fef08a !important; border-color: #eab308 !important; transform: scale(1.15); z-index: 20; box-shadow: 0 0 15px rgba(234, 179, 8, 0.6); }
+        
+        /* Animations */
+        .pop-in { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+
+        .float { animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+        /* Progress Stars */
+        .star-empty { color: #e2e8f0; }
+        .star-filled { color: #fbbf24; filter: drop-shadow(0 0 2px orange); animation: popIn 0.5s; }
+
+        /* Themes */
+        .theme-dark { --bg-color: #1e293b; --primary: #60a5fa; --text: #f8fafc; }
+        .theme-pink { --bg-color: #fdf2f8; --primary: #ec4899; --text: #831843; }
+        .theme-green { --bg-color: #f0fdf4; --primary: #22c55e; --text: #14532d; }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- KONSTANTEN & DATEN ---
+        const LEVELS = [0, 100, 300, 600, 1000, 1500, 2200, 3000, 4000, 5000, 10000];
+        const THEMES = [
+            { id: 'default', name: 'Standard', cost: 0, class: '' },
+            { id: 'dark', name: 'Nacht', cost: 200, class: 'theme-dark' },
+            { id: 'pink', name: 'Candy', cost: 300, class: 'theme-pink' },
+            { id: 'green', name: 'Natur', cost: 300, class: 'theme-green' },
+        ];
+        const AVATARS = [
+            { id: 'bear', icon: '🐻', name: 'Bruno', cost: 0 },
+            { id: 'cat', icon: '🐱', name: 'Mimi', cost: 50 },
+            { id: 'fox', icon: '🦊', name: 'Foxy', cost: 100 },
+            { id: 'lion', icon: '🦁', name: 'Leo', cost: 200 },
+            { id: 'robot', icon: '🤖', name: 'Robo', cost: 300 },
+            { id: 'alien', icon: '👽', name: 'Zorg', cost: 500 },
+            { id: 'ninja', icon: '🥷', name: 'Shadow', cost: 750 },
+            { id: 'king', icon: '👑', name: 'King', cost: 1000 }
+        ];
+
+        // --- HELPER ---
+        const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
+        const formatCH = (n) => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'");
+        
+        // Audio Synthesizer
+        const playSound = (type) => {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            const ctx = new AudioContext();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+
+            const now = ctx.currentTime;
+            if (type === 'correct') {
+                osc.type = 'triangle'; 
+                osc.frequency.setValueAtTime(600, now);
+                osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.4);
+                osc.start(now); osc.stop(now + 0.4);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.linearRampToValueAtTime(100, now + 0.2);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.3);
+                osc.start(now); osc.stop(now + 0.3);
+            } else if (type === 'cash') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(1200, now);
+                osc.frequency.exponentialRampToValueAtTime(1800, now + 0.1);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.3);
+                osc.start(now); osc.stop(now + 0.3);
+            } else if (type === 'levelup') {
+                [440, 554, 659, 880].forEach((freq, i) => {
+                    const o = ctx.createOscillator(); const g = ctx.createGain();
+                    o.connect(g); g.connect(ctx.destination);
+                    o.type = 'square'; o.frequency.value = freq;
+                    g.gain.setValueAtTime(0.2, ctx.currentTime + i*0.1);
+                    g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i*0.1 + 0.4);
+                    o.start(ctx.currentTime + i*0.1); o.stop(ctx.currentTime + i*0.1 + 0.4);
+                });
+            }
+        };
+
+        const speak = (text) => {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                let clean = text
+                    .replace(/'/g, '')
+                    .replace(/(\d)\.(\d)/g, '$1 Komma $2')
+                    .replace(/(\d)\./g, '$1 ')
+                    .replace(/\+/g, ' plus ')
+                    .replace(/-/g, ' minus ')
+                    .replace(/·/g, ' mal ')
+                    .replace(/:/g, ' geteilt durch ')
+                    .replace(/Fr\./g, ' Franken ')
+                    .replace(/Rp\./g, ' Rappen ')
+                    .replace(/=/g, ' gleich ')
+                    .replace(/</g, ' kleiner als ')
+                    .replace(/>/g, ' grösser als ');
+                const msg = new SpeechSynthesisUtterance(clean);
+                msg.lang = 'de-DE'; msg.rate = 0.9;
+                window.speechSynthesis.speak(msg);
+            }
+        };
+
+        // --- COMPONENTS ---
+        
+        // GEOMETRY RENDERER (Canvas)
+        const GeometryShape = ({ type }) => {
+            const canvasRef = useRef(null);
+            useEffect(() => {
+                const cvs = canvasRef.current;
+                const ctx = cvs.getContext('2d');
+                const w = cvs.width; const h = cvs.height;
+                ctx.clearRect(0,0,w,h);
+                ctx.lineWidth = 4; ctx.strokeStyle = '#3b82f6'; ctx.fillStyle = '#dbeafe';
+                
+                ctx.beginPath();
+                if (type === 'quadrat') { ctx.rect(50, 50, 100, 100); }
+                else if (type === 'rechteck') { ctx.rect(30, 60, 140, 80); }
+                else if (type === 'kreis') { ctx.arc(100, 100, 60, 0, 2*Math.PI); }
+                else if (type === 'dreieck') { ctx.moveTo(100, 40); ctx.lineTo(160, 150); ctx.lineTo(40, 150); ctx.closePath(); }
+                else if (type === 'winkel') { 
+                    ctx.moveTo(150, 50); ctx.lineTo(50, 50); ctx.lineTo(50, 150); 
+                    // Winkelzeichen
+                    ctx.moveTo(50, 70); ctx.lineTo(70, 70); ctx.lineTo(70, 50);
+                    ctx.stroke(); ctx.beginPath(); ctx.arc(60, 60, 2, 0, 2*Math.PI); ctx.fill(); return;
+                }
+                ctx.fill(); ctx.stroke();
+            }, [type]);
+            return <canvas ref={canvasRef} width={200} height={200} className="mx-auto" />;
+        };
+
+        // INTERAKTIVER LEHRER (VISUALIZER)
+        const VisualTeacher = ({ type, a, b, onClose }) => {
+            const sA = a.toString().split('').map(Number);
+            const sB = b.toString().split('').map(Number);
+            const cols = Math.max(sA.length, sB.length) + 1;
+            const [step, setStep] = useState(0);
+
+            const pad = (arr) => {
+                const p = Array(cols).fill(null);
+                for(let i=0; i<arr.length; i++) p[cols-1-i] = arr[arr.length-1-i];
+                return p;
+            };
+            const pA = pad(sA);
+            const pB = pad(sB);
+
+            const steps = [];
+            let c = 0;
+            for(let i=cols-1; i>=0; i--) {
+                const va = pA[i] || 0;
+                const vb = pB[i] || 0;
+                
+                if (type === 'add') {
+                    const sum = va + vb + c;
+                    const digit = sum % 10;
+                    const nextC = Math.floor(sum / 10);
+                    // Skip leading zeros steps
+                    if (i===0 && sum===0) continue;
+                    
+                    let txt = `Einer: ${va} plus ${vb}`;
+                    if (c > 0) txt += ` plus ${c} (Behalte)`;
+                    txt += ` gibt ${sum}.`;
+                    if (nextC > 0) txt += ` Schreibe ${digit}, behalte ${nextC}.`;
+                    else txt += ` Schreibe ${digit}.`;
+                    
+                    steps.push({ col: i, text: txt, carry: nextC, res: digit });
+                    c = nextC;
+                } else { // sub (Ergänzen)
+                    let lower = vb + c;
+                    let upper = va;
+                    let nextC = 0;
+                    if (i===0 && lower===0 && upper===0) continue;
+
+                    let txt = "";
+                    if (lower > upper) {
+                        txt = `Von ${lower} bis ${upper} geht nicht. Also bis ${upper+10}. Das sind ${upper+10-lower}. Schreibe ${upper+10-lower}, behalte 1.`;
+                        nextC = 1;
+                    } else {
+                        txt = `Von ${lower} bis ${upper} sind ${upper-lower}. Schreibe ${upper-lower}.`;
+                        nextC = 0;
+                    }
+                    steps.push({ col: i, text: txt, carry: nextC, res: (upper>=lower ? upper-lower : (upper+10)-lower) });
+                    c = nextC;
+                }
+            }
+
+            const cur = steps[step];
+            const finished = step >= steps.length;
+
+            useEffect(() => { if(cur && !finished) speak(cur.text); }, [step]);
+
+            return (
+                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-3xl p-6 w-full max-w-lg shadow-2xl pop-in relative border-4 border-yellow-400">
+                        <h2 className="text-center font-bold text-xl text-yellow-600 mb-4 uppercase">👨‍🏫 Lehrer Modus</h2>
+                        
+                        <div className="bg-blue-50 p-4 rounded-xl border border-blue-200 mb-6 min-h-[80px] flex items-center justify-center text-center font-medium text-slate-700">
+                            {finished ? "Alles klar? Jetzt du!" : cur.text}
+                        </div>
+
+                        <div className="flex justify-center mb-6 font-mono text-3xl">
+                            <div className="grid gap-1 justify-center" style={{gridTemplateColumns: `repeat(${cols}, 40px)`}}>
+                                {type==='add' && Array(cols).fill(0).map((_,i) => (
+                                    <div key={'c'+i} className="h-8 flex items-end justify-center text-red-500 text-sm">
+                                        {step > 0 && steps[step-1] && steps[step-1].col === i+1 && steps[step-1].carry > 0 ? steps[step-1].carry : ''}
+                                    </div>
+                                ))}
+                                {pA.map((val,i) => (
+                                    <div key={'a'+i} className={`flex justify-center ${!finished && cur.col===i ? 'bg-yellow-200 rounded' : ''}`}>{val!==undefined?val:''}</div>
+                                ))}
+                                {pB.map((val,i) => (
+                                    <div key={'b'+i} className={`flex justify-center relative ${!finished && cur.col===i ? 'bg-yellow-200 rounded' : ''}`}>
+                                        {i===0 && <span className="absolute -left-6 font-bold text-slate-400">{type==='add'?'+':'-'}</span>}
+                                        {val!==undefined?val:''}
+                                    </div>
+                                ))}
+                                {type==='sub' && Array(cols).fill(0).map((_,i) => (
+                                    <div key={'c'+i} className="h-8 flex items-start justify-center text-red-500 text-sm">
+                                        {step > 0 && steps[step-1] && steps[step-1].col === i+1 && steps[step-1].carry > 0 ? steps[step-1].carry : ''}
+                                    </div>
+                                ))}
+                                <div className="col-span-full h-1 bg-slate-800 rounded"></div>
+                                {Array(cols).fill(0).map((_,i) => {
+                                    const s = steps.find(x => x.col === i);
+                                    const show = s && step > steps.indexOf(s);
+                                    return <div key={'r'+i} className="flex justify-center text-blue-600 font-bold">{finished && s ? s.res : (show ? s.res : '')}</div>
+                                })}
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end">
+                            {!finished ? (
+                                <button onClick={()=>setStep(s=>s+1)} className="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold shadow hover:bg-blue-700">Weiter ▶</button>
+                            ) : (
+                                <button onClick={onClose} className="bg-green-500 text-white px-6 py-2 rounded-xl font-bold shadow hover:bg-green-600">Verstanden!</button>
+                            )}
+                        </div>
+                        {!finished && <button onClick={onClose} className="absolute top-4 right-4 text-slate-300 hover:text-slate-500 text-2xl">×</button>}
+                    </div>
+                </div>
+            );
+        };
+
+        // --- WRITTEN CALCULATOR COMPONENT ---
+        const WrittenCalculator = ({ type, a, b, onCorrect }) => {
+            const sA = a.toString().split('').map(Number);
+            const sB = b.toString().split('').map(Number);
+            const cols = Math.max(sA.length, sB.length) + 1;
+            const [res, setRes] = useState(Array(cols).fill(''));
+            const [carry, setCarry] = useState(Array(cols).fill(''));
+            const [status, setStatus] = useState('input');
+            const [teacher, setTeacher] = useState(false);
+
+            const handleInput = (arr, setArr, i, val) => {
+                if(!/^\d*$/.test(val)) return;
+                const n = [...arr]; n[i] = val.slice(-1); setArr(n);
+                setStatus('input');
+            };
+
+            const check = () => {
+                let correct = true; let c = 0;
+                for(let i=cols-1; i>=0; i--) {
+                    const va = sA[sA.length - (cols-i)] || 0;
+                    const vb = sB[sB.length - (cols-i)] || 0;
+                    let tr, tc;
+                    if(type === 'add') {
+                        const sum = va + vb + c; tr = sum%10; tc = Math.floor(sum/10);
+                    } else {
+                        let l = vb + c; let u = va;
+                        if(l > u) { u+=10; tc=1; } else { tc=0; }
+                        tr = u-l;
+                    }
+                    if(!(i===0 && tr===0 && res[i]==='') && parseInt(res[i]||0) !== tr) correct = false;
+                    if(i>0) {
+                        const uc = parseInt(carry[i-1]||0);
+                        const nc = type==='add' ? Math.floor((va+vb+c)/10) : (vb+c>va?1:0);
+                        if(uc !== nc && !(nc===0 && carry[i-1]==='')) correct = false;
+                        c = nc;
+                    }
+                }
+                if(correct) { setStatus('correct'); playSound('correct'); onCorrect(); }
+                else { setStatus('wrong'); playSound('wrong'); }
+            };
+
+            return (
+                <div className={`bg-white/90 p-6 rounded-xl border-4 ${status==='wrong'?'border-red-400 shake':'border-slate-200'} shadow-xl relative inline-block`}>
+                    <button onClick={()=>setTeacher(true)} className="absolute -top-3 -right-3 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full font-bold shadow-lg border-2 border-yellow-200 animate-bounce z-10 text-sm">💡 Hilfe</button>
+                    {teacher && <VisualTeacher type={type} a={a} b={b} onClose={()=>setTeacher(false)} />}
+                    <div className="grid gap-1 justify-center" style={{gridTemplateColumns: `repeat(${cols}, 45px)`}}>
+                        {type==='add' && carry.map((v,i) => (<div key={'c'+i} className="flex justify-center items-end h-[30px]">{i<cols-1 && <input className="grid-cell carry" value={v} onChange={e=>handleInput(carry, setCarry, i, e.target.value)} placeholder="¹"/>}</div>))}
+                        {Array(cols).fill(0).map((_,i) => <div key={'a'+i} className="grid-cell readonly flex items-center justify-center text-2xl">{sA[sA.length-(cols-i)] ?? ''}</div>)}
+                        {Array(cols).fill(0).map((_,i) => <div key={'b'+i} className="grid-cell readonly flex items-center justify-center text-2xl relative">{i===0 && <span className="absolute -left-8 font-bold text-slate-400 text-3xl">{type==='add'?'+':'-'}</span>}{sB[sB.length-(cols-i)] ?? ''}</div>)}
+                        {type==='sub' && carry.map((v,i) => (<div key={'c'+i} className="flex justify-center items-start h-[30px]">{i<cols-1 && <input className="grid-cell carry" value={v} onChange={e=>handleInput(carry, setCarry, i, e.target.value)} placeholder="1"/>}</div>))}
+                        <div className="col-span-full h-1 bg-slate-800 rounded my-1"></div>
+                        {res.map((v,i) => <input key={'r'+i} className={`grid-cell font-bold text-blue-600 border-2 ${status==='correct'?'border-green-500 bg-green-50':''}`} value={v} onChange={e=>handleInput(res, setRes, i, e.target.value)} />)}
+                    </div>
+                    <button onClick={check} className="mt-4 w-full bg-blue-600 text-white font-bold py-2 rounded-lg shadow hover:bg-blue-700">Prüfen</button>
+                </div>
+            );
+        };
+
+        // --- MAIN APP ---
+        const App = () => {
+            const [user, setUser] = useState({ name: 'Gast', coins: 0, xp: 0, level: 1, avatar: 'bear', theme: 'default', mastery: {} });
+            const [view, setView] = useState('menu');
+            const [problem, setProblem] = useState(null);
+            const [input, setInput] = useState('');
+            const [feedback, setFeedback] = useState(null);
+            
+            useEffect(() => {
+                const s = localStorage.getItem('math_inf_v1');
+                if(s) setUser(JSON.parse(s));
+            }, []);
+
+            const save = (u) => { setUser(u); localStorage.setItem('math_inf_v1', JSON.stringify(u)); };
+
+            const updateProgress = (correct, topic) => {
+                const u = { ...user };
+                if (correct) {
+                    u.coins += 15; u.xp += 20;
+                    u.mastery[topic] = (u.mastery[topic] || 0) + 1;
+                    if(u.xp >= LEVELS[u.level]) { u.level++; playSound('levelup'); confetti(); alert("LEVEL UP!"); }
+                } else {
+                    u.coins += 2;
+                }
+                save(u);
+            };
+
+            const startProblem = (t) => {
+                const r = randomInt;
+                let p = { topic: t };
+                if (t === 'add') { p.q = `${formatCH(r(100,50000))} + ${formatCH(r(100,40000))}`; p.type = 'written'; p.op = 'add'; p.a = r(100,50000); p.b = r(100,40000); }
+                else if (t === 'sub') { const a = r(1000,90000); p.q = `${formatCH(a)} - ${formatCH(r(100,a-100))}`; p.type = 'written'; p.op = 'sub'; p.a = a; p.b = r(100,a-100); }
+                else if (t === 'mul') { const a = r(2,9); const b = r(100,2000); p.q = `${a} · ${b}`; p.a = a*b; p.type = 'calc'; }
+                else if (t === 'div') { const d = r(2,9); const res = r(10,200); p.q = `${d*res} : ${d}`; p.a = res; p.type = 'calc'; }
+                else if (t === 'len') { 
+                    // Längen
+                    const m = r(1,3);
+                    if(m===1) { const km=r(1,10); p={q:`${km} km = ... m`, a:km*1000, type:'calc', unit:'m'}; }
+                    else if(m===2) { const m=r(1,9); const cm=r(1,99); p={q:`${m} m ${cm} cm = ... cm`, a:m*100+cm, type:'calc', unit:'cm'}; }
+                    else { const cm=r(1,99); p={q:`${cm} cm = ... mm`, a:cm*10, type:'calc', unit:'mm'}; }
+                }
+                else if (t === 'weight') {
+                    // Gewichte
+                    const m = r(1,2);
+                    if(m===1) { const t=r(1,10); p={q:`${t} t = ... kg`, a:t*1000, type:'calc', unit:'kg'}; }
+                    else { const kg=r(1,9); const g=r(1,999); p={q:`${kg} kg ${g} g = ... g`, a:kg*1000+g, type:'calc', unit:'g'}; }
+                }
+                else if (t === 'liq') {
+                    // Hohlmasse
+                    const m = r(1,3);
+                    if(m===1) { const l=r(1,10); p={q:`${l} l = ... dl`, a:l*10, type:'calc', unit:'dl'}; }
+                    else if(m===2) { const l=r(1,5); p={q:`${l} l = ... ml`, a:l*1000, type:'calc', unit:'ml'}; }
+                    else { const cl=r(1,10)*10; p={q:`${cl} cl = ... dl`, a:cl/10, type:'calc', unit:'dl'}; }
+                }
+                else if (t === 'time') {
+                    const m = r(1,2);
+                    if(m===1) { const h=r(1,5); p={q:`${h} h = ... min`, a:h*60, type:'calc', unit:'min'}; }
+                    else { const m=r(120,300); p={q:`${m} min = ... h`, a:m/60, type:'calc', unit:'h'}; }
+                }
+                else if (t === 'money') {
+                    const p1 = (r(1, 50) + r(0,9)*0.10).toFixed(2);
+                    const g = Math.ceil(p1/10)*10;
+                    p = { q: `Preis: Fr. ${p1}`, text: `Du gibst Fr. ${g.toFixed(2)}. Rückgeld?`, a: (g-p1).toFixed(2), type: 'calc', unit: 'Fr.' };
+                }
+                else if (t === 'geo') { 
+                    const shapes = ['quadrat','rechteck','kreis','dreieck','winkel']; 
+                    const s = shapes[r(0,4)]; 
+                    p.type = 'geo'; p.target = s; p.q = "Welche Form ist das?";
+                    const opts = shapes.filter(x=>x!==s).sort(()=>Math.random()-0.5).slice(0,3);
+                    p.opts = [...opts, s].sort(()=>Math.random()-0.5);
+                }
+                else if (t === 'num') {
+                    // Zahlenbuch
+                    const m = r(1,3);
+                    const n = r(1000,9999);
+                    if(m===1) { p={q:`${formatCH(n)} + 10`, a:n+10, type:'calc'}; }
+                    else if(m===2) { p={q:`${formatCH(n)} - 100`, a:n-100, type:'calc'}; }
+                    else { const n1=r(100,900); const n2=r(100,900); p={q:`${n1} ... ${n2}`, a:n1>n2?'>':n1<n2?'<':'=', type:'text'}; }
+                }
+                else if (t === 'seq') {
+                    const start = r(2,20); const step = r(2,10);
+                    p={q:`${start}, ${start+step}, ${start+step*2}, ...`, a:start+step*3, type:'calc'};
+                }
+
+                setProblem(p); setView('game'); setInput(''); setFeedback(null);
+            };
+
+            const checkSimple = (val) => {
+                const userVal = val ? val : input.replace(',','.');
+                const sol = problem.a ? problem.a.toString() : problem.target;
+                if (userVal.toLowerCase() == sol.toLowerCase()) {
+                    setFeedback('correct'); playSound('correct'); updateProgress(true, problem.topic); confetti({particleCount:50, origin:{y:0.7}});
+                } else {
+                    setFeedback('wrong'); playSound('wrong'); updateProgress(false, problem.topic);
+                }
+            };
+
+            const Stars = ({ topic }) => {
+                const m = user.mastery[topic] || 0;
+                const stars = m > 50 ? 3 : m > 20 ? 2 : m > 5 ? 1 : 0;
+                return <div className="flex gap-1">{[...Array(3)].map((_,i) => <span key={i} className={i<(m>50?3:m>20?2:m>5?1:0) ? "star-filled" : "star-empty"}>★</span>)}</div>
+            };
+
+            // --- VIEW: MENU ---
+            if (view === 'menu') {
+                const theme = THEMES.find(t=>t.id===user.theme) || THEMES[0];
+                document.body.className = theme.class; 
+                
+                return (
+                    <div className={`min-h-screen p-4 max-w-4xl mx-auto ${theme.class}`}>
+                        <header className="bg-white p-4 rounded-3xl shadow-sm mb-6 flex justify-between items-center">
+                            <div className="flex items-center gap-3">
+                                <div className="text-4xl bg-blue-50 p-2 rounded-xl">{AVATARS.find(a=>a.id===user.avatar)?.icon}</div>
+                                <div>
+                                    <div className="font-bold text-lg">{user.name}</div>
+                                    <div className="text-xs text-slate-400 font-bold">Lvl {user.level}</div>
+                                </div>
+                            </div>
+                            <button onClick={()=>setView('shop')} className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-xl font-bold flex items-center gap-2 shadow-sm hover:scale-105 transition">
+                                <span>{user.coins}</span> 💰 Shop
+                            </button>
+                        </header>
+
+                        <div className="space-y-6">
+                            {[
+                                {t:'Schriftlich', items:[{id:'add',l:'Plus',i:'➕',c:'blue'},{id:'sub',l:'Minus',i:'➖',c:'red'}]},
+                                {t:'Kopfrechnen', items:[{id:'mul',l:'Mal',i:'✖️',c:'purple'},{id:'div',l:'Geteilt',i:'➗',c:'pink'}]},
+                                {t:'Grössen', items:[
+                                    {id:'len',l:'Längen',i:'📏',c:'teal'}, {id:'weight',l:'Gewichte',i:'⚖️',c:'orange'},
+                                    {id:'liq',l:'Hohlmasse',i:'🥛',c:'cyan'}, {id:'time',l:'Zeit',i:'⏱️',c:'indigo'}
+                                ]},
+                                {t:'Zahlen & Logik', items:[
+                                    {id:'num',l:'Zahlen',i:'💯',c:'gray'}, {id:'seq',l:'Folgen',i:'🔢',c:'emerald'},
+                                    {id:'money',l:'Geld',i:'💰',c:'yellow'}, {id:'geo',l:'Formen',i:'📐',c:'green'}
+                                ]}
+                            ].map((sec, idx) => (
+                                <section key={idx}>
+                                    <h2 className="font-bold text-slate-400 text-xs uppercase tracking-widest mb-3 ml-2">{sec.t}</h2>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {sec.items.map(b => (
+                                            <button key={b.id} onClick={()=>startProblem(b.id)} className={`bg-white p-4 rounded-2xl shadow-sm border-l-8 border-${b.c}-500 hover:shadow-lg transition active:scale-95 text-left`}>
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <span className="text-3xl">{b.i}</span>
+                                                    <Stars topic={b.id} />
+                                                </div>
+                                                <div className="font-bold text-slate-700">{b.l}</div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </section>
+                            ))}
+                        </div>
+                    </div>
+                );
+            }
+
+            // --- VIEW: SHOP ---
+            if (view === 'shop') return (
+                <div className="min-h-screen bg-yellow-50 p-4">
+                    <div className="max-w-2xl mx-auto">
+                        <div className="flex justify-between items-center mb-6">
+                            <button onClick={()=>setView('menu')} className="font-bold text-slate-500">◀ Zurück</button>
+                            <div className="font-bold text-xl text-yellow-600">{user.coins} 💰</div>
+                        </div>
+                        <h1 className="text-3xl font-black text-slate-800 mb-6 text-center">Belohnungen</h1>
+                        
+                        <h3 className="font-bold text-slate-400 mb-3 uppercase text-xs">Avatare</h3>
+                        <div className="grid grid-cols-4 gap-3 mb-8">
+                            {AVATARS.map(a => {
+                                const owned = (user.unlockedAvatars || ['bear']).includes(a.id);
+                                return (
+                                    <button key={a.id} disabled={!owned && user.coins<a.cost} 
+                                        onClick={()=>{
+                                            if(!owned) { save({...user, coins:user.coins-a.cost, unlockedAvatars:[...(user.unlockedAvatars||['bear']), a.id], avatar:a.id}); playSound('cash'); confetti(); }
+                                            else save({...user, avatar:a.id});
+                                        }}
+                                        className={`bg-white p-3 rounded-xl flex flex-col items-center shadow-sm ${!owned ? 'opacity-50' : user.avatar===a.id ? 'ring-4 ring-green-400' : ''}`}>
+                                        <span className="text-4xl mb-2">{a.icon}</span>
+                                        {!owned && <span className="text-xs font-bold bg-yellow-100 px-2 rounded text-yellow-800">{a.cost}</span>}
+                                    </button>
+                                )
+                            })}
+                        </div>
+
+                        <h3 className="font-bold text-slate-400 mb-3 uppercase text-xs">Designs</h3>
+                        <div className="grid grid-cols-2 gap-3">
+                            {THEMES.map(t => (
+                                <button key={t.id} onClick={()=>{ save({...user, theme:t.id}); }} className={`p-4 rounded-xl font-bold border-2 ${t.id==='dark'?'bg-slate-800 text-white':'bg-white text-slate-800'} ${user.theme===t.id ? 'border-green-500' : 'border-transparent'}`}>
+                                    {t.name}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+
+            // --- VIEW: GAME ---
+            if (view === 'game') return (
+                <div className="min-h-screen flex flex-col items-center justify-center p-4">
+                    <div className="w-full max-w-lg bg-white rounded-3xl shadow-xl p-6 relative pop-in">
+                        <button onClick={()=>setView('menu')} className="absolute top-4 left-4 text-slate-300 hover:text-slate-500 font-bold">✕</button>
+                        <button onClick={()=>speak(problem.q + (problem.text || ''))} className="absolute top-4 right-4 text-blue-400 hover:text-blue-600 font-bold bg-blue-50 p-2 rounded-lg">🔊</button>
+                        
+                        {problem.type === 'written' ? (
+                            <div className="text-center mt-6">
+                                <WrittenCalculator type={problem.op} a={problem.a} b={problem.b} onCorrect={()=>updateProgress(true, problem.topic)} />
+                            </div>
+                        ) : (
+                            <div className="text-center mt-8">
+                                {problem.type === 'geo' && <GeometryShape type={problem.target} />}
+                                <h2 className="text-3xl font-bold text-slate-800 mb-6 font-mono bg-slate-50 p-4 rounded-xl mt-4">{problem.q}</h2>
+                                {problem.text && <p className="mb-4 text-lg text-slate-600">{problem.text}</p>}
+                                
+                                {feedback === null ? (
+                                    problem.opts ? (
+                                        <div className="grid grid-cols-1 gap-3">
+                                            {problem.opts.map(o => (
+                                                <button key={o} onClick={()=>checkSimple(o)} className="bg-blue-50 text-blue-800 font-bold py-3 rounded-xl border border-blue-200 capitalize">{o}</button>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col gap-3">
+                                            <input value={input} onChange={e=>setInput(e.target.value)} className="text-center text-2xl p-3 border-4 border-slate-200 rounded-xl outline-none focus:border-blue-400" autoFocus type="number" placeholder="?" />
+                                            <button onClick={()=>checkSimple()} className="bg-green-500 text-white font-bold py-3 rounded-xl shadow-lg">Prüfen</button>
+                                        </div>
+                                    )
+                                ) : (
+                                    <div className="pop-in">
+                                        {feedback === 'correct' ? (
+                                            <div>
+                                                <div className="text-6xl mb-2">🎉</div>
+                                                <h3 className="text-green-600 font-bold text-xl mb-4">Richtig!</h3>
+                                                <button onClick={()=>startProblem(problem.topic)} className="bg-blue-600 text-white font-bold px-8 py-3 rounded-xl shadow-lg">Weiter ➜</button>
+                                            </div>
+                                        ) : (
+                                            <div>
+                                                <div className="text-6xl mb-2">🧐</div>
+                                                <h3 className="text-red-500 font-bold mb-4">Leider falsch</h3>
+                                                <button onClick={()=>{setFeedback(null);setInput('')}} className="bg-slate-200 font-bold px-6 py-2 rounded-xl">Nochmal</button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

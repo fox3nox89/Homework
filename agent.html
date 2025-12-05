@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="de-CH">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Agenten Mission</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap');
+        
+        body { 
+            background-color: #050505; 
+            color: #4ade80; 
+            font-family: 'Share Tech Mono', monospace; 
+            overflow: hidden;
+        }
+        
+        .scanlines {
+            position: fixed; left: 0; top: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+            background-size: 100% 4px;
+            pointer-events: none; z-index: 60; opacity: 0.6;
+        }
+        
+        .glow-text { text-shadow: 0 0 10px rgba(74, 222, 128, 0.7); }
+        
+        .typing::after { content: '▋'; animation: blink 1s infinite; color: #4ade80; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        .cyber-btn {
+            border: 1px solid #22c55e;
+            background: rgba(0, 50, 0, 0.5);
+            color: #4ade80;
+            transition: all 0.2s;
+        }
+        .cyber-btn:hover {
+            background: #22c55e;
+            color: black;
+            box-shadow: 0 0 15px #22c55e;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center h-screen bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')]">
+    <div class="scanlines"></div>
+    <div id="root" class="w-full max-w-3xl h-full p-4 flex flex-col z-10"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const STORY = {
+            start: {
+                title: "MISSION START",
+                text: [
+                    "AGENT! Hörst du mich?",
+                    "Wir haben Hinweise auf geheime Aktivitäten im Schulkeller.",
+                    "Codename des Ziels: 'Griesgram'.",
+                    "Deine Mission: Finde heraus, was er plant.",
+                    "Bist du bereit?"
+                ],
+                choices: [
+                    { txt: "Mission annehmen", next: "door_math" },
+                    { txt: "Verbindung trennen", next: "abort" }
+                ]
+            },
+            abort: {
+                title: "VERBINDUNG GETRENNT",
+                text: ["Mission abgebrochen.", "Das Geheimnis bleibt ungelöst."],
+                choices: [{ txt: "Neustart", next: "start" }]
+            },
+            door_math: {
+                title: "SICHERHEITSTÜR ALPHA",
+                text: [
+                    "Du stehst vor einer Stahltür.",
+                    "Ein Keypad blinkt rot.",
+                    "Sicherheitsfrage: '5 kg = ??? g'",
+                    "Gib den Code ein."
+                ],
+                input: "5000",
+                next: "hallway",
+                failText: "ZUGRIFF VERWEIGERT. (Tipp: 1 kg = 1000 g)"
+            },
+            hallway: {
+                title: "DER DUNKLE FLUR",
+                text: [
+                    "Zugriff gewährt. Die Tür öffnet sich.",
+                    "Du bist im Flur. Es ist dunkel.",
+                    "An der Wand hängt ein Schild: 'GARDER LE SILENCE!'",
+                    "Was bedeutet das erste Wort?"
+                ],
+                choices: [
+                    { txt: "Rennen", next: "alarm" },
+                    { txt: "Behalten / Bewahren", next: "hub" },
+                    { txt: "Essen", next: "alarm" }
+                ]
+            },
+            alarm: {
+                title: "ALARM AUSGELÖST",
+                text: [
+                    "Falsche Entscheidung!",
+                    "Sensoren haben dich entdeckt.",
+                    "Mission gescheitert."
+                ],
+                choices: [{ txt: "Neustart", next: "start" }]
+            },
+            hub: {
+                title: "KNOTENPUNKT",
+                text: [
+                    "Richtig. Du schleichst leise weiter.",
+                    "Du stehst an einer Kreuzung.",
+                    "Links: Chemielabor (Benötigt Code)",
+                    "Rechts: Archiv (Benötigt Code)",
+                    "Geradeaus: Zentrale (Benötigt 2 Items)"
+                ],
+                choices: [
+                    { txt: "Zum Labor (Volumen)", next: "lab_gate" },
+                    { txt: "Zum Archiv (Länge)", next: "arch_gate" },
+                    { txt: "Zur Zentrale", next: "final_gate" }
+                ]
+            },
+            lab_gate: {
+                title: "LABOR ZUGANG",
+                text: [
+                    "Sicherheitssystem: Flüssigkeits-Sensor.",
+                    "Fülle exakt einen halben Liter (1/2 l) ein.",
+                    "Eingabe in Milliliter (ml):"
+                ],
+                input: "500",
+                next: "lab_loot",
+                failText: "FEHLER. Überlauf! (Tipp: 1 l = 1000 ml)"
+            },
+            lab_loot: {
+                title: "IM LABOR",
+                text: [
+                    "Du bist drin. Es blubbert.",
+                    "Auf dem Tisch liegt ein blauer Kristall.",
+                    "Du steckst ihn ein.",
+                    "+ ITEM: KRISTALL"
+                ],
+                item: "Kristall",
+                choices: [{ txt: "Zurück zur Kreuzung", next: "hub" }]
+            },
+            arch_gate: {
+                title: "ARCHIV ZUGANG",
+                text: [
+                    "Laser-Schranke aktiv.",
+                    "Frage: Wie viele Zentimeter sind 4 Meter?"
+                ],
+                input: "400",
+                next: "arch_loot",
+                failText: "FEHLER. Laser aktiv. (Tipp: 1 m = 100 cm)"
+            },
+            arch_loot: {
+                title: "IM ARCHIV",
+                text: [
+                    "Staubige Akten.",
+                    "Du findest eine Code-Karte mit einem Chip.",
+                    "Du nimmst sie mit.",
+                    "+ ITEM: KARTE"
+                ],
+                item: "Karte",
+                choices: [{ txt: "Zurück zur Kreuzung", next: "hub" }]
+            },
+            final_gate: {
+                title: "DIE SCHLEUSE",
+                text: [
+                    "Panzertür zur Zentrale.",
+                    "Scanner verlangt: KRISTALL und KARTE."
+                ],
+                checkItems: ["Kristall", "Karte"],
+                next: "final_riddle",
+                failNext: "hub"
+            },
+            final_riddle: {
+                title: "LETZTE HÜRDE",
+                text: [
+                    "Die Tür ist offen. Aber ein Gitter versperrt den Weg.",
+                    "Passwort-Abfrage: Übersetzung von 'D'ABORD'",
+                    "Eingabe (Deutsch):"
+                ],
+                input: "zuerst",
+                next: "win",
+                failText: "FALSCH. (Tipp: Fängt mit Z an)"
+            },
+            win: {
+                title: "MISSION ERFÜLLT",
+                text: [
+                    "Das Gitter öffnet sich.",
+                    "Du findest Griesgram... er isst gemütlich ein Sandwich.",
+                    "'Ah, ein neuer Rekrut! Gut gemacht.'",
+                    "Griesgram ist kein Bösewicht, sondern Trainer für Geheimagenten!",
+                    "Du hast bestanden."
+                ],
+                choices: [{ txt: "Mission beenden (Neustart)", next: "start" }]
+            }
+        };
+
+        const Typewriter = ({ text, onComplete }) => {
+            const [lines, setLines] = useState([]);
+            const [currentLine, setCurrentLine] = useState(0);
+            const [charIndex, setCharIndex] = useState(0);
+
+            useEffect(() => { setLines([]); setCurrentLine(0); setCharIndex(0); }, [text]);
+
+            useEffect(() => {
+                if (currentLine < text.length) {
+                    if (charIndex < text[currentLine].length) {
+                        const t = setTimeout(() => setCharIndex(c => c + 1), 30);
+                        return () => clearTimeout(t);
+                    } else {
+                        const t = setTimeout(() => { setCurrentLine(l => l + 1); setCharIndex(0); }, 400);
+                        return () => clearTimeout(t);
+                    }
+                } else if (onComplete) {
+                    onComplete();
+                }
+            }, [charIndex, currentLine, text]);
+
+            return (
+                <div className="font-mono text-lg space-y-2">
+                    {text.slice(0, currentLine + 1).map((line, i) => (
+                        <p key={i} className={i === currentLine ? "typing" : "text-green-600"}>
+                            {i < currentLine ? line : line.slice(0, charIndex)}
+                        </p>
+                    ))}
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [scene, setScene] = useState('start');
+            const [inv, setInv] = useState([]);
+            const [inp, setInp] = useState('');
+            const [ready, setReady] = useState(false);
+            const s = STORY[scene];
+
+            useEffect(() => { 
+                if(s.item && !inv.includes(s.item)) setInv([...inv, s.item]); 
+                setReady(false);
+                setInp('');
+            }, [scene]);
+
+            const handleInputCheck = () => {
+                if (inp.toLowerCase() === s.input.toLowerCase()) setScene(s.next);
+                else alert(s.failText || "ZUGRIFF VERWEIGERT");
+            };
+
+            const handleItemCheck = () => {
+                const missing = s.checkItems.find(i => !inv.includes(i));
+                if (missing) {
+                    alert(`DIR FEHLT: ${missing}. Suche im Labor oder Archiv!`);
+                    setScene(s.failNext);
+                } else {
+                    setScene(s.next);
+                }
+            };
+
+            return (
+                <div className="w-full h-full flex flex-col justify-between border-2 border-green-800 bg-black p-6 rounded-lg shadow-[0_0_50px_rgba(34,197,94,0.2)] relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-green-500 shadow-[0_0_20px_#22c55e]"></div>
+                    
+                    <div className="flex justify-between items-end border-b border-green-900 pb-2 mb-4">
+                        <div>
+                            <h1 className="text-2xl font-bold font-[Orbitron] tracking-widest text-green-400 glow-text">{s.title}</h1>
+                            <div className="text-xs text-green-800">SECURE CONNECTION // ENCRYPTED</div>
+                        </div>
+                        <div className="text-right text-xs text-green-600">
+                            <div>INV: {inv.length > 0 ? inv.join(' | ') : 'LEER'}</div>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto mb-6">
+                        <Typewriter text={s.text} onComplete={() => setReady(true)} />
+                    </div>
+
+                    <div className={`transition-opacity duration-1000 ${ready ? 'opacity-100' : 'opacity-0'}`}>
+                        {s.input && (
+                            <div className="flex gap-2">
+                                <input 
+                                    value={inp} 
+                                    onChange={e=>setInp(e.target.value)} 
+                                    onKeyDown={e=>e.key==='Enter'&&handleInputCheck()}
+                                    className="bg-black border border-green-600 p-3 w-full focus:outline-none focus:border-green-400 text-green-400 font-bold tracking-widest placeholder-green-900" 
+                                    placeholder="CODE EINGABE..." 
+                                    autoFocus
+                                />
+                                <button onClick={handleInputCheck} className="cyber-btn px-6 font-bold uppercase">Enter</button>
+                            </div>
+                        )}
+
+                        {s.choices && (
+                            <div className="grid gap-3">
+                                {s.choices.map((c, i) => (
+                                    <button key={i} onClick={() => setScene(c.next)} className="cyber-btn w-full p-4 text-left font-bold tracking-wider flex justify-between group">
+                                        <span>&gt; {c.txt}</span>
+                                        <span className="opacity-0 group-hover:opacity-100">&lt;&lt;</span>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        {s.checkItems && (
+                            <button onClick={handleItemCheck} className="cyber-btn w-full p-4 font-bold text-center tracking-widest animate-pulse">
+                                [ ITEMS EINSETZEN ]
+                            </button>
+                        )}
+                    </div>
+                    
+                    <div className="mt-4 flex justify-between text-[10px] text-green-900">
+                        <span>SYS_V8.0</span>
+                        <a href="index.html" className="hover:text-green-500 cursor-pointer">[ ABBRUCH / MENÜ ]</a>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

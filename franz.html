@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="de-CH">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Französisch Profi</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700&display=swap');
+        
+        body { 
+            font-family: 'Fredoka', sans-serif; 
+            background-color: #eef2ff; 
+            color: #312e81; 
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .card { 
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
+            cursor: pointer; 
+            transform-style: preserve-3d;
+        }
+        .card:active { transform: scale(0.95); }
+        
+        .selected { 
+            border: 4px solid #6366f1; 
+            background: #e0e7ff; 
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);
+        }
+        
+        .matched { 
+            opacity: 0; 
+            pointer-events: none; 
+            transform: scale(0.8);
+        }
+        
+        .pop-in { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- VOKABELLISTE (Erweiterbar) ---
+        const WORDS = [
+            { id: 1, fr: "D'abord", de: "Zuerst" },
+            { id: 2, fr: "Puis", de: "Dann" },
+            { id: 3, fr: "Après", de: "Danach" },
+            { id: 4, fr: "Finalement", de: "Schliesslich" },
+            { id: 5, fr: "De", de: "Von" },
+            { id: 6, fr: "Garder", de: "Behalten" },
+            { id: 7, fr: "Peut-être", de: "Vielleicht" },
+            { id: 8, fr: "Le chien", de: "Der Hund" },
+            { id: 9, fr: "La maison", de: "Das Haus" },
+            { id: 10, fr: "Rouge", de: "Rot" },
+            { id: 11, fr: "L'école", de: "Die Schule" },
+            { id: 12, fr: "Jouer", de: "Spielen" }
+        ];
+
+        // --- SPRACHAUSGABE ---
+        const speak = (txt) => {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(txt);
+                u.lang = 'fr-FR'; 
+                u.rate = 0.9;
+                window.speechSynthesis.speak(u);
+            }
+        };
+
+        // --- APP ---
+        const App = () => {
+            const [cards, setCards] = useState([]);
+            const [selected, setSelected] = useState(null);
+            const [score, setScore] = useState(0);
+            const [won, setWon] = useState(false);
+
+            // Spiel neu starten
+            const initGame = () => {
+                // Wir nehmen zufällig 6 Wortpaare (damit es auf dem Handy nicht zu voll wird)
+                const shuffledWords = [...WORDS].sort(() => Math.random() - 0.5).slice(0, 6);
+                
+                // Erstelle Karten für DE und FR
+                const deck = [
+                    ...shuffledWords.map(w => ({ ...w, type: 'fr', txt: w.fr })),
+                    ...shuffledWords.map(w => ({ ...w, type: 'de', txt: w.de }))
+                ];
+                
+                setCards(deck.sort(() => Math.random() - 0.5));
+                setScore(0);
+                setWon(false);
+                setSelected(null);
+            };
+
+            useEffect(() => {
+                initGame();
+            }, []);
+
+            const click = (card) => {
+                if (card.matched) return;
+                
+                // Französisch vorlesen
+                if (card.type === 'fr') speak(card.txt);
+                
+                // Erste Karte auswählen
+                if (!selected) { 
+                    setSelected(card); 
+                    return; 
+                }
+
+                // Gleiche Karte geklickt? Abbrechen
+                if (selected === card) return;
+
+                // Match prüfen
+                if (selected.id === card.id) {
+                    // RICHTIG!
+                    const newCards = cards.map(c => c.id === card.id ? { ...c, matched: true } : c);
+                    setCards(newCards);
+                    setSelected(null);
+                    setScore(s => s + 1);
+                    
+                    // Prüfen ob gewonnen (6 Paare = 6 Punkte)
+                    if (score + 1 === 6) {
+                        setWon(true);
+                        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+                    }
+                } else {
+                    // FALSCH - Kurz warten und zurücksetzen
+                    setSelected(card); // Zeige kurz die zweite Karte
+                    setTimeout(() => {
+                        setSelected(null);
+                    }, 800);
+                }
+            };
+
+            return (
+                <div className="min-h-screen p-4 flex flex-col items-center max-w-4xl mx-auto">
+                    
+                    {/* Header */}
+                    <div className="w-full flex justify-between items-center mb-8 bg-white p-4 rounded-3xl shadow-sm border border-indigo-100">
+                        <div className="flex items-center gap-3">
+                            <a href="index.html" className="bg-indigo-50 text-indigo-400 p-2 rounded-xl hover:bg-indigo-100 transition">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                            </a>
+                            <h1 className="text-2xl font-bold text-indigo-900">Französisch</h1>
+                        </div>
+                        <div className="text-xl font-bold bg-indigo-100 text-indigo-700 px-4 py-1 rounded-full">
+                            {score} / 6 Paare
+                        </div>
+                    </div>
+
+                    {/* Game Grid */}
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
+                        {cards.map((c, i) => (
+                            <div key={i} onClick={() => click(c)} 
+                                className={`card bg-white p-4 rounded-2xl shadow-sm border-b-4 border-indigo-100 flex flex-col items-center justify-center text-center min-h-[120px] 
+                                ${c.matched ? 'matched' : ''} 
+                                ${selected === c ? 'selected' : ''}`}>
+                                
+                                <span className="text-xs font-bold uppercase tracking-widest mb-1 text-slate-300">
+                                    {c.type === 'fr' ? '🇫🇷' : '🇩🇪'}
+                                </span>
+                                <span className="font-bold text-lg md:text-xl text-slate-700">
+                                    {c.txt}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Win Screen Overlay */}
+                    {won && (
+                        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+                            <div className="bg-white rounded-3xl p-8 text-center max-w-sm w-full pop-in border-4 border-indigo-500">
+                                <div className="text-6xl mb-4">🏆</div>
+                                <h2 className="text-3xl font-black text-indigo-900 mb-2">Très Bien!</h2>
+                                <p className="text-slate-500 mb-8">Du hast alle Wörter gefunden.</p>
+                                <button onClick={initGame} className="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:bg-indigo-700 transition transform hover:scale-105">
+                                    Nochmal spielen
+                                </button>
+                                <a href="index.html" className="block mt-4 text-indigo-400 font-bold text-sm hover:underline">Zurück zum Menü</a>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="mt-8 text-center text-slate-400 text-sm">
+                        Tipp: Klicke auf die französischen Karten, um sie zu hören! 🔊
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
