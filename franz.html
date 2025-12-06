@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Französisch Galaxy Legends</title>
+    <title>Französisch Galaxy Final</title>
     
     <!-- ENGINE -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -354,59 +354,86 @@
             );
         };
 
-        // 3. QUIZ GAME (Generisch für Quiz, Hören, Schreiben)
-        const GenericQuiz = ({ words, mode, onFinish }) => {
+        // 3. QUIZ GAME
+        const QuizGame = ({ words, onFinish }) => {
             const [q, setQ] = useState(null);
-            const [inp, setInp] = useState('');
             const [count, setCount] = useState(0);
             
             const next = () => {
                 if(count >= 5) { onFinish(); return; }
                 const t = words[Math.floor(Math.random()*words.length)];
                 const o = [...words.filter(w=>w.fr!==t.fr).sort(()=>Math.random()-0.5).slice(0,3), t].sort(()=>Math.random()-0.5);
-                setQ({t, o}); setInp('');
-                if(mode !== 'write') speak(t.fr);
-                setCount(c=>c+1);
+                setQ({t, o}); speak(t.fr); setCount(c=>c+1);
             };
             useEffect(next, []);
 
             const check = (val) => {
-                let correct = false;
-                if(mode === 'write') correct = val.toLowerCase().trim() === DICTIONARY[q.t.fr].toLowerCase();
-                else correct = val === DICTIONARY[q.t.fr];
-
-                if(correct){ playSound('correct'); next(); }
-                else { playSound('wrong'); alert("Falsch! " + (mode==='write' ? DICTIONARY[q.t.fr] : DICTIONARY[q.t.fr])); }
+                if(val===q.t.fr){ playSound('correct'); next(); }
+                else { playSound('wrong'); alert("Falsch! " + DICTIONARY[q.t.fr]); }
             };
 
             if(!q) return null;
-
             return (
                 <div className="w-full max-w-md text-center pop-in p-4">
                     <div className="glass-panel p-8 mb-6">
-                        {mode === 'listen' ? (
-                            <button onClick={()=>speak(q.t.fr)} className="w-24 h-24 bg-purple-500 rounded-full text-5xl flex items-center justify-center shadow-lg hover:scale-110 transition animate-bounce text-white">🔊</button>
-                        ) : (
-                            <div>
-                                <h1 className="text-3xl font-black text-white mb-2">{q.t.fr}</h1>
-                                <button onClick={()=>speak(q.t.fr)} className="text-sm bg-blue-600 px-3 py-1 rounded-full text-white font-bold">🔊</button>
-                            </div>
-                        )}
+                        <h1 className="text-3xl font-black text-blue-300 mb-2">{q.t.fr}</h1>
+                        <button onClick={()=>speak(q.t.fr)} className="text-sm bg-blue-600 px-3 py-1 rounded-full">🔊 Hören</button>
                     </div>
+                    <div className="grid gap-3">{q.o.map(w=><button key={w.de} onClick={()=>check(w.fr)} className="btn-action btn-purple w-full p-4 justify-start pl-6 text-sm">{DICTIONARY[w.fr]}</button>)}</div>
+                </div>
+            );
+        };
 
-                    {mode === 'write' ? (
-                        <div className="flex flex-col gap-4">
-                            <input value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>e.key==='Enter'&&check(inp)} className="input-galaxy" placeholder="Auf Deutsch..." autoFocus />
-                            <div className="flex justify-center gap-2">
-                                {['ä','ö','ü','ß'].map(c=><button key={c} onClick={()=>setInp(i=>i+c)} className="bg-slate-700 text-white w-10 h-10 rounded font-bold hover:bg-slate-600">{c}</button>)}
-                            </div>
-                            <button onClick={()=>check(inp)} className="btn-action btn-green w-full p-4">PRÜFEN</button>
-                        </div>
-                    ) : (
-                        <div className="grid gap-3">
-                            {q.o.map((o,i)=><button key={i} onClick={()=>check(DICTIONARY[o.fr])} className="btn-action btn-purple w-full p-4 justify-start pl-6 text-sm">{DICTIONARY[o.fr]}</button>)}
-                        </div>
-                    )}
+        // 4. LISTEN GAME
+        const ListenGame = ({ words, onFinish }) => {
+            const [q, setQ] = useState(null);
+            const [count, setCount] = useState(0);
+            const next = () => {
+                if(count >= 5) { onFinish(); return; }
+                const t = words[Math.floor(Math.random()*words.length)];
+                const o = [...words.filter(w=>w.fr!==t.fr).sort(()=>Math.random()-0.5).slice(0,3), t].sort(()=>Math.random()-0.5);
+                setQ({t, o}); speak(t.fr); setCount(c=>c+1);
+            };
+            useEffect(next, []);
+            const check = (val) => { if(val===q.t.fr){ playSound('correct'); next(); } else playSound('wrong'); };
+            if(!q) return null;
+            return (
+                <div className="w-full max-w-md text-center pop-in">
+                    <div className="glass-panel p-12 mb-6 flex justify-center">
+                        <button onClick={()=>speak(q.t.fr)} className="w-24 h-24 bg-pink-500 rounded-full text-5xl shadow-lg hover:scale-110 transition animate-bounce">🔊</button>
+                    </div>
+                    <div className="grid gap-3">{q.o.map(w=><button key={w.de} onClick={()=>check(w.fr)} className="btn-action btn-blue w-full p-4 justify-start pl-6">{DICTIONARY[w.fr]}</button>)}</div>
+                </div>
+            );
+        };
+
+        // 5. WRITE GAME
+        const WriteGame = ({ words, onFinish }) => {
+            const [q, setQ] = useState(null);
+            const [inp, setInp] = useState('');
+            const [count, setCount] = useState(0);
+            const next = () => {
+                if(count >= 5) { onFinish(); return; }
+                const t = words[Math.floor(Math.random()*words.length)];
+                setQ(t); setInp(''); speak(t.fr); setCount(c=>c+1);
+            };
+            useEffect(next, []);
+            const check = () => {
+                if(inp.toLowerCase().trim() === DICTIONARY[q.fr].toLowerCase()) { playSound('correct'); next(); }
+                else { playSound('wrong'); alert("Falsch! Lösung: " + DICTIONARY[q.fr]); }
+            };
+            if(!q) return null;
+            return (
+                <div className="w-full max-w-md text-center pop-in p-4">
+                    <div className="glass-panel p-8 mb-6">
+                        <h2 className="text-3xl font-black text-green-400 mb-2">{q.fr}</h2>
+                        <button onClick={()=>speak(q.fr)} className="text-sm bg-green-600 px-3 py-1 rounded-full">🔊 Hören</button>
+                    </div>
+                    <input value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>e.key==='Enter'&&check()} className="w-full p-4 rounded-xl text-center text-xl bg-slate-800 text-white border-2 border-slate-600 mb-4 focus:border-green-500 outline-none" placeholder="Auf Deutsch..." autoFocus />
+                    <div className="flex justify-center gap-2 mb-4">
+                        {['ä','ö','ü','ß'].map(c=><button key={c} onClick={()=>setInp(i=>i+c)} className="bg-slate-700 text-white w-10 h-10 rounded font-bold hover:bg-slate-600">{c}</button>)}
+                    </div>
+                    <button onClick={check} className="btn-action btn-green w-full p-4">Prüfen</button>
                 </div>
             );
         };
@@ -459,8 +486,8 @@
             const [gameMode, setGameMode] = useState(null);
             const [modal, setModal] = useState(null);
 
-            useEffect(() => { const s = localStorage.getItem('franz_final_v15'); if(s) setUser(JSON.parse(s)); }, []);
-            const save = (u) => { setUser(u); localStorage.setItem('franz_final_v15', JSON.stringify(u)); };
+            useEffect(() => { const s = localStorage.getItem('franz_final_v16'); if(s) setUser(JSON.parse(s)); }, []);
+            const save = (u) => { setUser(u); localStorage.setItem('franz_final_v16', JSON.stringify(u)); };
 
             const addProgress = (xp, coins) => {
                 const u = { ...user }; u.xp += xp; u.coins += coins;
@@ -535,12 +562,13 @@
                             <button onClick={()=>setView('map')} className="glass-panel w-12 h-12 flex items-center justify-center text-white font-bold text-xl">✕</button>
                             <div className="glass-panel px-4 py-1 text-blue-400 font-bold text-sm uppercase">{gameMode}</div>
                         </div>
+
                         <div className="flex-1 flex flex-col justify-center items-center w-full max-w-2xl mx-auto">
                             {gameMode === 'memory' && <MemoryGame words={activeWorld.words} onFinish={() => addProgress(50, 20)} />}
                             {gameMode === 'match' && <MatchGame words={activeWorld.words} onFinish={() => addProgress(50, 20)} />}
-                            {gameMode === 'quiz' && <GenericQuiz words={activeWorld.words} mode="quiz" onFinish={() => addProgress(30, 10)} />}
-                            {gameMode === 'listen' && <GenericQuiz words={activeWorld ? activeWorld.words : []} mode="listen" onFinish={() => addProgress(30, 15)} />}
-                            {gameMode === 'write' && <GenericQuiz words={activeWorld.words} mode="write" onFinish={() => addProgress(40, 20)} />}
+                            {gameMode === 'quiz' && <QuizGame words={activeWorld.words} onFinish={() => addProgress(30, 10)} />}
+                            {gameMode === 'listen' && <ListenGame words={activeWorld.words} onFinish={() => addProgress(30, 15)} />}
+                            {gameMode === 'write' && <WriteGame words={activeWorld.words} onFinish={() => addProgress(40, 20)} />}
                         </div>
                         {modal && <Modal title={modal.title} type={modal.type} onClose={()=>{setModal(null); setView('map');}}>{modal.msg}</Modal>}
                     </div>
@@ -551,7 +579,7 @@
 
             return null;
         };
-        
+
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
