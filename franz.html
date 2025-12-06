@@ -3,142 +3,220 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Französisch Infinity Final</title>
+    <title>Französisch Galaxy Legends</title>
     
+    <!-- ENGINE -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700;900&display=swap');
-        
-        :root { --bg-color: #eef2ff; --primary: #4f46e5; --text: #312e81; --card-bg: #ffffff; }
-        
-        /* THEMES */
-        .theme-dark { --bg-color: #0f172a; --primary: #818cf8; --text: #f1f5f9; --card-bg: #1e293b; }
-        .theme-pink { --bg-color: #fdf2f8; --primary: #db2777; --text: #831843; --card-bg: #fff1f2; }
-        .theme-green { --bg-color: #f0fdf4; --primary: #16a34a; --text: #14532d; --card-bg: #dcfce7; }
-        .theme-gold { --bg-color: #fffbeb; --primary: #d97706; --text: #78350f; --card-bg: #fef3c7; }
+        :root { --primary: #6366f1; --secondary: #a855f7; --bg-dark: #0f172a; }
         
         body { 
-            font-family: 'Fredoka', sans-serif; background-color: var(--bg-color); color: var(--text); 
-            user-select: none; -webkit-tap-highlight-color: transparent; transition: background-color 0.5s, color 0.5s;
+            font-family: 'Nunito', sans-serif; 
+            background-color: var(--bg-dark); 
+            color: #f8fafc; 
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
         }
-        .nunito { font-family: 'Nunito', sans-serif; }
         
-        /* FLIP CARD (Memory) */
-        .scene { perspective: 600px; height: 100px; cursor: pointer; }
-        .card { width: 100%; height: 100%; position: relative; transition: transform 0.4s; transform-style: preserve-3d; }
-        .card.is-flipped { transform: rotateY(180deg); }
-        .card.is-matched { opacity: 0; pointer-events: none; transition: opacity 0.5s 0.5s; }
-        .card__face { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 2px solid white; }
-        .card__face--front { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; font-size: 2rem; border: 4px solid white; }
-        .card__face--back { background: white; transform: rotateY(180deg); font-weight: bold; font-size: 1rem; padding: 5px; text-align: center; }
+        .font-game { font-family: 'Baloo 2', cursive; }
+
+        /* --- HINTERGRUND --- */
+        .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; background: radial-gradient(circle at bottom, #1e293b 0%, #020617 100%); }
+        .star { position: absolute; background: white; border-radius: 50%; opacity: 0.5; animation: twinkle 4s infinite; }
+        @keyframes twinkle { 0%, 100% { opacity: 0.2; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
+
+        /* --- UI COMPONENTS --- */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.75); backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            border-radius: 24px;
+        }
+
+        .btn-action {
+            transition: all 0.1s; border-radius: 16px; 
+            font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.3); cursor: pointer;
+            border-bottom-width: 6px; position: relative; overflow: hidden;
+        }
+        .btn-action:active { transform: translateY(4px); border-bottom-width: 2px; box-shadow: none; }
         
-        /* VERBINDEN KARTEN */
-        .word-card {
+        .btn-blue { background: #3b82f6; border-color: #1d4ed8; color: white; }
+        .btn-green { background: #22c55e; border-color: #15803d; color: white; }
+        .btn-purple { background: #8b5cf6; border-color: #6d28d9; color: white; }
+        .btn-yellow { background: #eab308; border-color: #a16207; color: white; }
+        .btn-red { background: #ef4444; border-color: #b91c1c; color: white; }
+
+        /* --- MEMORY KARTEN --- */
+        .scene { perspective: 1000px; height: 100px; cursor: pointer; }
+        .card { width: 100%; height: 100%; position: relative; transition: transform 0.6s; transform-style: preserve-3d; }
+        .card.flipped { transform: rotateY(180deg); }
+        .card.matched { animation: popOut 0.5s forwards; pointer-events: none; }
+        
+        .face {
+            position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden;
             border-radius: 16px; display: flex; align-items: center; justify-content: center;
-            text-align: center; font-size: 1.1rem; font-weight: bold;
-            box-shadow: 0 4px 0 rgba(0,0,0,0.1); cursor: pointer; transition: all 0.15s;
-            min-height: 70px; position: relative; overflow: hidden; background-color: var(--card-bg); border: 3px solid transparent;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 3px solid rgba(255,255,255,0.2);
         }
-        .word-card:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
-        .word-card.matched { transform: scale(0); opacity: 0; pointer-events: none; transition: all 0.5s; }
+        .front { background: linear-gradient(135deg, #6366f1, #a855f7); font-size: 2.5rem; z-index: 2; color: white; }
+        .back { background: #1e293b; transform: rotateY(180deg); z-index: 1; padding: 5px; text-align: center; font-weight: 800; font-size: 0.95rem; }
         
-        /* FARBEN */
-        .card-fr { border-color: #3b82f6; color: #1e40af; background: #eff6ff; }
-        .theme-dark .card-fr { background: #172554; border-color: #3b82f6; color: #bfdbfe; }
-        .card-fr.selected { background: #3b82f6 !important; color: white !important; }
-        
-        .card-de { border-color: #f97316; color: #9a3412; background: #fff7ed; }
-        .theme-dark .card-de { background: #431407; border-color: #f97316; color: #fed7aa; }
-        .card-de.selected { background: #f97316 !important; color: white !important; }
+        .type-fr .back { border-color: #3b82f6; color: #60a5fa; background: #172554; }
+        .type-de .back { border-color: #f97316; color: #fdba74; background: #431407; }
 
-        .card-fr .card__face--back { border: 3px solid #3b82f6; color: #1e40af; background: #eff6ff; }
-        .card-de .card__face--back { border: 3px solid #f97316; color: #9a3412; background: #fff7ed; }
+        /* --- VERBINDEN KARTEN --- */
+        .match-card {
+            background: #1e293b; border: 3px solid #334155; border-radius: 16px; padding: 12px;
+            font-weight: 800; cursor: pointer; transition: all 0.2s; min-height: 60px;
+            display: flex; align-items: center; justify-content: center; text-align: center;
+            box-shadow: 0 4px 0 #0f172a; font-size: 1.1rem;
+        }
+        .match-card:active { transform: translateY(4px); box-shadow: none; }
+        .match-card.fr { border-left: 6px solid #3b82f6; color: #93c5fd; }
+        .match-card.de { border-right: 6px solid #f97316; color: #fdba74; }
+        .match-card.selected { background: #1e3a8a; border-color: #3b82f6; transform: scale(1.05); z-index: 10; color: white; box-shadow: 0 0 20px rgba(59,130,246,0.5); }
+        .match-card.matched { animation: popOut 0.4s forwards; }
 
-        /* AVATAR SAMMLUNG */
-        .avatar-slot { aspect-ratio: 1; border-radius: 16px; background: white; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; position: relative; border: 2px solid #e2e8f0; transition: all 0.2s; }
-        .avatar-slot.locked { filter: grayscale(100%) opacity(0.4); background: #cbd5e1; box-shadow: inset 0 0 10px rgba(0,0,0,0.1); }
-        .avatar-slot.unlocked { cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,0.1); }
-        .avatar-slot.equipped { border-color: #22c55e; background: #f0fdf4; box-shadow: 0 0 0 4px #bbf7d0; }
-        .rarity-common { border-bottom: 4px solid #94a3b8; }
-        .rarity-rare { border-bottom: 4px solid #3b82f6; }
-        .rarity-epic { border-bottom: 4px solid #a855f7; }
-        .rarity-legendary { border-bottom: 4px solid #eab308; background: linear-gradient(135deg, #fffbeb, #fef3c7); }
+        /* --- AVATAR SHOP CARDS --- */
+        .shop-card { transition: all 0.2s; position: relative; overflow: hidden; cursor: pointer; border-width: 3px; }
+        .shop-card:active { transform: scale(0.95); }
+        .rarity-common { border-color: #94a3b8; background: #f1f5f9; color: #334155; }
+        .rarity-rare { border-color: #3b82f6; background: #eff6ff; color: #1e3a8a; box-shadow: 0 0 10px rgba(59,130,246,0.3); }
+        .rarity-epic { border-color: #a855f7; background: #faf5ff; color: #581c87; box-shadow: 0 0 15px rgba(168,85,247,0.5); animation: pulse 2s infinite; }
+        .rarity-legendary { border-color: #eab308; background: linear-gradient(135deg, #422006, #713f12); box-shadow: 0 0 20px rgba(234,179,8,0.6); animation: shine 2s infinite; }
 
-        /* INPUTS */
-        .input-field { width: 100%; padding: 1rem; text-align: center; font-size: 1.5rem; border: 4px solid #e2e8f0; border-radius: 16px; outline: none; background: var(--card-bg); color: var(--text); transition: all 0.3s; }
-        .input-field:focus { border-color: var(--primary); }
-        .input-field.error { border-color: #ef4444; background-color: #fef2f2; animation: shake 0.4s; }
-        .input-field.success { border-color: #22c55e; background-color: #f0fdf4; }
-
-        /* ANIMATIONS */
+        /* --- ANIMATIONS --- */
+        @keyframes popOut { 0% { transform: scale(1); } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(0); opacity: 0; } }
+        @keyframes shine { 0% { filter: brightness(1); } 50% { filter: brightness(1.2); } 100% { filter: brightness(1); } }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(168,85,247,0.4); } 70% { box-shadow: 0 0 0 10px rgba(168,85,247,0); } }
         .pop-in { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .shake-box { animation: shake 0.5s infinite; }
-        @keyframes shake { 0% { transform: rotate(0deg); } 25% { transform: rotate(5deg); } 75% { transform: rotate(-5deg); } }
-        .xp-bar { transition: width 1s ease-out; }
+        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+
+        /* LOADING */
+        #loading { position: fixed; inset: 0; background: #0f172a; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         
-        #loading { position: fixed; top:0; left:0; width:100%; height:100%; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.5s; }
+        /* XP Bar */
+        .xp-track { height: 16px; background: rgba(0,0,0,0.3); border-radius: 8px; overflow: hidden; position: relative; border: 1px solid rgba(255,255,255,0.2); }
+        .xp-fill { height: 100%; background: linear-gradient(90deg, #4ade80, #22c55e); transition: width 1s ease-out; }
+
+        /* Input Field */
+        .input-galaxy { background: #0f172a; border: 3px solid #334155; color: white; text-align: center; font-size: 1.5rem; padding: 1rem; border-radius: 16px; outline: none; width: 100%; }
+        .input-galaxy:focus { border-color: #6366f1; box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.3); }
+
+        /* Modal */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(5px); }
     </style>
 </head>
 <body class="min-h-screen pb-20">
+
+    <div class="stars" id="stars"></div>
     
     <div id="loading">
-        <div class="text-6xl mb-4 animate-bounce">🇫🇷</div>
-        <div class="text-xl font-bold text-teal-600">Lade Vokabeln...</div>
+        <div class="text-6xl mb-6 animate-bounce">🇫🇷</div>
+        <div class="text-2xl font-black text-blue-500 tracking-[0.3em] font-game">LADE GALAXY...</div>
     </div>
+    
     <div id="root"></div>
 
     <script type="text/babel">
-        setTimeout(() => { const l = document.getElementById('loading'); if(l) l.style.display = 'none'; }, 1000);
+        // --- INIT ---
+        const starCont = document.getElementById('stars');
+        for(let i=0; i<50; i++) {
+            const s = document.createElement('div'); s.className = 'star';
+            s.style.top = Math.random()*100+'%'; s.style.left = Math.random()*100+'%';
+            s.style.width = Math.random()*3+'px'; s.style.height = s.style.width;
+            s.style.animationDelay = Math.random()*5+'s'; starCont.appendChild(s);
+        }
+
+        setTimeout(() => document.getElementById('loading').style.display='none', 1000);
+        window.onerror = function(msg) { console.error("Error:", msg); return false; };
 
         const { useState, useEffect, useRef } = React;
 
-        const LEVELS = [0, 100, 300, 600, 1000, 1500, 2200, 3000, 4000, 5000, 10000];
-        const RANKS = ["Schüler", "Entdecker", "Profi", "Meister", "Champion", "Legende"];
+        // --- DATEN ---
+        const LEVELS = [0, 200, 500, 1000, 2000, 3500, 5500, 8000, 11000, 15000, 20000];
+        const RANKS = ["Kadett", "Entdecker", "Pilot", "Captain", "Commander", "Admiral", "Galactic Hero"];
 
-        // AVATAR LISTE
+        // Welten (Levels) - INHALT AUS "ÇA ROULE"
+        const WORLDS = [
+            { 
+                id: 1, name: "Basis Lager", icon: "🚀", reqLvl: 1, 
+                words: [
+                    {fr:"Bonjour", de:"Guten Tag"}, {fr:"Salut", de:"Hallo"}, {fr:"Au revoir", de:"Auf Wiedersehen"}, 
+                    {fr:"Merci", de:"Danke"}, {fr:"S'il vous plaît", de:"Bitte"}, {fr:"Oui", de:"Ja"}, {fr:"Non", de:"Nein"},
+                    {fr:"Je", de:"Ich"}, {fr:"Tu", de:"Du"}, {fr:"Il", de:"Er"}, {fr:"Elle", de:"Sie"}
+                ] 
+            },
+            { 
+                id: 2, name: "Struktur", icon: "🧩", reqLvl: 1, 
+                words: [
+                    {fr:"D'abord", de:"Zuerst"}, {fr:"Puis", de:"Dann"}, {fr:"Après", de:"Danach"}, 
+                    {fr:"Finalement", de:"Schliesslich"}, {fr:"De", de:"Von"}, {fr:"Garder", de:"Behalten"},
+                    {fr:"Peut-être", de:"Vielleicht"}, {fr:"Toujours", de:"Immer"}, {fr:"Jamais", de:"Nie"}
+                ] 
+            },
+            { 
+                id: 3, name: "Die Schule", icon: "🏫", reqLvl: 2, 
+                words: [
+                    {fr:"L'école", de:"Die Schule"}, {fr:"Le livre", de:"Das Buch"}, {fr:"Le cahier", de:"Das Heft"}, 
+                    {fr:"Le crayon", de:"Der Bleistift"}, {fr:"La gomme", de:"Der Gummi"}, {fr:"La trousse", de:"Das Etui"},
+                    {fr:"La classe", de:"Die Klasse"}, {fr:"Le devoir", de:"Die Hausaufgabe"}
+                ] 
+            },
+            { 
+                id: 4, name: "Tier-Planet", icon: "🦁", reqLvl: 3, 
+                words: [
+                    {fr:"Le chien", de:"Der Hund"}, {fr:"Le chat", de:"Die Katze"}, {fr:"La souris", de:"Die Maus"},
+                    {fr:"L'oiseau", de:"Der Vogel"}, {fr:"Le cheval", de:"Das Pferd"}, {fr:"La vache", de:"Die Kuh"},
+                    {fr:"Le cochon", de:"Das Schwein"}, {fr:"Le lion", de:"Der Löwe"}
+                ] 
+            },
+            { 
+                id: 5, name: "Farben-Nebel", icon: "🎨", reqLvl: 5, 
+                words: [
+                    {fr:"Rouge", de:"Rot"}, {fr:"Bleu", de:"Blau"}, {fr:"Vert", de:"Grün"}, {fr:"Jaune", de:"Gelb"},
+                    {fr:"Noir", de:"Schwarz"}, {fr:"Blanc", de:"Weiss"}, {fr:"Gris", de:"Grau"}, {fr:"Orange", de:"Orange"}
+                ] 
+            },
+            { 
+                id: 6, name: "Aktion", icon: "⚡", reqLvl: 7, 
+                words: [
+                    {fr:"Jouer", de:"Spielen"}, {fr:"Chanter", de:"Singen"}, {fr:"Parler", de:"Sprechen"}, 
+                    {fr:"Écouter", de:"Zuhören"}, {fr:"Regarder", de:"Schauen"}, {fr:"Manger", de:"Essen"},
+                    {fr:"Boire", de:"Trinken"}, {fr:"Dormir", de:"Schlafen"}, {fr:"Chercher", de:"Suchen"}
+                ] 
+            }
+        ];
+
+        // Hilfs-Dictionary für schnellen Zugriff
+        const DICTIONARY = {};
+        WORLDS.forEach(w => w.words.forEach(pair => DICTIONARY[pair.fr] = pair.de));
+
         const AVATARS = [
-            { id: 'bear', icon: '🐻', name: 'Bruno', rarity: 'common' },
-            { id: 'cat', icon: '🐱', name: 'Mimi', rarity: 'common' },
-            { id: 'fox', icon: '🦊', name: 'Foxy', rarity: 'rare' },
-            { id: 'lion', icon: '🦁', name: 'Leo', rarity: 'rare' },
-            { id: 'robot', icon: '🤖', name: 'Robo', rarity: 'epic' },
-            { id: 'alien', icon: '👽', name: 'Zorg', rarity: 'epic' },
-            { id: 'dragon', icon: '🐲', name: 'Drago', rarity: 'legendary' },
-            { id: 'king', icon: '👑', name: 'King', rarity: 'legendary' }
+            { id: 'bear', icon: '🐻', name: 'Bruno', cost: 0, rarity: 'common' },
+            { id: 'cat', icon: '🐱', name: 'Mimi', cost: 100, rarity: 'common' },
+            { id: 'fox', icon: '🦊', name: 'Foxy', cost: 300, rarity: 'rare' },
+            { id: 'robot', icon: '🤖', name: 'Robo', cost: 1000, rarity: 'epic' },
+            { id: 'alien', icon: '👽', name: 'Zorg', cost: 1500, rarity: 'epic' },
+            { id: 'dragon', icon: '🐲', name: 'Drago', cost: 5000, rarity: 'legendary' },
+            { id: 'king', icon: '👑', name: 'King', cost: 10000, rarity: 'legendary' }
         ];
 
         const PACKS = [
-            { id: 'basic', name: 'Starter Box', cost: 100, emoji: '📦', prob: { common: 70, rare: 29, epic: 1, legendary: 0 } },
+            { id: 'basic', name: 'Starter Pack', cost: 100, emoji: '📦', prob: { common: 70, rare: 29, epic: 1, legendary: 0 } },
             { id: 'gold', name: 'Gold Box', cost: 500, emoji: '🎁', prob: { common: 20, rare: 50, epic: 25, legendary: 5 } },
-            { id: 'legend', name: 'Mystery Box', cost: 2000, emoji: '🔮', prob: { common: 0, rare: 10, epic: 40, legendary: 50 } }
-        ];
-
-        // WORTSCHATZ (Ça roule 4)
-        const VOCABULARY = [
-            { fr: "Bonjour", de: "Guten Tag" }, { fr: "Salut", de: "Hallo" }, { fr: "Au revoir", de: "Auf Wiedersehen" },
-            { fr: "Merci", de: "Danke" }, { fr: "S'il vous plaît", de: "Bitte" }, 
-            { fr: "L'école", de: "Die Schule" }, { fr: "Le livre", de: "Das Buch" }, { fr: "Le cahier", de: "Das Heft" },
-            { fr: "Le crayon", de: "Der Bleistift" }, { fr: "La gomme", de: "Der Gummi" }, { fr: "La trousse", de: "Das Etui" },
-            { fr: "Le chien", de: "Der Hund" }, { fr: "Le chat", de: "Die Katze" }, { fr: "La souris", de: "Die Maus" },
-            { fr: "L'oiseau", de: "Der Vogel" }, { fr: "La vache", de: "Die Kuh" }, { fr: "Le cheval", de: "Das Pferd" },
-            { fr: "Jouer", de: "Spielen" }, { fr: "Chanter", de: "Singen" }, { fr: "Parler", de: "Sprechen" },
-            { fr: "Écouter", de: "Zuhören" }, { fr: "Regarder", de: "Schauen" }, { fr: "Manger", de: "Essen" },
-            { fr: "D'abord", de: "Zuerst" }, { fr: "Puis", de: "Dann" }, { fr: "Après", de: "Danach" },
-            { fr: "Finalement", de: "Schliesslich" }, { fr: "Peut-être", de: "Vielleicht" }, { fr: "Toujours", de: "Immer" },
-            { fr: "Rouge", de: "Rot" }, { fr: "Bleu", de: "Blau" }, { fr: "Vert", de: "Grün" }, { fr: "Jaune", de: "Gelb" },
-            { fr: "Noir", de: "Schwarz" }, { fr: "Blanc", de: "Weiss" }, { fr: "Gris", de: "Grau" }, { fr: "Orange", de: "Orange" },
-            { fr: "Un", de: "Eins" }, { fr: "Deux", de: "Zwei" }, { fr: "Trois", de: "Drei" }, { fr: "Quatre", de: "Vier" },
-            { fr: "Cinq", de: "Fünf" }, { fr: "Six", de: "Sechs" }, { fr: "Sept", de: "Sieben" }, { fr: "Huit", de: "Acht" },
-            { fr: "Neuf", de: "Neun" }, { fr: "Dix", de: "Zehn" },
-            { fr: "Je", de: "Ich" }, { fr: "Tu", de: "Du" }, { fr: "Il", de: "Er" }, { fr: "Elle", de: "Sie" },
-            { fr: "Nous", de: "Wir" }, { fr: "Vous", de: "Ihr" }, { fr: "Ils", de: "Sie (Plural)" }
+            { id: 'legend', name: 'Legenden Box', cost: 2000, emoji: '💎', prob: { common: 0, rare: 10, epic: 50, legendary: 40 } }
         ];
 
         // --- HELPER ---
@@ -155,365 +233,325 @@
         };
 
         const playSound = (type) => {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            if (!AudioContext) return;
-            const ctx = new AudioContext();
-            const osc = ctx.createOscillator(); const gain = ctx.createGain();
-            osc.connect(gain); gain.connect(ctx.destination);
+            const ctx = new (window.AudioContext||window.webkitAudioContext)();
+            const osc = ctx.createOscillator(); const g = ctx.createGain();
+            osc.connect(g); g.connect(ctx.destination);
             const now = ctx.currentTime;
             
-            if (type === 'correct') {
-                osc.type = 'triangle'; osc.frequency.setValueAtTime(600, now); osc.frequency.linearRampToValueAtTime(1000, now+0.1);
-                gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now+0.4);
-            } else if (type === 'wrong') {
-                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now); gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now+0.3);
-            } else if (type === 'levelup') {
-                [440, 554, 659, 880].forEach((f, i) => {
-                    const o = ctx.createOscillator(); const g = ctx.createGain(); o.connect(g); g.connect(ctx.destination);
-                    o.type = 'square'; o.frequency.value = f; g.gain.setValueAtTime(0.1, ctx.currentTime + i*0.1); g.gain.linearRampToValueAtTime(0, ctx.currentTime + i*0.1 + 0.3);
-                    o.start(ctx.currentTime + i*0.1); o.stop(ctx.currentTime + i*0.1 + 0.3);
-                });
-                return;
-            } else if (type === 'cash') {
-                osc.type = 'sine'; osc.frequency.setValueAtTime(1200, now); osc.frequency.exponentialRampToValueAtTime(1800, now + 0.1);
-                gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now + 0.4);
-            } else if (type === 'open') {
-                osc.type = 'square'; osc.frequency.setValueAtTime(100, now); osc.frequency.linearRampToValueAtTime(800, now+1); gain.gain.exponentialRampToValueAtTime(0.01, now+1); return;
+            if(type==='correct') {
+                osc.type='triangle'; osc.frequency.setValueAtTime(600,now); osc.frequency.linearRampToValueAtTime(1000,now+0.1); g.gain.linearRampToValueAtTime(0,now+0.4);
+            } else if(type==='wrong') {
+                osc.type='sawtooth'; osc.frequency.setValueAtTime(150,now); g.gain.linearRampToValueAtTime(0,now+0.3);
+            } else if(type==='win') {
+                osc.type='sine'; osc.frequency.setValueAtTime(400,now); osc.frequency.linearRampToValueAtTime(800,now+0.6); g.gain.linearRampToValueAtTime(0,now+1);
+            } else if(type==='cash') {
+                osc.type='square'; osc.frequency.setValueAtTime(800,now); g.gain.linearRampToValueAtTime(0,now+0.4);
             }
-            osc.start(now); osc.stop(now+0.5);
+            osc.start(now); osc.stop(now+1);
         };
 
         const safeConfetti = () => { if (window.confetti) window.confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); };
 
-        // --- COMPONENTS ---
+        // --- GAME COMPONENTS ---
 
-        // 1. MATCH GAME (Verbinden)
-        const MatchGame = ({ onFinish }) => {
-            const [left, setLeft] = useState([]);
-            const [right, setRight] = useState([]);
-            const [selLeft, setSelLeft] = useState(null);
-            const [solved, setSolved] = useState([]);
-
-            useEffect(() => {
-                const s = [...VOCABULARY].sort(()=>Math.random()-0.5).slice(0,5);
-                setLeft(s.map(w => ({id: w.fr, txt: w.fr, pair: w.fr})));
-                setRight(s.map(w => ({id: w.fr+'d', txt: w.de, pair: w.fr})).sort(()=>Math.random()-0.5));
-            }, []);
-
-            const clickLeft = (item) => {
-                if(solved.includes(item.pair)) return;
-                speak(item.txt);
-                setSelLeft(item);
-            };
-
-            const clickRight = (item) => {
-                if(solved.includes(item.pair) || !selLeft) return;
-                if(selLeft.pair === item.pair) {
-                    setSolved([...solved, item.pair]);
-                    setSelLeft(null);
-                    playSound('correct');
-                    if(solved.length + 1 === 5) setTimeout(onFinish, 1000);
-                } else {
-                    playSound('wrong');
-                    setSelLeft(null); // Reset
-                }
-            };
-
-            return (
-                <div className="flex gap-4 justify-between w-full h-full overflow-y-auto p-2">
-                    <div className="w-1/2 flex flex-col gap-3">
-                        {left.map(l => (
-                            <div key={l.id} onClick={()=>clickLeft(l)} className={`word-card card-fr ${selLeft?.id===l.id?'selected':''} ${solved.includes(l.pair)?'matched':''}`}>
-                                {l.txt}
-                            </div>
-                        ))}
-                    </div>
-                    <div className="w-1/2 flex flex-col gap-3">
-                        {right.map(r => (
-                            <div key={r.id} onClick={()=>clickRight(r)} className={`word-card card-de ${solved.includes(r.pair)?'matched':''}`}>
-                                {r.txt}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            );
-        };
-        
-        // 2. MEMORY GAME (Echtes Flip)
-        const MemoryCard = ({ card, onClick, flipped, matched }) => (
-            <div className={`scene ${matched ? 'pointer-events-none' : ''}`} onClick={() => onClick(card)}>
-                <div className={`card ${flipped ? 'is-flipped' : ''} ${matched ? 'is-matched' : ''}`}>
-                    <div className="card__face card__face--front">?</div>
-                    <div className={`card__face card__face--back ${card.type === 'fr' ? 'card-fr' : 'card-de'}`}>
-                        {/* Kein Label mehr, nur Farbe und Text */}
-                        <div className={card.type === 'fr' ? 'text-fr' : 'text-de'}>{card.txt}</div>
-                    </div>
-                </div>
-            </div>
-        );
-
-        const MemoryGame = ({ onFinish }) => {
+        // 1. MEMORY GAME
+        const MemoryGame = ({ words, onFinish }) => {
             const [cards, setCards] = useState([]);
             const [flipped, setFlipped] = useState([]);
             const [matched, setMatched] = useState([]);
             const [locked, setLocked] = useState(false);
 
             useEffect(() => {
-                const s = [...VOCABULARY].sort(()=>Math.random()-0.5).slice(0,6);
-                const d = s.flatMap(p => [
-                    { id: p.fr, txt: p.fr, type: 'fr', pair: p.fr },
-                    { id: p.fr+'d', txt: p.de, type: 'de', pair: p.fr }
+                const selection = [...words].sort(()=>Math.random()-0.5).slice(0,6);
+                const deck = selection.flatMap(p => [
+                    { id: p.fr+'-fr', txt: p.fr, type: 'fr', pair: p.fr },
+                    { id: p.fr+'-de', txt: DICTIONARY[p.fr], type: 'de', pair: p.fr }
                 ]).sort(() => Math.random() - 0.5);
-                setCards(d);
-            }, []);
+                setCards(deck);
+            }, [words]);
 
             const click = (card) => {
                 if(locked || flipped.includes(card.id) || matched.includes(card.id)) return;
-                
                 if(card.type === 'fr') speak(card.txt);
+                
                 const newFlipped = [...flipped, card.id];
                 setFlipped(newFlipped);
 
                 if(newFlipped.length === 2) {
                     setLocked(true);
-                    const c1 = cards.find(c=>c.id===newFlipped[0]);
-                    const c2 = cards.find(c=>c.id===newFlipped[1]);
-                    
+                    const c1 = cards.find(x=>x.id===newFlipped[0]);
+                    const c2 = cards.find(x=>x.id===newFlipped[1]);
                     if(c1.pair === c2.pair) {
                         playSound('correct');
                         setTimeout(() => {
-                            setMatched([...matched, c1.id, c2.id]);
-                            setFlipped([]);
-                            setLocked(false);
-                            if(matched.length + 2 === cards.length) setTimeout(onFinish, 500);
-                        }, 800);
+                            setMatched([...matched, c1.id, c2.id]); setFlipped([]); setLocked(false);
+                            if(matched.length+2 === cards.length) setTimeout(onFinish, 800);
+                        }, 600);
                     } else {
                         playSound('wrong');
-                        setTimeout(() => {
-                            setFlipped([]);
-                            setLocked(false);
-                        }, 1200);
+                        setTimeout(() => { setFlipped([]); setLocked(false); }, 1000);
                     }
                 }
             };
 
             return (
-                <div className="grid grid-cols-3 gap-3 p-2">
+                <div className="grid grid-cols-3 gap-3 w-full max-w-md">
                     {cards.map(c => (
-                        <MemoryCard 
-                            key={c.id} 
-                            card={c} 
-                            flipped={flipped.includes(c.id) || matched.includes(c.id)} 
-                            matched={matched.includes(c.id)}
-                            onClick={click} 
-                        />
+                        <div key={c.id} className={`scene ${matched.includes(c.id)?'pointer-events-none':''}`} onClick={()=>click(c)}>
+                            <div className={`card ${flipped.includes(c.id)?'flipped':''} ${matched.includes(c.id)?'matched':''}`}>
+                                <div className="face front">?</div>
+                                <div className={`face back type-${c.type}`}>{c.txt}</div>
+                            </div>
+                        </div>
                     ))}
                 </div>
             );
         };
 
-        // 3. QUIZ GAME
-        const QuizGame = ({ onCorrect }) => {
+        // 2. MATCHING GAME
+        const MatchGame = ({ words, onFinish }) => {
+            const [left, setLeft] = useState([]);
+            const [right, setRight] = useState([]);
+            const [sel, setSel] = useState(null);
+            const [solved, setSolved] = useState([]);
+
+            useEffect(() => {
+                const s = [...words].sort(()=>Math.random()-0.5).slice(0,5);
+                setLeft(s.map(w => ({id: w.fr, txt: w.fr, pair: w.fr, type: 'fr'})));
+                setRight(s.map(w => ({id: w.fr+'d', txt: DICTIONARY[w.fr], pair: w.fr, type: 'de'})).sort(() => Math.random() - 0.5));
+            }, [words]);
+
+            const click = (item) => {
+                if(solved.includes(item.pair)) return;
+                if(item.type === 'fr') speak(item.txt);
+
+                if(!sel) {
+                    setSel(item);
+                } else {
+                    if(sel.id === item.id) { setSel(null); return; }
+                    if(sel.pair === item.pair) {
+                        setSolved([...solved, item.pair]); setSel(null); playSound('correct');
+                        if(solved.length + 1 === 5) setTimeout(onFinish, 800);
+                    } else {
+                        playSound('wrong'); setSel(null);
+                    }
+                }
+            };
+
+            return (
+                <div className="flex gap-4 w-full max-w-2xl px-2 h-full items-center">
+                    <div className="w-1/2 flex flex-col gap-3 justify-center">
+                        {left.map(l => (
+                            <div key={l.id} onClick={()=>click(l)} className={`match-card fr ${sel?.id===l.id?'selected':''} ${solved.includes(l.pair)?'matched':''}`}>{l.txt}</div>
+                        ))}
+                    </div>
+                    <div className="w-1/2 flex flex-col gap-3 justify-center">
+                        {right.map(r => (
+                            <div key={r.id} onClick={()=>click(r)} className={`match-card de ${sel?.id===r.id?'selected':''} ${solved.includes(r.pair)?'matched':''}`}>{r.txt}</div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        // 3. QUIZ GAME (Generisch für Quiz, Hören, Schreiben)
+        const GenericQuiz = ({ words, mode, onFinish }) => {
             const [q, setQ] = useState(null);
+            const [inp, setInp] = useState('');
+            const [count, setCount] = useState(0);
+            
             const next = () => {
-                const t = VOCABULARY[Math.floor(Math.random()*VOCABULARY.length)];
-                const opts = [...VOCABULARY.filter(w=>w.fr!==t.fr).sort(()=>Math.random()-0.5).slice(0,3), t].sort(()=>Math.random()-0.5);
-                setQ({t, opts}); speak(t.fr);
+                if(count >= 5) { onFinish(); return; }
+                const t = words[Math.floor(Math.random()*words.length)];
+                const o = [...words.filter(w=>w.fr!==t.fr).sort(()=>Math.random()-0.5).slice(0,3), t].sort(()=>Math.random()-0.5);
+                setQ({t, o}); setInp('');
+                if(mode !== 'write') speak(t.fr);
+                setCount(c=>c+1);
             };
-            useEffect(()=>next(),[]);
-            const check = (opt) => {
-                if(opt.fr===q.t.fr){ playSound('correct'); onCorrect(); next(); }
-                else { playSound('wrong'); alert(`Falsch! ${q.t.fr} = ${q.t.de}`); }
+            useEffect(next, []);
+
+            const check = (val) => {
+                let correct = false;
+                if(mode === 'write') correct = val.toLowerCase().trim() === DICTIONARY[q.t.fr].toLowerCase();
+                else correct = val === DICTIONARY[q.t.fr];
+
+                if(correct){ playSound('correct'); next(); }
+                else { playSound('wrong'); alert("Falsch! " + (mode==='write' ? DICTIONARY[q.t.fr] : DICTIONARY[q.t.fr])); }
             };
+
             if(!q) return null;
+
             return (
-                <div className="pop-in text-center w-full max-w-md">
-                    <div className="bg-white p-6 rounded-2xl shadow mb-6 border-t-4 border-indigo-500">
-                        <h1 className="text-3xl font-black text-indigo-900 mb-2">{q.t.fr}</h1>
-                        <button onClick={()=>speak(q.t.fr)} className="text-sm bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full font-bold">🔊 Hören</button>
+                <div className="w-full max-w-md text-center pop-in p-4">
+                    <div className="glass-panel p-8 mb-6">
+                        {mode === 'listen' ? (
+                            <button onClick={()=>speak(q.t.fr)} className="w-24 h-24 bg-purple-500 rounded-full text-5xl flex items-center justify-center shadow-lg hover:scale-110 transition animate-bounce text-white">🔊</button>
+                        ) : (
+                            <div>
+                                <h1 className="text-3xl font-black text-white mb-2">{q.t.fr}</h1>
+                                <button onClick={()=>speak(q.t.fr)} className="text-sm bg-blue-600 px-3 py-1 rounded-full text-white font-bold">🔊</button>
+                            </div>
+                        )}
                     </div>
-                    <div className="grid gap-3">{q.opts.map((o,i)=><button key={i} onClick={()=>check(o)} className="bg-white p-4 rounded-xl shadow-sm font-bold text-left border-2 border-indigo-50 hover:border-indigo-400 hover:bg-indigo-50 transition text-slate-700">{o.de}</button>)}</div>
-                </div>
-            );
-        };
 
-        // 4. LISTEN GAME
-        const ListenGame = ({ onCorrect }) => {
-            const [q, setQ] = useState(null);
-            const next = () => {
-                const t = VOCABULARY[Math.floor(Math.random()*VOCABULARY.length)];
-                const opts = [...VOCABULARY.filter(w=>w.fr!==t.fr).sort(()=>Math.random()-0.5).slice(0,3), t].sort(()=>Math.random()-0.5);
-                setQ({t, opts}); speak(t.fr);
-            };
-            useEffect(()=>next(),[]);
-            const check = (opt) => {
-                if(opt.fr===q.t.fr){ playSound('correct'); onCorrect(); next(); } else { playSound('wrong'); }
-            };
-            if(!q) return null;
-            return (
-                <div className="pop-in text-center w-full max-w-md">
-                    <div className="bg-white p-10 rounded-3xl shadow-lg mb-6 flex justify-center">
-                        <button onClick={()=>speak(q.t.fr)} className="w-24 h-24 bg-purple-100 rounded-full text-5xl flex items-center justify-center shadow-inner hover:scale-110 transition animate-bounce">🔊</button>
-                    </div>
-                    <p className="text-slate-400 mb-4 text-sm font-bold uppercase">Was hast du gehört?</p>
-                    <div className="grid gap-3">{q.opts.map((o,i)=><button key={i} onClick={()=>check(o)} className="bg-white p-4 rounded-xl shadow-sm font-bold text-left border-2 border-purple-50 hover:border-purple-400 hover:bg-purple-50 transition text-slate-700">{o.de}</button>)}</div>
-                </div>
-            );
-        };
-
-        // 5. WRITE GAME (Enter Taste Support)
-        const WriteGame = ({ onCorrect }) => {
-            const [t, setT] = useState(null);
-            const [inp, setInp] = useState("");
-            const [st, setSt] = useState("typing");
-            const next = () => { const w=VOCABULARY[Math.floor(Math.random()*VOCABULARY.length)]; setT(w); setInp(""); setSt("typing"); speak(w.fr); };
-            useEffect(()=>next(),[]);
-            const check = () => {
-                if(st!=="typing"){ if(st==="success"){onCorrect(); next();} else next(); return; }
-                if(inp.toLowerCase().trim()===t.de.toLowerCase().split(' (')[0].toLowerCase()){ setSt("success"); playSound('correct'); } 
-                else { setSt("error"); playSound('wrong'); }
-            };
-            if(!t) return null;
-            return (
-                <div className="pop-in text-center w-full max-w-md">
-                    <div className="bg-white p-6 rounded-2xl shadow mb-6 border-t-4 border-emerald-500">
-                        <h1 className="text-3xl font-black text-emerald-900 mb-2">{t.fr}</h1>
-                        <button onClick={()=>speak(t.fr)} className="text-sm bg-emerald-100 text-emerald-600 px-3 py-1 rounded-full font-bold">🔊 Hören</button>
-                    </div>
-                    <input value={inp} onChange={e=>setInp(e.target.value)} className={`input-field ${st==='error'?'error':st==='success'?'success':''}`} placeholder="Deutsch..." onKeyDown={e=>e.key==='Enter'&&check()} autoFocus readOnly={st!=="typing"} />
-                    {st==="error" && <div className="mt-2 text-red-500 font-bold animate-bounce">Lösung: {t.de}</div>}
-                    <button onClick={check} className={`w-full bg-emerald-600 text-white font-bold py-4 mt-4 rounded-xl shadow-lg ${st==='typing'?'':'bg-blue-600'}`}>{st==="typing"?"Prüfen":"Weiter"}</button>
-                </div>
-            );
-        };
-
-        // --- PACK OPENER ---
-        const PackOpener = ({ pack, onClose, onUnlock }) => {
-            const [stage, setStage] = useState('closed');
-            const [reward, setReward] = useState(null);
-
-            const open = () => {
-                setStage('shaking'); playSound('open');
-                setTimeout(() => {
-                    const rand = Math.random()*100;
-                    let r = 'common';
-                    if(rand < pack.prob.legendary) r='legendary';
-                    else if(rand < pack.prob.legendary + pack.prob.epic) r='epic';
-                    else if(rand < pack.prob.legendary + pack.prob.epic + pack.prob.rare) r='rare';
-                    
-                    const pool = AVATARS.filter(a=>a.rarity===r);
-                    const item = pool.length ? pool[Math.floor(Math.random()*pool.length)] : AVATARS[0];
-                    setReward(item); onUnlock(item); setStage('open'); safeConfetti();
-                }, 2000);
-            };
-
-            return (
-                <div className="fixed inset-0 bg-black/90 flex flex-col items-center justify-center z-50">
-                    {stage==='closed' && <div onClick={open} className="text-9xl cursor-pointer animate-bounce">{pack.emoji}</div>}
-                    {stage==='shaking' && <div className="text-9xl shake-box">{pack.emoji}</div>}
-                    {stage==='open' && (
-                        <div className="bg-white p-8 rounded-3xl text-center pop-in">
-                            <div className="text-2xl font-bold mb-4">Du bekommst:</div>
-                            <div className="text-8xl mb-4">{reward.icon}</div>
-                            <div className="text-xl font-black uppercase text-indigo-600">{reward.name}</div>
-                            <div className="text-xs font-bold uppercase bg-slate-200 px-2 py-1 rounded inline-block mt-2">{reward.rarity}</div>
-                            <button onClick={onClose} className="mt-8 w-full bg-indigo-600 text-white py-3 rounded-xl font-bold">OK</button>
+                    {mode === 'write' ? (
+                        <div className="flex flex-col gap-4">
+                            <input value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>e.key==='Enter'&&check(inp)} className="input-galaxy" placeholder="Auf Deutsch..." autoFocus />
+                            <div className="flex justify-center gap-2">
+                                {['ä','ö','ü','ß'].map(c=><button key={c} onClick={()=>setInp(i=>i+c)} className="bg-slate-700 text-white w-10 h-10 rounded font-bold hover:bg-slate-600">{c}</button>)}
+                            </div>
+                            <button onClick={()=>check(inp)} className="btn-action btn-green w-full p-4">PRÜFEN</button>
+                        </div>
+                    ) : (
+                        <div className="grid gap-3">
+                            {q.o.map((o,i)=><button key={i} onClick={()=>check(DICTIONARY[o.fr])} className="btn-action btn-purple w-full p-4 justify-start pl-6 text-sm">{DICTIONARY[o.fr]}</button>)}
                         </div>
                     )}
                 </div>
             );
         };
 
-        // --- APP SHELL ---
-        const App = () => {
-            const [user, setUser] = useState({ name: 'Gast', coins: 100, xp: 0, level: 1, avatar: 'bear', unlockedAvatars: ['bear'] });
-            const [view, setView] = useState('menu');
-            const [pack, setPack] = useState(null);
-            const [float, setFloat] = useState(null);
-
-            useEffect(() => { const s = localStorage.getItem('franz_coll_v6'); if (s) setUser(JSON.parse(s)); document.getElementById('loading').style.display = 'none'; }, []);
-            const save = (u) => { setUser(u); localStorage.setItem('franz_coll_v6', JSON.stringify(u)); };
-
-            const addProgress = (c, x) => {
-                const u = { ...user }; u.coins += c; u.xp += x;
-                if (u.xp >= getXPForLevel(u.level + 1)) { u.level++; playSound('levelup'); alert("LEVEL UP! 🎉"); safeConfetti(); }
-                save(u); if(c > 10) safeConfetti();
-                setFloat(`+${c}💰 +${x}XP`); setTimeout(()=>setFloat(null), 1500);
-            };
-
-            const openBox = (p) => {
-                if(user.coins < p.cost) { alert("Zu wenig Münzen!"); return; }
-                save({...user, coins: user.coins - p.cost});
-                setPack(p); setView('loot');
-            };
-            const unlock = (item) => {
-                if(!user.unlockedAvatars.includes(item.id)) save({...user, unlockedAvatars: [...user.unlockedAvatars, item.id], avatar: item.id});
-            };
-            const equip = (id) => { save({...user, avatar: id}); };
-
-            if (view === 'menu') {
-                const nextXP = getXPForLevel(user.level + 1);
-                const progress = Math.min(100, (user.xp / nextXP) * 100);
-                return (
-                    <div className="max-w-md mx-auto p-4 min-h-screen flex flex-col justify-center">
-                        <div className="bg-white rounded-3xl shadow-xl p-6 mb-6 border-b-8 border-teal-200 relative overflow-hidden">
-                            <div className="flex justify-between items-center mb-4 bg-slate-50 p-3 rounded-2xl relative z-10">
-                                 <div className="flex items-center gap-3">
-                                    <div className="text-4xl bg-white p-2 rounded-xl shadow-sm">{AVATARS.find(a=>a.id===user.avatar)?.icon || '🐻'}</div>
-                                    <div className="text-left"><div className="font-bold text-teal-900">{user.name}</div><div className="text-xs text-teal-400 font-bold">{getRankTitle(user.level)}</div></div>
-                                 </div>
-                                 <button onClick={()=>setView('shop')} className="bg-yellow-100 text-yellow-700 px-4 py-2 rounded-xl font-bold text-sm shadow-sm">{user.coins} 💰</button>
-                            </div>
-                            <div className="xp-bar-container mb-1 relative z-10"><div className="xp-bar-fill" style={{width: `${progress}%`}}></div></div>
-                            <div className="text-right text-xs font-bold text-slate-400 relative z-10">{user.xp}/{nextXP} XP</div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3 mb-6">
-                            <button onClick={()=>setView('match')} className="bg-blue-50 p-6 rounded-2xl border-2 border-blue-100 hover:border-blue-400 font-bold text-blue-800 text-xl flex flex-col items-center gap-2"><span className="text-4xl">🔗</span>Verbinden</button>
-                            <button onClick={()=>setView('memory')} className="bg-indigo-50 p-6 rounded-2xl border-2 border-indigo-100 hover:border-indigo-400 font-bold text-indigo-800 text-xl flex flex-col items-center gap-2"><span className="text-4xl">🃏</span>Memory</button>
-                            <button onClick={()=>setView('quiz')} className="bg-purple-50 p-6 rounded-2xl border-2 border-purple-100 hover:border-purple-400 font-bold text-purple-800 text-xl flex flex-col items-center gap-2"><span className="text-4xl">❓</span>Quiz</button>
-                            <button onClick={()=>setView('listen')} className="bg-pink-50 p-6 rounded-2xl border-2 border-pink-100 hover:border-pink-400 font-bold text-pink-800 text-xl flex flex-col items-center gap-2"><span className="text-4xl">👂</span>Hören</button>
-                            <button onClick={()=>setView('write')} className="bg-emerald-50 p-6 rounded-2xl border-2 border-emerald-100 hover:border-emerald-400 font-bold text-emerald-800 text-xl flex flex-col items-center gap-2 col-span-2"><span className="text-4xl">✍️</span>Schreiben</button>
-                        </div>
-                        <a href="index.html" className="text-center text-slate-400 font-bold text-sm bg-white p-3 rounded-xl">🏠 Zentrale</a>
-                    </div>
-                );
-            }
-
-            if (view === 'shop') return (
-                <div className="max-w-2xl mx-auto p-4 min-h-screen pb-20">
-                    <div className="flex justify-between items-center mb-6"><button onClick={()=>setView('menu')} className="font-bold text-slate-500">◀ Zurück</button><div className="font-bold text-xl text-yellow-600">{user.coins} 💰</div></div>
-                    <div className="flex gap-4 overflow-x-auto pb-4 mb-8">{PACKS.map(p => (<button key={p.id} onClick={()=>openBox(p)} className="min-w-[140px] bg-white p-4 rounded-2xl shadow border-b-4 border-teal-200 flex flex-col items-center hover:scale-105 transition"><span className="text-5xl mb-2">{p.emoji}</span><span className="font-bold text-sm">{p.name}</span><span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full font-bold text-xs">{p.cost} 💰</span></button>))}</div>
-                    <h3 className="font-bold text-slate-400 uppercase text-xs mb-4">Sammelalbum</h3>
-                    <div className="grid grid-cols-4 gap-3">
-                        {AVATARS.map(a => {
-                            const owned = user.unlockedAvatars.includes(a.id);
-                            return <div key={a.id} onClick={()=>{if(owned)equip(a.id)}} className={`avatar-slot ${owned ? 'unlocked' : 'locked'} ${user.avatar===a.id ? 'equipped' : ''} ${'rarity-'+a.rarity}`}>{a.icon}</div>
-                        })}
-                    </div>
-                </div>
-            );
-
-            if(view === 'loot') return <PackOpener pack={pack} onClose={()=>{setView('shop'); setPack(null);}} onUnlock={unlock} />;
-
+        // --- SHOP ---
+        const Shop = ({ user, onBuy, onClose, onEquip }) => {
             return (
-                <div className="min-h-screen p-4 flex flex-col">
-                    {float && <div className="float-text text-4xl text-yellow-500 fixed top-1/2 left-1/2" style={{marginLeft: -50}}>{float}</div>}
-                    <div className="flex justify-between items-center max-w-4xl mx-auto w-full mb-6 relative z-20">
-                        <button onClick={()=>setView('menu')} className="bg-white px-4 py-2 rounded-xl font-bold shadow text-slate-500 hover:text-red-500 transition">✕ Ende</button>
-                        <div className="font-bold text-teal-600 bg-white px-4 py-2 rounded-full shadow-sm">{user.coins} 💰</div>
-                    </div>
-                    <div className="flex-1 flex flex-col justify-center items-center w-full">
-                        {view === 'match' && <MatchGame onFinish={() => addProgress(20, 50)} />}
-                        {view === 'memory' && <MemoryGame onFinish={() => addProgress(20, 50)} />}
-                        {view === 'quiz' && <QuizGame onCorrect={() => addProgress(5, 10)} />}
-                        {view === 'listen' && <ListenGame onCorrect={() => addProgress(10, 15)} />}
-                        {view === 'write' && <WriteGame onCorrect={() => addProgress(15, 25)} />}
+                <div className="max-w-md mx-auto p-4 min-h-screen pb-20">
+                    <div className="flex justify-between items-center mb-6"><button onClick={onClose} className="font-bold text-slate-500">◀ Zurück</button><div className="font-bold text-xl text-yellow-400">{user.coins} 💰</div></div>
+                    <h1 className="text-3xl font-black text-white mb-6 text-center">Avatar Shop</h1>
+                    <div className="grid grid-cols-3 gap-4 mb-8">
+                        {AVATARS.map(a => {
+                            const owned = user.unlocked.includes(a.id);
+                            return (
+                                <div key={a.id} 
+                                    onClick={() => {
+                                        if (owned) { onEquip(a.id); playSound('click'); }
+                                        else if (user.coins >= a.cost) { onBuy(a.cost); onEquip(a.id); playSound('cash'); safeConfetti(); }
+                                        else alert("Zu wenig Münzen!");
+                                    }}
+                                    className={`glass-panel p-4 flex flex-col items-center cursor-pointer hover:scale-105 transition ${user.avatar===a.id ? 'border-green-500 bg-green-900/20' : 'rarity-'+a.rarity} ${!owned && user.coins < a.cost ? 'opacity-50' : ''}`}>
+                                    <div className="text-5xl mb-2">{a.icon}</div>
+                                    <div className="font-bold text-sm text-slate-300">{a.name}</div>
+                                    {!owned && <div className="bg-yellow-500 text-black px-2 py-1 rounded text-xs font-bold mt-2">{a.cost} 💰</div>}
+                                    {owned && <div className="text-green-400 text-xs font-bold mt-2">{user.avatar===a.id ? 'AKTIV' : 'BESITZ'}</div>}
+                                </div>
+                            )
+                        })}
                     </div>
                 </div>
             );
         };
 
+        // --- MODAL (POPUP) ---
+        const Modal = ({ title, children, onClose, type='info' }) => (
+            <div className="modal-overlay pop-in fixed inset-0 bg-black/80 flex items-center justify-center z-50 backdrop-blur-sm" onClick={onClose}>
+                <div className={`bg-slate-800 p-6 rounded-3xl border-4 w-full max-w-sm text-center relative shadow-2xl ${type==='win'?'border-yellow-400':type==='error'?'border-red-500':'border-blue-500'}`} onClick={e=>e.stopPropagation()}>
+                    <h2 className={`text-2xl font-black mb-4 font-game ${type==='win'?'text-yellow-400':type==='error'?'text-red-400':'text-white'}`}>{title}</h2>
+                    <div className="text-slate-300 mb-6">{children}</div>
+                    <button onClick={onClose} className={`btn-action w-full py-3 ${type==='win'?'btn-yellow':type==='error'?'btn-red':'btn-blue'}`}>OK</button>
+                </div>
+            </div>
+        );
+
+        // --- APP SHELL ---
+        const App = () => {
+            const [user, setUser] = useState({ name: 'Agent', coins: 100, xp: 0, level: 1, avatar: 'bear', unlocked: ['bear'], unlockedWorlds: [1] });
+            const [view, setView] = useState('map');
+            const [activeWorld, setActiveWorld] = useState(null);
+            const [gameMode, setGameMode] = useState(null);
+            const [modal, setModal] = useState(null);
+
+            useEffect(() => { const s = localStorage.getItem('franz_final_v15'); if(s) setUser(JSON.parse(s)); }, []);
+            const save = (u) => { setUser(u); localStorage.setItem('franz_final_v15', JSON.stringify(u)); };
+
+            const addProgress = (xp, coins) => {
+                const u = { ...user }; u.xp += xp; u.coins += coins;
+                const nextXP = getXPForLevel(u.level + 1);
+                if(u.xp >= nextXP) { 
+                    u.level++; 
+                    setModal({title: "LEVEL UP!", msg: `Du bist jetzt ${RANKS[Math.min(Math.floor((u.level-1)/2), RANKS.length-1)]}!`, type: 'win'});
+                    playSound('win'); window.confetti(); 
+                } else {
+                    setModal({title: "MISSION ERFÜLLT", msg: `+${xp} XP | +${coins} Münzen`, type: 'win'});
+                    playSound('win'); window.confetti();
+                }
+                save(u);
+                setView('map');
+            };
+            
+            const getXPForLevel = (l) => 200 * l;
+            const getRankTitle = (lvl) => RANKS[Math.min(Math.floor((lvl-1)/2), RANKS.length-1)];
+
+            if (view === 'map') {
+                const nextXP = getXPForLevel(user.level + 1);
+                const progress = Math.min(100, (user.xp / nextXP) * 100);
+                return (
+                    <div className="max-w-md mx-auto p-4 min-h-screen flex flex-col">
+                        <div className="glass-panel p-4 mb-6 flex justify-between items-center">
+                            <div className="flex items-center gap-3">
+                                <div className="text-4xl bg-white/10 p-2 rounded-xl">{AVATARS.find(a=>a.id===user.avatar)?.icon}</div>
+                                <div><div className="font-bold text-white">{user.name}</div><div className="text-xs text-blue-400 font-bold uppercase">{getRankTitle(user.level)}</div></div>
+                            </div>
+                            <button onClick={()=>setView('shop')} className="font-bold text-yellow-400 text-xl hover:scale-110 transition">{user.coins} 💰</button>
+                        </div>
+                        <div className="bg-slate-800 rounded-full h-3 overflow-hidden mb-8 border border-slate-700"><div className="bg-blue-500 h-full transition-all" style={{width: `${progress}%`}}></div></div>
+                        <div className="space-y-6 pb-20">
+                            {WORLDS.map((w,i) => {
+                                const locked = user.level < w.reqLvl;
+                                return (
+                                    <div key={w.id} className="relative">
+                                        <div onClick={() => !locked && setActiveWorld(activeWorld===w.id ? null : w)} 
+                                             className={`glass-panel p-4 flex items-center gap-4 transition cursor-pointer border-l-4 border-${locked?'slate-500':'blue-500'} ${locked ? 'opacity-50' : 'hover:bg-white/10'}`}>
+                                            <div className="text-4xl">{locked ? '🔒' : w.icon}</div>
+                                            <div className="flex-1">
+                                                <div className="font-bold text-lg text-white">{w.name}</div>
+                                                <div className="text-xs text-slate-400">{locked ? `Ab Lvl ${w.reqLvl}` : `${w.words.length} Wörter`}</div>
+                                            </div>
+                                            <div className="text-white">{activeWorld?.id===w.id ? '▼' : '▶'}</div>
+                                        </div>
+
+                                        {activeWorld?.id === w.id && !locked && (
+                                            <div className="mt-4 grid grid-cols-2 gap-3 pop-in pl-4 border-l-2 border-blue-500">
+                                                <button onClick={()=>{setGameMode('match'); setView('game');}} className="btn-action btn-blue py-3 text-sm">🔗 Verbinden</button>
+                                                <button onClick={()=>{setGameMode('memory'); setView('game');}} className="btn-action btn-green py-3 text-sm">🃏 Memory</button>
+                                                <button onClick={()=>{setGameMode('quiz'); setView('game');}} className="btn-action btn-purple py-3 text-sm">❓ Quiz</button>
+                                                <button onClick={()=>{setGameMode('listen'); setView('game');}} className="btn-action btn-yellow py-3 text-sm text-black">👂 HÖREN</button>
+                                                <button onClick={()=>{setGameMode('write'); setView('game');}} className="btn-action btn-red py-3 text-sm col-span-2">✍️ SCHREIBEN</button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )
+                            })}
+                        </div>
+                        <a href="index.html" className="glass-panel text-center text-slate-400 font-bold text-xs p-3 mt-auto mb-4 block">🏠 ZENTRALE</a>
+                        
+                        {modal && <Modal title={modal.title} type={modal.type} onClose={()=>setModal(null)}>{modal.msg}</Modal>}
+                    </div>
+                );
+            }
+
+            if (view === 'game') {
+                return (
+                    <div className="min-h-screen p-4 flex flex-col relative">
+                        <div className="flex justify-between items-center mb-6 z-20">
+                            <button onClick={()=>setView('map')} className="glass-panel w-12 h-12 flex items-center justify-center text-white font-bold text-xl">✕</button>
+                            <div className="glass-panel px-4 py-1 text-blue-400 font-bold text-sm uppercase">{gameMode}</div>
+                        </div>
+                        <div className="flex-1 flex flex-col justify-center items-center w-full max-w-2xl mx-auto">
+                            {gameMode === 'memory' && <MemoryGame words={activeWorld.words} onFinish={() => addProgress(50, 20)} />}
+                            {gameMode === 'match' && <MatchGame words={activeWorld.words} onFinish={() => addProgress(50, 20)} />}
+                            {gameMode === 'quiz' && <GenericQuiz words={activeWorld.words} mode="quiz" onFinish={() => addProgress(30, 10)} />}
+                            {gameMode === 'listen' && <GenericQuiz words={activeWorld ? activeWorld.words : []} mode="listen" onFinish={() => addProgress(30, 15)} />}
+                            {gameMode === 'write' && <GenericQuiz words={activeWorld.words} mode="write" onFinish={() => addProgress(40, 20)} />}
+                        </div>
+                        {modal && <Modal title={modal.title} type={modal.type} onClose={()=>{setModal(null); setView('map');}}>{modal.msg}</Modal>}
+                    </div>
+                );
+            }
+            
+            if (view === 'shop') return <Shop user={user} onBuy={(c)=>{save({...user, coins:user.coins-c})}} onClose={()=>setView('menu')} onEquip={(id)=>{if(!user.unlocked.includes(id))save({...user, unlocked:[...user.unlocked, id], avatar:id}); else save({...user, avatar:id});}} />;
+
+            return null;
+        };
+        
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
