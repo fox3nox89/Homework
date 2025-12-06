@@ -56,6 +56,7 @@
         .card-mathe { background: linear-gradient(135deg, #93c5fd 0%, #3b82f6 100%); color: white; }
         .card-franz { background: linear-gradient(135deg, #fca5a5 0%, #ef4444 100%); color: white; }
         .card-agent { background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%); color: white; }
+        .card-jump { background: linear-gradient(135deg, #fcd34d 0%, #f59e0b 100%); color: white; }
 
         /* Titel Animation */
         .title-bounce { animation: bounce-in 1s cubic-bezier(0.34, 1.56, 0.64, 1); }
@@ -97,48 +98,38 @@
     </header>
 
     <!-- APP GRID -->
-    <main class="w-full max-w-5xl px-6 pb-20 grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+    <main class="w-full max-w-6xl px-6 pb-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-8 relative z-10">
         
         <!-- MATHE -->
         <a href="mathe.html" class="app-card card-mathe p-8 flex flex-col items-center text-center group">
-            <div class="card-icon text-blue-500">
-                🧮
-            </div>
+            <div class="card-icon text-blue-500">🧮</div>
             <h2 class="text-3xl font-black mb-2">Mathe</h2>
-            <p class="text-blue-100 font-bold mb-6 leading-tight">
-                Werde zum Rechen-König! Plus, Minus, Mal, Geteilt & Geometrie.
-            </p>
-            <div class="mt-auto play-btn text-blue-600">
-                STARTEN <i class="fa-solid fa-play"></i>
-            </div>
+            <p class="text-blue-100 font-bold mb-6 leading-tight">Werde zum Rechen-König! Plus, Minus, Mal, Geteilt & Geometrie.</p>
+            <div class="mt-auto play-btn text-blue-600">STARTEN <i class="fa-solid fa-play"></i></div>
         </a>
 
         <!-- FRANZÖSISCH -->
         <a href="franz.html" class="app-card card-franz p-8 flex flex-col items-center text-center group">
-            <div class="card-icon text-red-500">
-                🇫🇷
-            </div>
+            <div class="card-icon text-red-500">🇫🇷</div>
             <h2 class="text-3xl font-black mb-2">Französisch</h2>
-            <p class="text-red-100 font-bold mb-6 leading-tight">
-                Sammle Wörter, knacke den Highscore und finde alle Tiere!
-            </p>
-            <div class="mt-auto play-btn text-red-500">
-                LOS GEHT'S <i class="fa-solid fa-language"></i>
-            </div>
+            <p class="text-red-100 font-bold mb-6 leading-tight">Sammle Wörter, knacke den Highscore und finde alle Tiere!</p>
+            <div class="mt-auto play-btn text-red-500">LOS GEHT'S <i class="fa-solid fa-language"></i></div>
         </a>
 
         <!-- AGENTEN -->
         <a href="agent.html" class="app-card card-agent p-8 flex flex-col items-center text-center group">
-            <div class="card-icon text-green-600">
-                🕵️
-            </div>
+            <div class="card-icon text-green-600">🕵️</div>
             <h2 class="text-3xl font-black mb-2">Agenten</h2>
-            <p class="text-green-100 font-bold mb-6 leading-tight">
-                Löse das Geheimnis der Schule. Ein spannendes Lese-Abenteuer.
-            </p>
-            <div class="mt-auto play-btn text-green-600">
-                MISSION <i class="fa-solid fa-user-secret"></i>
-            </div>
+            <p class="text-green-100 font-bold mb-6 leading-tight">Löse das Geheimnis der Schule. Ein spannendes Lese-Abenteuer.</p>
+            <div class="mt-auto play-btn text-green-600">MISSION <i class="fa-solid fa-user-secret"></i></div>
+        </a>
+        
+        <!-- NEU: JUMP & RUN -->
+        <a href="jump.html" class="app-card card-jump p-8 flex flex-col items-center text-center group">
+            <div class="card-icon text-yellow-500">🏃</div>
+            <h2 class="text-3xl font-black mb-2">Wort-Runner</h2>
+            <p class="text-yellow-100 font-bold mb-6 leading-tight">Springe über Hindernisse und fange die richtigen Antworten!</p>
+            <div class="mt-auto play-btn text-yellow-600">RENNEN <i class="fa-solid fa-person-running"></i></div>
         </a>
 
     </main>
