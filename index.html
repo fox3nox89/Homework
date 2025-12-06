@@ -1,146 +1,151 @@
 <!DOCTYPE html>
-<html lang="de-CH" class="scroll-smooth">
+<html lang="de-CH">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lern-Campus Schweiz</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lern-Abenteuer Schweiz</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; overflow-x: hidden; }
-        h1, h2, h3, .brand-font { font-family: 'Outfit', sans-serif; }
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            background: linear-gradient(180deg, #e0f7fa 0%, #e1f5fe 100%);
+            color: #1e293b;
+            overflow-x: hidden;
+        }
         
-        .animated-bg {
-            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-            background-size: 400% 400%; animation: gradient 15s ease infinite;
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.05;
-        }
-        @keyframes gradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        h1, h2, .font-fun { font-family: 'Fredoka', sans-serif; }
 
-        .glass-card {
-            background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        /* Wolken-Hintergrund Animation */
+        .cloud {
+            position: absolute; background: white; border-radius: 50%;
+            opacity: 0.8; animation: floatCloud 20s infinite linear;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
         }
-        .hover-lift { transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease; }
-        .hover-lift:hover { transform: translateY(-8px); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.15); }
+        .cloud::after, .cloud::before {
+            content: ''; position: absolute; background: white; border-radius: 50%;
+        }
+        @keyframes floatCloud { from { transform: translateX(-100vw); } to { transform: translateX(100vw); } }
 
-        .blob { position: absolute; filter: blur(40px); z-index: -1; opacity: 0.4; animation: float 10s infinite ease-in-out; }
-        @keyframes float { 0%, 100% { transform: translate(0, 0); } 33% { transform: translate(30px, -50px); } 66% { transform: translate(-20px, 20px); } }
+        /* Karten Design */
+        .app-card {
+            border-radius: 30px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            border: 4px solid white;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+        }
+        .app-card:hover { transform: translateY(-10px) scale(1.02); box-shadow: 0 20px 30px -5px rgba(0,0,0,0.2); z-index: 10; }
+        .app-card:active { transform: scale(0.98); }
+
+        .card-icon {
+            width: 80px; height: 80px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 3rem; background: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 1rem; transition: transform 0.3s;
+        }
+        .app-card:hover .card-icon { transform: rotate(10deg) scale(1.1); }
+
+        /* Spezifische Karten-Themes */
+        .card-mathe { background: linear-gradient(135deg, #93c5fd 0%, #3b82f6 100%); color: white; }
+        .card-franz { background: linear-gradient(135deg, #fca5a5 0%, #ef4444 100%); color: white; }
+        .card-agent { background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%); color: white; }
+
+        /* Titel Animation */
+        .title-bounce { animation: bounce-in 1s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        @keyframes bounce-in { 0% { transform: scale(0.5); opacity: 0; } 60% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); } }
+
+        /* Button */
+        .play-btn {
+            background: white; color: #334155; font-weight: 900;
+            padding: 10px 25px; border-radius: 99px;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+            transition: all 0.1s; display: inline-flex; align-items: center; gap: 8px;
+        }
+        .play-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 0 rgba(0,0,0,0.2); }
+        .play-btn:active { transform: translateY(2px); box-shadow: 0 0 0 rgba(0,0,0,0.2); }
+
+        /* Blob Deko */
+        .blob { position: absolute; filter: blur(40px); opacity: 0.6; z-index: -1; }
     </style>
 </head>
-<body class="text-slate-800 relative">
+<body class="min-h-screen flex flex-col items-center relative">
 
-    <div class="animated-bg"></div>
+    <!-- HINTERGRUND DEKO -->
+    <div class="cloud w-24 h-24 top-10" style="animation-duration: 25s; top: 5%;"></div>
+    <div class="cloud w-32 h-32 top-20" style="animation-duration: 35s; top: 15%; animation-delay: -10s;"></div>
+    <div class="blob bg-blue-200 w-64 h-64 rounded-full top-0 left-0"></div>
+    <div class="blob bg-yellow-200 w-64 h-64 rounded-full bottom-0 right-0"></div>
 
-    <nav class="fixed w-full z-50 transition-all duration-300">
-        <div class="glass-card border-t-0 border-x-0">
-            <div class="max-w-7xl mx-auto px-4 h-20 flex justify-between items-center">
-                <div class="flex items-center gap-3 cursor-pointer" onclick="window.scrollTo(0,0)">
-                    <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg">
-                        <i class="fa-solid fa-graduation-cap"></i>
-                    </div>
-                    <span class="font-bold text-xl brand-font text-slate-900">Lern<span class="text-blue-600">Campus</span></span>
-                </div>
-                <div class="hidden md:flex items-center space-x-8">
-                    <a href="#apps" class="text-slate-600 hover:text-blue-600 font-medium transition">Apps</a>
-                    <a href="#faq" class="text-slate-600 hover:text-blue-600 font-medium transition">Hilfe</a>
-                </div>
-            </div>
+    <!-- HEADER -->
+    <header class="text-center mt-12 mb-12 relative z-10">
+        <div class="inline-block bg-white px-6 py-2 rounded-full shadow-sm mb-4 transform -rotate-2 border-2 border-blue-100">
+            <span class="text-blue-500 font-bold uppercase tracking-wider text-sm">Für 4. Klasse</span>
         </div>
-    </nav>
+        <h1 class="text-5xl md:text-7xl font-black text-slate-800 mb-4 title-bounce drop-shadow-sm">
+            Lern<span class="text-blue-500">Campus</span>
+        </h1>
+        <p class="text-xl text-slate-600 font-bold max-w-lg mx-auto leading-relaxed">
+            Wähle dein Abenteuer und werde zum Super-Schüler! 🚀
+        </p>
+    </header>
 
-    <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden text-center">
-        <div class="blob bg-blue-300 w-64 h-64 rounded-full top-20 left-10 mix-blend-multiply"></div>
-        <div class="blob bg-purple-300 w-64 h-64 rounded-full top-40 right-10 mix-blend-multiply animation-delay-2000"></div>
-
-        <div class="max-w-4xl mx-auto px-4 relative z-10">
-            <span class="bg-blue-100 text-blue-700 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-8 inline-block shadow-sm">
-                Version 8.0 • Alles Aktiv
-            </span>
-            <h1 class="text-5xl md:text-7xl lg:text-8xl font-black mb-8 text-slate-900 tracking-tight leading-tight">
-                Lernen wird zum <br/>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">Abenteuer.</span>
-            </h1>
-            <p class="text-xl text-slate-500 mb-12 max-w-2xl mx-auto leading-relaxed">
-                Die Schweizer Lernplattform für Mathe, Sprachen & Logik. <br>
-                <b>Kostenlos. Sicher. Werbefrei.</b>
+    <!-- APP GRID -->
+    <main class="w-full max-w-5xl px-6 pb-20 grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+        
+        <!-- MATHE -->
+        <a href="mathe.html" class="app-card card-mathe p-8 flex flex-col items-center text-center group">
+            <div class="card-icon text-blue-500">
+                🧮
+            </div>
+            <h2 class="text-3xl font-black mb-2">Mathe</h2>
+            <p class="text-blue-100 font-bold mb-6 leading-tight">
+                Werde zum Rechen-König! Plus, Minus, Mal, Geteilt & Geometrie.
             </p>
-            <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <a href="#apps" class="bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-blue-600 transition shadow-xl hover:shadow-blue-500/30 flex items-center justify-center gap-3">
-                    <i class="fa-solid fa-play"></i> Jetzt starten
-                </a>
+            <div class="mt-auto play-btn text-blue-600">
+                STARTEN <i class="fa-solid fa-play"></i>
             </div>
-        </div>
-    </section>
+        </a>
 
-    <section id="apps" class="py-24 bg-white/50 relative">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-black mb-4 text-slate-900">Wähle dein Fach</h2>
-                <p class="text-slate-500">Alle Apps sind startklar.</p>
+        <!-- FRANZÖSISCH -->
+        <a href="franz.html" class="app-card card-franz p-8 flex flex-col items-center text-center group">
+            <div class="card-icon text-red-500">
+                🇫🇷
             </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                
-                <!-- MATHE -->
-                <a href="mathe.html" class="glass-card hover-lift rounded-3xl p-8 relative group border-t-4 border-t-blue-500">
-                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-150 duration-500">
-                        <i class="fa-solid fa-calculator text-9xl text-blue-600"></i>
-                    </div>
-                    <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-3xl mb-6 shadow-sm">
-                        🧮
-                    </div>
-                    <h3 class="text-2xl font-bold mb-2 text-slate-900">Mathe Platinum</h3>
-                    <p class="text-slate-500 mb-6 text-sm leading-relaxed">
-                        Das komplette Training: Schriftlich Rechnen, Geometrie, Geld & Zeit. Mit Shop & Level-System.
-                    </p>
-                    <span class="text-blue-600 font-bold text-sm flex items-center gap-2 group-hover:gap-3 transition-all">
-                        App starten <i class="fa-solid fa-arrow-right"></i>
-                    </span>
-                </a>
-
-                <!-- FRANZÖSISCH -->
-                <a href="franz.html" class="glass-card hover-lift rounded-3xl p-8 relative group border-t-4 border-t-indigo-500">
-                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-150 duration-500">
-                        <i class="fa-solid fa-language text-9xl text-indigo-600"></i>
-                    </div>
-                    <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center text-3xl mb-6 shadow-sm">
-                        🇫🇷
-                    </div>
-                    <h3 class="text-2xl font-bold mb-2 text-slate-900">Französisch</h3>
-                    <p class="text-slate-500 mb-6 text-sm leading-relaxed">
-                        Vokabeltrainer für die Schule. Zuordnen, Schreiben und Hören. Trainiere deine Wörter!
-                    </p>
-                    <span class="text-indigo-600 font-bold text-sm flex items-center gap-2 group-hover:gap-3 transition-all">
-                        App starten <i class="fa-solid fa-arrow-right"></i>
-                    </span>
-                </a>
-
-                <!-- AGENT -->
-                <a href="agent.html" class="glass-card hover-lift rounded-3xl p-8 relative group border-t-4 border-t-emerald-500">
-                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-150 duration-500">
-                        <i class="fa-solid fa-user-secret text-9xl text-emerald-600"></i>
-                    </div>
-                    <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-3xl mb-6 shadow-sm">
-                        🕵️
-                    </div>
-                    <h3 class="text-2xl font-bold mb-2 text-slate-900">Agenten Mission</h3>
-                    <p class="text-slate-500 mb-6 text-sm leading-relaxed">
-                        Ein spannendes Text-Abenteuer. Löse Rätsel durch Lesen und logisches Denken.
-                    </p>
-                    <span class="text-emerald-600 font-bold text-sm flex items-center gap-2 group-hover:gap-3 transition-all">
-                        App starten <i class="fa-solid fa-arrow-right"></i>
-                    </span>
-                </a>
-
+            <h2 class="text-3xl font-black mb-2">Französisch</h2>
+            <p class="text-red-100 font-bold mb-6 leading-tight">
+                Sammle Wörter, knacke den Highscore und finde alle Tiere!
+            </p>
+            <div class="mt-auto play-btn text-red-500">
+                LOS GEHT'S <i class="fa-solid fa-language"></i>
             </div>
-        </div>
-    </section>
+        </a>
 
-    <footer class="bg-slate-900 text-slate-400 py-12 text-center text-sm border-t border-slate-800">
-        <p>&copy; 2025 Lern-Campus Schweiz.</p>
+        <!-- AGENTEN -->
+        <a href="agent.html" class="app-card card-agent p-8 flex flex-col items-center text-center group">
+            <div class="card-icon text-green-600">
+                🕵️
+            </div>
+            <h2 class="text-3xl font-black mb-2">Agenten</h2>
+            <p class="text-green-100 font-bold mb-6 leading-tight">
+                Löse das Geheimnis der Schule. Ein spannendes Lese-Abenteuer.
+            </p>
+            <div class="mt-auto play-btn text-green-600">
+                MISSION <i class="fa-solid fa-user-secret"></i>
+            </div>
+        </a>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="mt-auto py-8 text-center text-slate-400 text-sm font-bold">
+        <p>© 2025 Lern-Campus Schweiz • Gemacht mit ❤️ für coole Kids</p>
     </footer>
 
 </body>
