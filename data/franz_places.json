@@ -1,0 +1,17 @@
+{
+  "places": [
+    { "fr": "À pied", "de": "Zu Fuss" },
+    { "fr": "En vélo", "de": "Mit dem Velo" },
+    { "fr": "En voiture", "de": "Mit dem Auto" },
+    { "fr": "En train", "de": "Mit dem Zug" },
+    { "fr": "En trottinette", "de": "Mit dem Trottinett" },
+    { "fr": "En rollers", "de": "Mit den Rollschuhen" },
+    { "fr": "La maison", "de": "Das Haus" },
+    { "fr": "La gare", "de": "Der Bahnhof" },
+    { "fr": "La forêt", "de": "Der Wald" },
+    { "fr": "Le parcours", "de": "Die Strecke" },
+    { "fr": "Jusqu'à", "de": "Bis" },
+    { "fr": "Bâle", "de": "Basel" },
+    { "fr": "SlowUp", "de": "SlowUp (Event)" }
+  ]
+}

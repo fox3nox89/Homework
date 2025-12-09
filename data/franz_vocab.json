@@ -1,0 +1,91 @@
+{
+  "worlds": [
+    {
+      "id": 1,
+      "name": "Begrüssung & Alltag",
+      "icon": "🚀",
+      "reqLvl": 1,
+      "words": [
+        { "fr": "Bonjour", "de": "Guten Tag" },
+        { "fr": "Salut", "de": "Hallo" },
+        { "fr": "Au revoir", "de": "Auf Wiedersehen" },
+        { "fr": "Merci", "de": "Danke" },
+        { "fr": "S'il vous plaît", "de": "Bitte" },
+        { "fr": "Oui", "de": "Ja" },
+        { "fr": "Non", "de": "Nein" },
+        { "fr": "Aussi", "de": "Auch" },
+        { "fr": "Peut-être", "de": "Vielleicht" },
+        { "fr": "Toujours", "de": "Immer" },
+        { "fr": "Jamais", "de": "Nie" }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Pronomen & Fragewörter",
+      "icon": "❓",
+      "reqLvl": 1,
+      "words": [
+        { "fr": "Je", "de": "Ich" },
+        { "fr": "Tu", "de": "Du" },
+        { "fr": "Il", "de": "Er" },
+        { "fr": "Elle", "de": "Sie" },
+        { "fr": "Nous", "de": "Wir" },
+        { "fr": "Vous", "de": "Ihr / Sie" },
+        { "fr": "Ils", "de": "Sie (m.)" },
+        { "fr": "Elles", "de": "Sie (w.)" },
+        { "fr": "Qui", "de": "Wer" },
+        { "fr": "Quoi", "de": "Was" },
+        { "fr": "Où", "de": "Wo" },
+        { "fr": "Quand", "de": "Wann" },
+        { "fr": "Comment", "de": "Wie" },
+        { "fr": "Combien", "de": "Wie viel" }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Schule & Bibliothek",
+      "icon": "🏫",
+      "reqLvl": 2,
+      "words": [
+        { "fr": "L'école", "de": "Die Schule" },
+        { "fr": "La bibliothèque", "de": "Die Bibliothek" },
+        { "fr": "La classe", "de": "Die Klasse" },
+        { "fr": "Le livre", "de": "Das Buch" },
+        { "fr": "Le cahier", "de": "Das Heft" },
+        { "fr": "Le crayon", "de": "Der Bleistift" },
+        { "fr": "La gomme", "de": "Der Gummi" },
+        { "fr": "La trousse", "de": "Das Etui" },
+        { "fr": "Le devoir", "de": "Die Hausaufgabe" },
+        { "fr": "La bande dessinée", "de": "Der Comic" },
+        { "fr": "L'histoire", "de": "Die Geschichte" },
+        { "fr": "La plante", "de": "Die Pflanze" },
+        { "fr": "Organiser", "de": "Organisieren" },
+        { "fr": "Raconter", "de": "Erzählen" },
+        { "fr": "Inviter", "de": "Einladen" },
+        { "fr": "Pour", "de": "Für" },
+        { "fr": "Garder", "de": "Behalten" }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Tiere",
+      "icon": "🐾",
+      "reqLvl": 3,
+      "words": [
+        { "fr": "Le chien", "de": "Der Hund" },
+        { "fr": "Le chat", "de": "Die Katze" },
+        { "fr": "La souris", "de": "Die Maus" },
+        { "fr": "Le lapin", "de": "Der Hase" },
+        { "fr": "La tortue", "de": "Die Schildkröte" },
+        { "fr": "L'oiseau", "de": "Der Vogel" },
+        { "fr": "Le cheval", "de": "Das Pferd" },
+        { "fr": "La vache", "de": "Die Kuh" },
+        { "fr": "Le cochon", "de": "Das Schwein" },
+        { "fr": "Le lion", "de": "Der Löwe" },
+        { "fr": "L'écureuil", "de": "Das Eichhörnchen" },
+        { "fr": "La pomme", "de": "Der Apfel" },
+        { "fr": "Le secret", "de": "Das Geheimnis" }
+      ]
+    }
+  ]
+}

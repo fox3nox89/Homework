@@ -2,974 +2,309 @@
 <html lang="de-CH">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Französisch Abenteuer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Französisch Lernen – Campus 4. Klasse</title>
 
-    <!-- Tailwind -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Icons + Fonts -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
-
-    <!-- Gemeinsames Design -->
-    <link rel="stylesheet" href="style.css">
-
-    <!-- React + Babel -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-    <!-- Konfetti (optional, nur für Belohnung) -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
     <style>
-        /* Seite etwas abdunkeln, aber Wolken/Blob vom style.css bleiben nutzbar */
         body {
+            background: linear-gradient(180deg, #dbeafe, #eff6ff);
             font-family: 'Nunito', sans-serif;
-            color: #0f172a;
         }
-
-        .franz-bg {
-            min-height: 100vh;
-            width: 100%;
-            padding-bottom: 4rem;
-            background: radial-gradient(circle at top, #e0f2fe 0%, #e0f7fa 40%, #fef3c7 100%);
-        }
-
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(16px);
-            border-radius: 24px;
-            border: 1px solid rgba(15, 23, 42, 0.08);
-            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
-        }
-
-        .pill-badge {
-            border-radius: 999px;
-            padding: 4px 10px;
-            font-size: 0.7rem;
-            font-weight: 800;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-        }
-
-        .btn-main {
-            border-radius: 999px;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.4rem;
-            padding: 0.7rem 1.5rem;
-            box-shadow: 0 4px 0 rgba(15, 23, 42, 0.3);
-            transition: all 0.1s;
-        }
-        .btn-main:active {
-            transform: translateY(3px);
-            box-shadow: 0 1px 0 rgba(15, 23, 42, 0.3);
-        }
-
-        .mode-btn {
-            @apply w-full text-sm md:text-base;
-        }
-
-        .mode-btn-inner {
-            border-radius: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.4rem;
-            padding: 0.75rem 1rem;
-            font-weight: 800;
-            box-shadow: 0 4px 0 rgba(15, 23, 42, 0.25);
-            transition: transform 0.1s, box-shadow 0.1s;
-        }
-        .mode-btn-inner:active {
-            transform: translateY(3px);
-            box-shadow: 0 1px 0 rgba(15, 23, 42, 0.25);
-        }
-
-        .card-small {
-            border-radius: 18px;
-            border: 2px solid rgba(148, 163, 184, 0.5);
-            background: rgba(248, 250, 252, 0.9);
-            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.1);
-        }
-
-        .card-world {
-            border-radius: 20px;
-            border: 2px solid rgba(148, 163, 184, 0.4);
-            background: linear-gradient(135deg, #eff6ff, #e0f2fe);
-            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.12);
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.15s, box-shadow 0.15s;
-        }
-        .card-world:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 18px 30px rgba(15, 23, 42, 0.18);
-        }
-
-        .xp-bar-track {
-            height: 10px;
-            border-radius: 999px;
-            background: rgba(148, 163, 184, 0.35);
-            overflow: hidden;
-        }
-        .xp-bar-fill {
-            height: 100%;
-            border-radius: 999px;
-            background: linear-gradient(90deg, #22c55e, #4ade80);
-            transition: width 0.4s ease-out;
-        }
-
-        /* Memory-Karten */
-        .memory-card {
-            border-radius: 18px;
-            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
-            border: 2px solid rgba(148,163,184,0.5);
-            cursor: pointer;
-            background: #0f172a;
-            color: white;
-            position: relative;
-            overflow: hidden;
-            transform-style: preserve-3d;
-            transition: transform 0.35s;
-        }
-
-        .memory-card.flipped {
-            transform: rotateY(180deg);
-        }
-
-        .memory-face {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.6rem;
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
-            font-weight: 800;
-            text-align: center;
-        }
-
-        .memory-front {
-            background: linear-gradient(135deg, #6366f1, #a855f7);
-            font-size: 1.4rem;
-        }
-
-        .memory-back {
-            background: #0f172a;
-            transform: rotateY(180deg);
-            font-size: 0.95rem;
-        }
-
-        /* Match-Karten */
-        .match-card {
-            border-radius: 16px;
-            border: 2px solid rgba(148, 163, 184, 0.7);
-            padding: 0.6rem 0.8rem;
-            cursor: pointer;
-            font-weight: 800;
-            font-size: 0.95rem;
-            background: rgba(15, 23, 42, 0.9);
-            color: #e5e7eb;
-            box-shadow: 0 5px 12px rgba(15, 23, 42, 0.35);
-            transition: transform 0.1s, box-shadow 0.1s, background 0.1s, border-color 0.1s;
-        }
-        .match-card.fr {
-            border-left-width: 4px;
-            border-left-color: #3b82f6;
-        }
-        .match-card.de {
-            border-right-width: 4px;
-            border-right-color: #f97316;
-        }
-        .match-card.selected {
-            background: #1d4ed8;
-            border-color: #2563eb;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 18px rgba(37, 99, 235, 0.6);
-        }
-        .match-card.correct {
-            background: #16a34a;
-            border-color: #16a34a;
-            color: white;
-        }
-
-        /* Input */
-        .fr-input {
-            border-radius: 16px;
-            border: 2px solid rgba(148, 163, 184, 0.7);
-            padding: 0.9rem 1rem;
-            font-size: 1.05rem;
-            width: 100%;
-            outline: none;
-            background: rgba(248, 250, 252, 0.95);
-            transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
-        }
-        .fr-input:focus {
-            border-color: #6366f1;
-            box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.5);
+        .card {
             background: white;
+            border-radius: 18px;
+            padding: 20px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: 0.2s;
         }
-
-        .shake {
-            animation: shake 0.35s cubic-bezier(.36,.07,.19,.97) both;
+        .card:hover {
+            transform: scale(1.03);
         }
-        @keyframes shake {
-            10%, 90% { transform: translate3d(-1px, 0, 0); }
-            20%, 80% { transform: translate3d(2px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-            40%, 60% { transform: translate3d(4px, 0, 0); }
+        .memory-card {
+            width: 100px;
+            height: 100px;
+            background: #bfdbfe;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 12px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .memory-card.flipped {
+            background: #2563eb;
+            color: white;
+        }
+        .choice-btn {
+            background: white;
+            border-radius: 12px;
+            padding: 14px;
+            border: 2px solid #93c5fd;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+        .choice-btn:hover {
+            background: #bfdbfe;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center relative">
 
-    <!-- Deko vom style.css (Clouds/Blob) können hier weiterverwendet werden -->
-    <div class="cloud w-24 h-24 top-10" style="animation-duration: 25s; top: 4%;"></div>
-    <div class="cloud w-32 h-32 top-24" style="animation-duration: 35s; top: 14%; animation-delay: -10s;"></div>
-    <div class="blob bg-blue-200 w-64 h-64 rounded-full top-0 left-0"></div>
-    <div class="blob bg-purple-200 w-64 h-64 rounded-full bottom-0 right-0"></div>
+<body class="p-6">
 
-    <div id="root" class="franz-bg flex justify-center items-start pt-6 px-3 w-full"></div>
+    <h1 class="text-4xl font-black text-center mb-6">🇫🇷 Französisch Abenteuer</h1>
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
+    <div id="app" class="max-w-3xl mx-auto"></div>
 
-        // Wort-Welten (an "Ça roule" angelehnt)
-        const WORLDS = [
-            {
-                id: 1,
-                name: "Basis-Lager",
-                icon: "🚀",
-                color: "from-blue-500 to-indigo-500",
-                description: "Begrüssungen & wichtige Wörter.",
-                words: [
-                    { fr: "Bonjour", de: "Guten Tag" },
-                    { fr: "Salut", de: "Hallo" },
-                    { fr: "Au revoir", de: "Auf Wiedersehen" },
-                    { fr: "Merci", de: "Danke" },
-                    { fr: "S'il vous plaît", de: "Bitte" },
-                    { fr: "Oui", de: "Ja" },
-                    { fr: "Non", de: "Nein" },
-                    { fr: "Je", de: "Ich" },
-                    { fr: "Tu", de: "Du" },
-                    { fr: "Il", de: "Er" },
-                    { fr: "Elle", de: "Sie" }
-                ]
-            },
-            {
-                id: 2,
-                name: "Reihenfolge",
-                icon: "🧩",
-                color: "from-violet-500 to-fuchsia-500",
-                description: "D'abord, puis, après...",
-                words: [
-                    { fr: "D'abord", de: "Zuerst" },
-                    { fr: "Puis", de: "Dann" },
-                    { fr: "Après", de: "Danach" },
-                    { fr: "Finalement", de: "Schliesslich" },
-                    { fr: "Toujours", de: "Immer" },
-                    { fr: "Jamais", de: "Nie" },
-                    { fr: "Peut-être", de: "Vielleicht" }
-                ]
-            },
-            {
-                id: 3,
-                name: "Schule",
-                icon: "🏫",
-                color: "from-emerald-500 to-teal-500",
-                description: "Dinge aus dem Schulzimmer.",
-                words: [
-                    { fr: "L'école", de: "Die Schule" },
-                    { fr: "Le livre", de: "Das Buch" },
-                    { fr: "Le cahier", de: "Das Heft" },
-                    { fr: "Le crayon", de: "Der Bleistift" },
-                    { fr: "La gomme", de: "Der Gummi" },
-                    { fr: "La trousse", de: "Das Etui" },
-                    { fr: "La classe", de: "Die Klasse" },
-                    { fr: "Le devoir", de: "Die Hausaufgabe" }
-                ]
-            },
-            {
-                id: 4,
-                name: "Tiere",
-                icon: "🦁",
-                color: "from-amber-500 to-orange-500",
-                description: "Tierplanet mit Freunden.",
-                words: [
-                    { fr: "Le chien", de: "Der Hund" },
-                    { fr: "Le chat", de: "Die Katze" },
-                    { fr: "La souris", de: "Die Maus" },
-                    { fr: "L'oiseau", de: "Der Vogel" },
-                    { fr: "Le cheval", de: "Das Pferd" },
-                    { fr: "La vache", de: "Die Kuh" },
-                    { fr: "Le cochon", de: "Das Schwein" },
-                    { fr: "Le lion", de: "Der Löwe" }
-                ]
-            }
-        ];
 
-        const AVATARS = [
-            { id: "bear", icon: "🐻", name: "Bruno", cost: 0 },
-            { id: "cat", icon: "🐱", name: "Mimi", cost: 50 },
-            { id: "fox", icon: "🦊", name: "Foxy", cost: 120 },
-            { id: "robot", icon: "🤖", name: "Robo", cost: 250 },
-            { id: "alien", icon: "👽", name: "Zorg", cost: 350 },
-            { id: "dragon", icon: "🐲", name: "Drago", cost: 500 }
-        ];
+    <!-- ===========================
+              JAVASCRIPT
+         =========================== -->
+    <script>
+    let VOCAB = [];
+    let VERBS = [];
+    let NUMBERS = [];
+    let PLACES = [];
+    let DICTIONARY = {};
 
-        const LEVEL_STEPS = [0, 100, 250, 500, 900, 1400, 2000];
+    /* ===========================
+        1) ALLE JSON DATEIEN LADEN
+    ============================ */
+    async function loadAll() {
+        const vocab = await fetch("data/franz_vocab.json").then(r => r.json());
+        const verbs = await fetch("data/franz_verbs.json").then(r => r.json());
+        const numbers = await fetch("data/franz_numbers.json").then(r => r.json());
+        const places = await fetch("data/franz_places.json").then(r => r.json());
 
-        const speakFR = (text) => {
-            if (!("speechSynthesis" in window)) return;
-            window.speechSynthesis.cancel();
-            const u = new SpeechSynthesisUtterance(text);
-            u.lang = "fr-FR";
-            u.rate = 0.9;
-            window.speechSynthesis.speak(u);
-        };
+        VOCAB = vocab.worlds;
+        VERBS = verbs.verbs;
+        NUMBERS = numbers.numbers;
+        PLACES = places.places;
 
-        const playSound = (type) => {
-            const ACtx = window.AudioContext || window.webkitAudioContext;
-            if (!ACtx) return;
-            const ctx = new ACtx();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            const now = ctx.currentTime;
+        // Dictionary zusammenbauen
+        DICTIONARY = {};
 
-            if (type === "good") {
-                osc.type = "triangle";
-                osc.frequency.setValueAtTime(700, now);
-                osc.frequency.linearRampToValueAtTime(1100, now + 0.12);
-                gain.gain.setValueAtTime(0.2, now);
-                gain.gain.linearRampToValueAtTime(0.0, now + 0.4);
-                osc.start(now);
-                osc.stop(now + 0.4);
-            } else if (type === "bad") {
-                osc.type = "sawtooth";
-                osc.frequency.setValueAtTime(180, now);
-                gain.gain.setValueAtTime(0.2, now);
-                gain.gain.linearRampToValueAtTime(0.0, now + 0.35);
-                osc.start(now);
-                osc.stop(now + 0.35);
-            } else if (type === "coin") {
-                osc.type = "square";
-                osc.frequency.setValueAtTime(900, now);
-                gain.gain.setValueAtTime(0.15, now);
-                gain.gain.linearRampToValueAtTime(0.0, now + 0.25);
-                osc.start(now);
-                osc.stop(now + 0.25);
-            }
-        };
+        VOCAB.forEach(world =>
+            world.words.forEach(w => DICTIONARY[w.fr] = w.de)
+        );
 
-        const fireConfetti = () => {
-            if (!window.confetti) return;
-            window.confetti({
-                particleCount: 80,
-                spread: 70,
-                origin: { y: 0.6 }
+        PLACES.forEach(p => DICTIONARY[p.fr] = p.de);
+        NUMBERS.forEach(n => DICTIONARY[n.fr] = n.de);
+
+        VERBS.forEach(v => {
+            DICTIONARY[v.infinitive] = v.de;
+            Object.entries(v.conjugation).forEach(([pron, form]) => {
+                DICTIONARY[form] = v.de + " (" + pron + ")";
             });
-        };
+        });
 
-        function App() {
-            const [xp, setXp] = useState(0);
-            const [coins, setCoins] = useState(0);
-            const [avatarId, setAvatarId] = useState("bear");
-            const [ownedAvatars, setOwnedAvatars] = useState(["bear"]);
-            const [currentWorld, setCurrentWorld] = useState(WORLDS[0]);
-            const [mode, setMode] = useState(null); // "memory" | "match" | "listen"
-            const [flash, setFlash] = useState(null);
-            const [shopOpen, setShopOpen] = useState(false);
+        renderMenu();
+    }
 
-            const addReward = (xpGain, coinGain) => {
-                setXp(prev => prev + xpGain);
-                setCoins(prev => prev + coinGain);
-                if (coinGain > 0) playSound("coin");
-                if (xpGain >= 20) {
-                    fireConfetti();
-                }
-            };
 
-            const level = React.useMemo(() => {
-                for (let i = LEVEL_STEPS.length - 1; i >= 0; i--) {
-                    if (xp >= LEVEL_STEPS[i]) return i + 1;
-                }
-                return 1;
-            }, [xp]);
+    /* ===========================
+        2) HAUPTMENÜ
+    ============================ */
+    function renderMenu() {
+        const app = document.getElementById("app");
 
-            const xpForCurrent = LEVEL_STEPS[Math.max(level - 1, 0)] || 0;
-            const xpForNext = LEVEL_STEPS[level] || LEVEL_STEPS[LEVEL_STEPS.length - 1];
-            const progress = Math.min(100, ((xp - xpForCurrent) / (xpForNext - xpForCurrent || 1)) * 100);
+        let html = `
+            <h2 class="text-xl font-bold mb-4">Wähle dein Spiel</h2>
 
-            const activeAvatar = AVATARS.find(a => a.id === avatarId) || AVATARS[0];
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-            const handleBuyAvatar = (id) => {
-                const a = AVATARS.find(x => x.id === id);
-                if (!a) return;
-                if (ownedAvatars.includes(id)) {
-                    setAvatarId(id);
-                    return;
-                }
-                if (coins < a.cost) {
-                    setFlash("coins");
-                    setTimeout(() => setFlash(null), 600);
-                    return;
-                }
-                setCoins(c => c - a.cost);
-                setOwnedAvatars(list => [...list, id]);
-                setAvatarId(id);
-                playSound("coin");
-            };
-
-            const resetMode = () => setMode(null);
-
-            return (
-                <div className="w-full max-w-5xl">
-
-                    {/* Header + Zurück */}
-                    <div className="flex items-center justify-between mb-4">
-                        <a href="index.html" className="btn-main bg-white text-slate-700 text-xs md:text-sm px-3 md:px-4">
-                            <i className="fa-solid fa-arrow-left-long"></i>
-                            <span>Zurück zum Campus</span>
-                        </a>
-                        <div className="pill-badge bg-blue-100 text-blue-700 hidden sm:inline-flex items-center gap-2">
-                            <i className="fa-solid fa-language"></i>
-                            <span>Französisch Abenteuer</span>
-                        </div>
-                    </div>
-
-                    {/* Kopfbereich */}
-                    <header className="glass-panel px-4 md:px-8 py-4 md:py-6 mb-6 flex flex-col md:flex-row gap-4 md:gap-6 items-start md:items-center">
-                        <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 flex items-center justify-center text-3xl md:text-4xl shadow-md">
-                                {activeAvatar.icon}
-                            </div>
-                            <div>
-                                <div className="pill-badge bg-indigo-100 text-indigo-700 mb-1 inline-flex items-center gap-1">
-                                    <i className="fa-solid fa-user-astronaut"></i>
-                                    <span>Level {level}</span>
-                                </div>
-                                <h1 className="text-2xl md:text-3xl font-black text-slate-800 leading-tight">
-                                    Französisch-Galaxie
-                                </h1>
-                                <p className="text-sm md:text-base text-slate-600 font-semibold">
-                                    Lerne Wörter, spiele Mini-Games und sammle Belohnungen.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex-1 w-full md:w-auto flex flex-col gap-3 md:items-end">
-                            <div className="w-full md:w-64">
-                                <div className="flex justify-between mb-1 text-xs font-bold text-slate-600">
-                                    <span>XP</span>
-                                    <span>{xp}/{xpForNext}</span>
-                                </div>
-                                <div className="xp-bar-track">
-                                    <div className="xp-bar-fill" style={{ width: progress + "%" }}></div>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-3 justify-between md:justify-end">
-                                <div className={"card-small px-3 py-2 flex items-center gap-2 " + (flash === "coins" ? "shake" : "")}>
-                                    <span className="text-amber-500 text-lg">🪙</span>
-                                    <div className="text-xs font-bold text-slate-700 leading-tight">
-                                        <div className="uppercase tracking-wide">Coins</div>
-                                        <div className="text-base">{coins}</div>
-                                    </div>
-                                </div>
-
-                                <button
-                                    onClick={() => setShopOpen(true)}
-                                    className="btn-main bg-indigo-500 text-white text-xs md:text-sm"
-                                >
-                                    <i className="fa-solid fa-shop"></i>
-                                    <span>Avatar-Shop</span>
-                                </button>
-                            </div>
-                        </div>
-                    </header>
-
-                    {/* Weltwahl */}
-                    <section className="mb-6">
-                        <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-2">
-                                <h2 className="text-lg md:text-xl font-black text-slate-800">Wähle deine Welt</h2>
-                                <span className="pill-badge bg-slate-900/5 text-slate-600">
-                                    {currentWorld.name}
-                                </span>
-                            </div>
-                            <span className="hidden sm:inline text-xs font-semibold text-slate-500">
-                                Tipp: Starte mit dem Basis-Lager 🚀
-                            </span>
-                        </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            {WORLDS.map(w => (
-                                <button
-                                    key={w.id}
-                                    onClick={() => { setCurrentWorld(w); setMode(null); }}
-                                    className={`card-world px-3 py-3 text-left ${w.id === currentWorld.id ? "ring-2 ring-indigo-400" : ""}`}
-                                >
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <div className={`w-9 h-9 rounded-2xl bg-gradient-to-br ${w.color} flex items-center justify-center text-xl text-white shadow`}>
-                                            {w.icon}
-                                        </div>
-                                        <div>
-                                            <div className="text-xs font-bold uppercase tracking-wide text-slate-600">Welt {w.id}</div>
-                                            <div className="text-sm font-extrabold text-slate-900">{w.name}</div>
-                                        </div>
-                                    </div>
-                                    <p className="text-xs text-slate-600 font-semibold leading-snug">
-                                        {w.description}
-                                    </p>
-                                </button>
-                            ))}
-                        </div>
-                    </section>
-
-                    {/* Spielmodi */}
-                    <section className="glass-panel px-4 md:px-6 py-4 md:py-5 mb-6">
-                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
-                            <div>
-                                <h2 className="text-lg md:text-xl font-black text-slate-800 mb-1">
-                                    Spielmodus wählen
-                                </h2>
-                                <p className="text-xs md:text-sm text-slate-600 font-semibold">
-                                    Nutze zuerst das Memory, danach Verbinden und zum Schluss Hören & Tippen.
-                                </p>
-                            </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full md:w-auto">
-                                <button onClick={() => setMode("memory")} className="mode-btn">
-                                    <div className={"mode-btn-inner bg-gradient-to-r from-indigo-500 to-sky-500 text-white " + (mode === "memory" ? "ring-2 ring-indigo-300" : "")}>
-                                        <i className="fa-solid fa-clone"></i>
-                                        <span>Memory</span>
-                                    </div>
-                                </button>
-                                <button onClick={() => setMode("match")} className="mode-btn">
-                                    <div className={"mode-btn-inner bg-gradient-to-r from-emerald-500 to-teal-500 text-white " + (mode === "match" ? "ring-2 ring-emerald-300" : "")}>
-                                        <i className="fa-solid fa-arrows-left-right"></i>
-                                        <span>Verbinden</span>
-                                    </div>
-                                </button>
-                                <button onClick={() => setMode("listen")} className="mode-btn">
-                                    <div className={"mode-btn-inner bg-gradient-to-r from-amber-500 to-orange-500 text-white " + (mode === "listen" ? "ring-2 ring-amber-300" : "")}>
-                                        <i className="fa-solid fa-headphones"></i>
-                                        <span>Hören & Tippen</span>
-                                    </div>
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Inhalt der Modi */}
-                        {!mode && (
-                            <div className="text-sm md:text-base text-slate-600 font-semibold">
-                                Wähle oben einen Modus. Alle Spiele verwenden die Wörter aus:{" "}
-                                <span className="font-black text-slate-900">{currentWorld.name}</span>.
-                            </div>
-                        )}
-
-                        {mode === "memory" && (
-                            <MemoryGame
-                                key={currentWorld.id + "-mem"}
-                                words={currentWorld.words}
-                                onReward={() => addReward(40, 10)}
-                            />
-                        )}
-
-                        {mode === "match" && (
-                            <MatchGame
-                                key={currentWorld.id + "-match"}
-                                words={currentWorld.words}
-                                onReward={() => addReward(35, 10)}
-                            />
-                        )}
-
-                        {mode === "listen" && (
-                            <ListenGame
-                                key={currentWorld.id + "-listen"}
-                                words={currentWorld.words}
-                                onReward={() => addReward(30, 15)}
-                            />
-                        )}
-                    </section>
-
-                    {/* Shop Modal */}
-                    {shopOpen && (
-                        <ShopModal
-                            onClose={() => setShopOpen(false)}
-                            avatars={AVATARS}
-                            owned={ownedAvatars}
-                            activeId={avatarId}
-                            coins={coins}
-                            onBuy={handleBuyAvatar}
-                        />
-                    )}
+                <div class="card" onclick="startMemory()">
+                    🧠 <b>Memory</b><br>
+                    Finde passende Kartenpaare.
                 </div>
-            );
+
+                <div class="card" onclick="startMultipleChoice()">
+                    🎯 <b>Multiple Choice</b><br>
+                    Wähle die richtige deutsche Bedeutung.
+                </div>
+
+                <div class="card" onclick="startListening()">
+                    🔊 <b>Hören</b><br>
+                    Höre das Wort und wähle die richtige Bedeutung.
+                </div>
+
+            </div>
+        `;
+
+        app.innerHTML = html;
+    }
+
+
+    /* ===========================
+        3) MEMORY SPIEL
+    ============================ */
+    function startMemory() {
+        const app = document.getElementById("app");
+
+        // Wörter mischen
+        let allWords = Object.entries(DICTIONARY).slice(0, 8);
+        let cards = [];
+
+        allWords.forEach(([fr, de]) => {
+            cards.push({ text: fr, lang: "fr" });
+            cards.push({ text: de, lang: "de" });
+        });
+
+        cards = shuffle(cards);
+
+        let html = `
+            <h2 class="text-xl font-bold mb-4">🧠 Memory</h2>
+            <div class="grid grid-cols-4 gap-3">
+        `;
+
+        cards.forEach((card, i) => {
+            html += `
+                <div class="memory-card" onclick="flip(${i})" id="card-${i}">
+                    ?
+                </div>
+            `;
+        });
+
+        html += `</div><br><button class="mt-6 px-4 py-2 bg-blue-600 text-white" onclick="renderMenu()">Zurück</button>`;
+
+        app.innerHTML = html;
+
+        window.memoryCards = cards;
+        window.memoryOpen = [];
+    }
+
+    function flip(i) {
+        const el = document.getElementById("card-" + i);
+        let card = memoryCards[i];
+
+        if (el.classList.contains("flipped")) return;
+        el.classList.add("flipped");
+        el.innerHTML = card.text;
+
+        memoryOpen.push(i);
+
+        if (memoryOpen.length === 2) {
+            const [a, b] = memoryOpen;
+
+            let cardA = memoryCards[a];
+            let cardB = memoryCards[b];
+
+            let match =
+                (DICTIONARY[cardA.text] === cardB.text) ||
+                (DICTIONARY[cardB.text] === cardA.text);
+
+            if (!match) {
+                setTimeout(() => {
+                    document.getElementById("card-" + a).classList.remove("flipped");
+                    document.getElementById("card-" + a).innerHTML = "?";
+
+                    document.getElementById("card-" + b).classList.remove("flipped");
+                    document.getElementById("card-" + b).innerHTML = "?";
+                }, 700);
+            }
+
+            memoryOpen = [];
         }
+    }
 
-        function MemoryGame({ words, onReward }) {
-            const [cards, setCards] = useState([]);
-            const [flipped, setFlipped] = useState([]);
-            const [matched, setMatched] = useState([]);
-            const [locked, setLocked] = useState(false);
 
-            useEffect(() => {
-                const selected = [...words].sort(() => Math.random() - 0.5).slice(0, 6);
-                const deck = selected.flatMap(p => ([
-                    { id: p.fr + "-fr", side: "fr", label: p.fr, pair: p.fr },
-                    { id: p.fr + "-de", side: "de", label: p.de, pair: p.fr }
-                ]));
-                deck.sort(() => Math.random() - 0.5);
-                setCards(deck);
-                setFlipped([]);
-                setMatched([]);
-                setLocked(false);
-            }, [words]);
+    /* ===========================
+        4) MULTIPLE CHOICE SPIEL
+    ============================ */
+    function startMultipleChoice() {
+        const app = document.getElementById("app");
 
-            const handleClick = (card) => {
-                if (locked) return;
-                if (matched.includes(card.id)) return;
-                if (flipped.includes(card.id)) return;
+        let words = shuffle(Object.entries(DICTIONARY)).slice(0, 10);
 
-                if (card.side === "fr") {
-                    speakFR(card.label);
-                }
+        let html = `<h2 class="text-xl font-bold mb-4">🎯 Multiple Choice</h2>`;
 
-                const newFlipped = [...flipped, card.id];
-                setFlipped(newFlipped);
+        words.forEach(([fr, de]) => {
+            // Falsche Antworten wählen
+            let wrong = shuffle(Object.values(DICTIONARY).filter(x => x !== de)).slice(0, 2);
+            let choices = shuffle([de, ...wrong]);
 
-                if (newFlipped.length === 2) {
-                    setLocked(true);
-                    const c1 = cards.find(c => c.id === newFlipped[0]);
-                    const c2 = cards.find(c => c.id === newFlipped[1]);
+            html += `<div class="mb-4 p-3 border rounded-lg bg-white shadow">
+                        <b>${fr}</b><br>
+                        ${choices.map(c =>
+                            `<div class="choice-btn mt-2" onclick="checkChoice('${de}','${c}', this)">
+                                ${c}
+                            </div>`
+                        ).join("")}
+                     </div>`;
+        });
 
-                    if (c1.pair === c2.pair) {
-                        playSound("good");
-                        setTimeout(() => {
-                            setMatched(prev => [...prev, c1.id, c2.id]);
-                            setFlipped([]);
-                            setLocked(false);
-                            if (matched.length + 2 === cards.length) {
-                                onReward();
-                            }
-                        }, 500);
-                    } else {
-                        playSound("bad");
-                        setTimeout(() => {
-                            setFlipped([]);
-                            setLocked(false);
-                        }, 750);
-                    }
-                }
-            };
+        html += `<button class="mt-6 px-4 py-2 bg-blue-600 text-white" onclick="renderMenu()">Zurück</button>`;
 
-            return (
-                <div className="mt-2">
-                    <p className="text-xs md:text-sm text-slate-600 font-semibold mb-3">
-                        Klicke zwei Karten nacheinander an. Französisch wird laut vorgelesen. Finde alle Paare!
-                    </p>
-                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                        {cards.map(card => {
-                            const isFlipped = flipped.includes(card.id) || matched.includes(card.id);
-                            return (
-                                <button
-                                    key={card.id}
-                                    className={"memory-card aspect-[3/4] " + (isFlipped ? "flipped" : "")}
-                                    onClick={() => handleClick(card)}
-                                >
-                                    <div className="memory-face memory-front">?</div>
-                                    <div className="memory-face memory-back">
-                                        <span className={card.side === "fr" ? "text-blue-300" : "text-amber-300"}>
-                                            {card.label}
-                                        </span>
-                                    </div>
-                                </button>
-                            );
-                        })}
+        app.innerHTML = html;
+    }
+
+    function checkChoice(correct, chosen, el) {
+        if (correct === chosen) {
+            el.style.background = "#4ade80";
+        } else {
+            el.style.background = "#f87171";
+        }
+    }
+
+
+    /* ===========================
+        5) HÖR-SPIEL
+    ============================ */
+    function startListening() {
+        const app = document.getElementById("app");
+
+        let words = shuffle(Object.entries(DICTIONARY)).slice(0, 8);
+
+        let html = `
+            <h2 class="text-xl font-bold mb-4">🔊 Hör zu</h2>
+            <p class="mb-4">Klicke auf den Lautsprecher und wähle die richtige Bedeutung.</p>
+        `;
+
+        words.forEach(([fr, de]) => {
+            let wrong = shuffle(Object.values(DICTIONARY).filter(x => x !== de)).slice(0, 2);
+            let choices = shuffle([de, ...wrong]);
+
+            html += `
+                <div class="mb-4 p-4 border rounded bg-white">
+                    <button class="px-3 py-2 bg-blue-600 text-white rounded" onclick="speak('${fr}')">🔊 Anhören</button>
+                    <div class="mt-2">
+                        ${choices.map(c =>
+                            `<div class="choice-btn mt-2" onclick="checkChoice('${de}','${c}', this)">
+                                ${c}
+                            </div>`
+                        ).join("")}
                     </div>
                 </div>
-            );
-        }
+            `;
+        });
 
-        function MatchGame({ words, onReward }) {
-            const [left, setLeft] = useState([]);
-            const [right, setRight] = useState([]);
-            const [selected, setSelected] = useState(null); // {side, id}
-            const [solvedPairs, setSolvedPairs] = useState([]);
+        html += `<button class="mt-6 px-4 py-2 bg-blue-600 text-white" onclick="renderMenu()">Zurück</button>`;
 
-            useEffect(() => {
-                const s = [...words].sort(() => Math.random() - 0.5).slice(0, 6);
-                setLeft(s.map(p => ({ id: p.fr, label: p.fr, key: p.fr })));
-                setRight(s.map(p => ({ id: p.fr, label: p.de, key: p.fr })).sort(() => Math.random() - 0.5));
-                setSelected(null);
-                setSolvedPairs([]);
-            }, [words]);
+        app.innerHTML = html;
+    }
 
-            const handleClick = (side, card) => {
-                if (solvedPairs.includes(card.id)) return;
+    function speak(text) {
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = "fr-FR";
+        speechSynthesis.speak(msg);
+    }
 
-                if (!selected) {
-                    if (side === "fr") speakFR(card.label);
-                    setSelected({ side, id: card.id });
-                } else {
-                    if (selected.side === side && selected.id === card.id) return;
 
-                    // Zweite Karte
-                    if (side === "fr") speakFR(card.label);
+    /* ===========================
+        HILFSFUNKTIONEN
+    ============================ */
+    function shuffle(arr) {
+        return arr.sort(() => Math.random() - 0.5);
+    }
 
-                    if (selected.id === card.id) {
-                        // Treffer
-                        playSound("good");
-                        setSolvedPairs(prev => {
-                            const np = [...prev, card.id];
-                            if (np.length === left.length) {
-                                onReward();
-                            }
-                            return np;
-                        });
-                        setSelected(null);
-                    } else {
-                        // Falsch
-                        playSound("bad");
-                        setSelected(null);
-                    }
-                }
-            };
+    // App starten
+    loadAll();
 
-            return (
-                <div className="mt-2">
-                    <p className="text-xs md:text-sm text-slate-600 font-semibold mb-3">
-                        Klicke zuerst Französisch, dann die passende deutsche Karte. Paare verschwinden, wenn sie richtig sind.
-                    </p>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="flex flex-col gap-2">
-                            {left.map(card => {
-                                const isSolved = solvedPairs.includes(card.id);
-                                const isSelected = selected && selected.side === "fr" && selected.id === card.id;
-                                return (
-                                    <button
-                                        key={card.id}
-                                        disabled={isSolved}
-                                        onClick={() => handleClick("fr", card)}
-                                        className={"match-card fr " +
-                                            (isSolved ? "correct" : "") +
-                                            (isSelected ? " selected" : "")}
-                                    >
-                                        {card.label}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                        <div className="flex flex-col gap-2">
-                            {right.map(card => {
-                                const isSolved = solvedPairs.includes(card.id);
-                                const isSelected = selected && selected.side === "de" && selected.id === card.id;
-                                return (
-                                    <button
-                                        key={card.id}
-                                        disabled={isSolved}
-                                        onClick={() => handleClick("de", card)}
-                                        className={"match-card de " +
-                                            (isSolved ? "correct" : "") +
-                                            (isSelected ? " selected" : "")}
-                                    >
-                                        {card.label}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-
-        function ListenGame({ words, onReward }) {
-            const [current, setCurrent] = useState(null);
-            const [answer, setAnswer] = useState("");
-            const [message, setMessage] = useState("");
-            const [shake, setShake] = useState(false);
-
-            useEffect(() => {
-                pickNew();
-            }, [words]);
-
-            const pickNew = () => {
-                const w = words[Math.floor(Math.random() * words.length)];
-                setCurrent(w);
-                setAnswer("");
-                setMessage("");
-                speakFR(w.fr);
-            };
-
-            const handleRepeat = () => {
-                if (!current) return;
-                speakFR(current.fr);
-            };
-
-            const handleCheck = (e) => {
-                e.preventDefault();
-                if (!current) return;
-                const cleaned = answer.trim().toLowerCase();
-                const target = current.de.trim().toLowerCase();
-
-                if (cleaned === target) {
-                    setMessage("Richtig! 🎉");
-                    onReward();
-                    setTimeout(() => {
-                        pickNew();
-                    }, 700);
-                } else {
-                    setMessage("Noch nicht ganz. Versuch es nochmal.");
-                    setShake(true);
-                    playSound("bad");
-                    setTimeout(() => setShake(false), 400);
-                }
-            };
-
-            return (
-                <div className="mt-2">
-                    <p className="text-xs md:text-sm text-slate-600 font-semibold mb-3">
-                        Klicke auf Kopfhörer zum Anhören. Schreibe die deutsche Bedeutung des französischen Wortes.
-                    </p>
-                    {current && (
-                        <div className="card-small px-4 md:px-5 py-3 md:py-4 mb-3">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <div className="pill-badge bg-indigo-100 text-indigo-700 mb-1 inline-flex items-center gap-1">
-                                        <i className="fa-solid fa-volume-high"></i>
-                                        <span>Französisches Wort</span>
-                                    </div>
-                                    <div className="text-lg md:text-xl font-black text-slate-800">
-                                        {current.fr}
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={handleRepeat}
-                                    className="btn-main bg-indigo-500 text-white text-xs md:text-sm px-3"
-                                >
-                                    <i className="fa-solid fa-headphones"></i>
-                                    <span>Nochmals hören</span>
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    <form onSubmit={handleCheck} className="space-y-2">
-                        <input
-                            type="text"
-                            className={"fr-input " + (shake ? "shake" : "")}
-                            placeholder="Deutsche Bedeutung hier eingeben..."
-                            value={answer}
-                            onChange={e => setAnswer(e.target.value)}
-                        />
-                        <div className="flex gap-2">
-                            <button
-                                type="submit"
-                                className="btn-main bg-emerald-500 text-white text-xs md:text-sm"
-                            >
-                                <i className="fa-solid fa-check"></i>
-                                <span>Antwort prüfen</span>
-                            </button>
-                            <button
-                                type="button"
-                                onClick={pickNew}
-                                className="btn-main bg-white text-slate-700 text-xs md:text-sm"
-                            >
-                                <i className="fa-solid fa-forward-step"></i>
-                                <span>Neue Karte</span>
-                            </button>
-                        </div>
-                        {message && (
-                            <p className="text-xs md:text-sm font-bold text-slate-700 mt-1">
-                                {message}{" "}
-                                {message.startsWith("Noch") && (
-                                    <span className="text-slate-500">
-                                        (Lösung: {current.de})
-                                    </span>
-                                )}
-                            </p>
-                        )}
-                    </form>
-                </div>
-            );
-        }
-
-        function ShopModal({ onClose, avatars, owned, activeId, coins, onBuy }) {
-            return (
-                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
-                    <div className="glass-panel max-w-lg w-full p-4 md:p-6 relative">
-                        <button
-                            onClick={onClose}
-                            className="absolute top-2 right-3 text-slate-400 hover:text-red-500 text-xl font-bold"
-                        >
-                            ×
-                        </button>
-                        <div className="flex items-center justify-between mb-4">
-                            <div>
-                                <div className="pill-badge bg-indigo-100 text-indigo-700 mb-1">
-                                    Avatar-Shop
-                                </div>
-                                <h2 className="text-lg md:text-xl font-black text-slate-800">
-                                    Wähle deinen Helden
-                                </h2>
-                                <p className="text-xs md:text-sm text-slate-600 font-semibold">
-                                    Kaufe neue Avatare mit Coins oder aktiviere bereits freigeschaltete.
-                                </p>
-                            </div>
-                            <div className="card-small px-3 py-2 flex items-center gap-2">
-                                <span className="text-amber-500 text-lg">🪙</span>
-                                <div className="text-xs font-bold text-slate-700 leading-tight">
-                                    <div className="uppercase tracking-wide">Coins</div>
-                                    <div className="text-base">{coins}</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2">
-                            {avatars.map(a => {
-                                const isOwned = owned.includes(a.id);
-                                const isActive = activeId === a.id;
-                                return (
-                                    <button
-                                        key={a.id}
-                                        onClick={() => onBuy(a.id)}
-                                        className={
-                                            "card-small px-3 py-3 flex flex-col items-center text-center gap-1 " +
-                                            (isActive ? "ring-2 ring-indigo-400" : "")
-                                        }
-                                    >
-                                        <div className="w-12 h-12 rounded-full bg-slate-900/90 flex items-center justify-center text-2xl mb-1">
-                                            {a.icon}
-                                        </div>
-                                        <div className="text-xs font-extrabold text-slate-800">{a.name}</div>
-                                        <div className="text-[0.65rem] font-bold text-slate-500 uppercase tracking-wide">
-                                            {isOwned ? "Freigeschaltet" : `Kosten: ${a.cost} 🪙`}
-                                        </div>
-                                        {isActive && (
-                                            <span className="pill-badge bg-indigo-500 text-white mt-1 text-[0.6rem]">
-                                                Ausgerüstet
-                                            </span>
-                                        )}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-
-        ReactDOM.createRoot(document.getElementById("root")).render(<App />);
     </script>
+
 </body>
 </html>

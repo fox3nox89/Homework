@@ -1,0 +1,24 @@
+{
+  "numbers": [
+    { "fr": "Un", "de": "Eins", "value": 1 },
+    { "fr": "Deux", "de": "Zwei", "value": 2 },
+    { "fr": "Trois", "de": "Drei", "value": 3 },
+    { "fr": "Quatre", "de": "Vier", "value": 4 },
+    { "fr": "Cinq", "de": "Fünf", "value": 5 },
+    { "fr": "Six", "de": "Sechs", "value": 6 },
+    { "fr": "Sept", "de": "Sieben", "value": 7 },
+    { "fr": "Huit", "de": "Acht", "value": 8 },
+    { "fr": "Neuf", "de": "Neun", "value": 9 },
+    { "fr": "Dix", "de": "Zehn", "value": 10 },
+    { "fr": "Onze", "de": "Elf", "value": 11 },
+    { "fr": "Douze", "de": "Zwölf", "value": 12 },
+    { "fr": "Treize", "de": "Dreizehn", "value": 13 },
+    { "fr": "Quatorze", "de": "Vierzehn", "value": 14 },
+    { "fr": "Quinze", "de": "Fünfzehn", "value": 15 },
+    { "fr": "Seize", "de": "Sechzehn", "value": 16 },
+    { "fr": "Dix-sept", "de": "Siebzehn", "value": 17 },
+    { "fr": "Dix-huit", "de": "Achtzehn", "value": 18 },
+    { "fr": "Dix-neuf", "de": "Neunzehn", "value": 19 },
+    { "fr": "Vingt", "de": "Zwanzig", "value": 20 }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "verbs": [
+    {
+      "infinitive": "Aller",
+      "de": "Gehen",
+      "conjugation": {
+        "je": "vais",
+        "tu": "vas",
+        "il": "va",
+        "elle": "va",
+        "nous": "allons",
+        "vous": "allez",
+        "ils": "vont",
+        "elles": "vont"
+      }
+    },
+    {
+      "infinitive": "Être",
+      "de": "Sein",
+      "conjugation": {
+        "je": "suis",
+        "tu": "es",
+        "il": "est",
+        "elle": "est",
+        "nous": "sommes",
+        "vous": "êtes",
+        "ils": "sont",
+        "elles": "sont"
+      }
+    },
+    {
+      "infinitive": "Avoir",
+      "de": "Haben",
+      "conjugation": {
+        "je": "ai",
+        "tu": "as",
+        "il": "a",
+        "elle": "a",
+        "nous": "avons",
+        "vous": "avez",
+        "ils": "ont",
+        "elles": "ont"
+      }
+    },
+    {
+      "infinitive": "Faire",
+      "de": "Machen",
+      "conjugation": {
+        "je": "fais",
+        "tu": "fais",
+        "il": "fait",
+        "elle": "fait",
+        "nous": "faisons",
+        "vous": "faites",
+        "ils": "font",
+        "elles": "font"
+      }
+    }
+  ]
+}
