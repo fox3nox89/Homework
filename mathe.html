@@ -2,404 +2,214 @@
 <html lang="de-CH">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mathe Infinity 14.1 (Fixed)</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathe – Rechen-Quest</title>
+
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Fonts / Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700;800&family=Patrick+Hand&display=swap');
-        
-        :root { --bg-color: #f0f9ff; --primary: #3b82f6; --text: #1e293b; }
-        
-        body { font-family: 'Fredoka', sans-serif; background-color: var(--bg-color); color: var(--text); user-select: none; -webkit-tap-highlight-color: transparent; transition: background-color 0.5s; }
-        .nunito { font-family: 'Nunito', sans-serif; }
-        .handwritten { font-family: 'Patrick Hand', cursive; }
-        
-        /* Grid Input Felder */
-        .grid-cell {
-            width: 45px; height: 55px;
-            border: 2px solid #cbd5e1; background: white; color: #334155;
-            font-family: 'Patrick Hand', cursive; font-size: 1.8rem;
-            text-align: center; border-radius: 8px; outline: none;
-            transition: all 0.2s; box-shadow: 2px 2px 0px rgba(0,0,0,0.05);
-        }
-        .grid-cell:focus { border-color: var(--primary); transform: scale(1.1); z-index: 10; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        .grid-cell.readonly { background: transparent; border-color: transparent; box-shadow: none; font-weight: bold; cursor: default; }
-        .grid-cell.carry { 
-            height: 30px; width: 45px; font-size: 1.2rem; color: #ef4444; 
-            border: 1px dashed #fca5a5; background: #fff1f2; margin-bottom: 2px;
-        }
-
-        /* Shop Cards */
-        .item-card { transition: all 0.2s; position: relative; overflow: hidden; border-width: 4px; }
-        .item-card:active { transform: scale(0.95); }
-        
-        /* Animations */
-        .pop-in { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        
-        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
-        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
-
-        /* Stars */
-        .star-filled { color: #fbbf24; filter: drop-shadow(0 0 2px orange); }
-        .star-empty { color: #e2e8f0; }
-        
-        /* Teacher */
-        .highlight-step { background-color: #fef08a !important; border-color: #eab308 !important; transform: scale(1.15); z-index: 20; box-shadow: 0 0 15px rgba(234, 179, 8, 0.6); }
-
-        /* Loading Screen */
-        #loading { position: fixed; top:0; left:0; width:100%; height:100%; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.5s; }
-    </style>
 </head>
-<body class="min-h-screen">
-    
-    <div id="loading">
-        <div class="text-4xl mb-4">🚀</div>
-        <div class="text-2xl font-bold text-blue-600 animate-bounce">Lade Mathe Universum...</div>
-    </div>
-    <div id="root"></div>
 
-    <script type="text/babel">
-        // Sicherheits-Check
-        setTimeout(() => { const l = document.getElementById('loading'); if(l) l.style.display = 'none'; }, 1500);
-        window.onerror = function(msg, url, line) { console.error("Fehler:", msg); return false; };
+<body>
 
-        const { useState, useEffect, useRef } = React;
+    <!-- WALD-HINTERGRUND (optional, kindgerecht) -->
+    <div class="blob bg-blue-200 w-64 h-64 top-0 left-0"></div>
+    <div class="blob bg-yellow-200 w-64 h-64 bottom-0 right-0"></div>
 
-        // --- KONSTANTEN ---
-        const LEVELS = [0, 100, 300, 600, 1000, 1500, 2200, 3000, 4000, 5000, 10000];
-        const THEMES = [
-            { id: 'default', name: 'Standard', cost: 0, class: '' },
-            { id: 'dark', name: 'Nacht', cost: 200, class: 'theme-dark' },
-            { id: 'pink', name: 'Candy', cost: 300, class: 'theme-pink' },
-            { id: 'green', name: 'Natur', cost: 300, class: 'theme-green' },
-        ];
-        const AVATARS = [
-            { id: 'bear', icon: '🐻', name: 'Bruno', cost: 0 },
-            { id: 'fox', icon: '🦊', name: 'Foxy', cost: 100 },
-            { id: 'robot', icon: '🤖', name: 'Robo', cost: 300 },
-            { id: 'alien', icon: '👽', name: 'Zorg', cost: 500 },
-            { id: 'unicorn', icon: '🦄', name: 'Sparkle', cost: 750 },
-            { id: 'king', icon: '👑', name: 'King', cost: 1000 }
-        ];
+    <div class="app-page-wrapper">
 
-        // --- HELPER ---
-        const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
-        const formatCH = (n) => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'");
-        
-        const playSound = (type) => {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            if (!AudioContext) return;
-            const ctx = new AudioContext();
-            const osc = ctx.createOscillator(); const gain = ctx.createGain();
-            osc.connect(gain); gain.connect(ctx.destination);
-            const now = ctx.currentTime;
-            if (type === 'correct') {
-                osc.type = 'triangle'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
-                gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now + 0.4);
-                osc.start(now); osc.stop(now + 0.4);
-            } else if (type === 'wrong') {
-                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now); osc.frequency.linearRampToValueAtTime(100, now + 0.2);
-                gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now + 0.3);
-                osc.start(now); osc.stop(now + 0.3);
-            } else if (type === 'levelup') {
-                [440, 554, 659, 880].forEach((f, i) => {
-                    const o = ctx.createOscillator(); const g = ctx.createGain(); o.connect(g); g.connect(ctx.destination);
-                    o.type = 'square'; o.frequency.value = f; g.gain.setValueAtTime(0.1, ctx.currentTime + i*0.1); g.gain.linearRampToValueAtTime(0, ctx.currentTime + i*0.1 + 0.3);
-                    o.start(ctx.currentTime + i*0.1); o.stop(ctx.currentTime + i*0.1 + 0.3);
-                });
-            } else if (type === 'cash') {
-                osc.type = 'sine'; osc.frequency.setValueAtTime(1200, now); osc.frequency.exponentialRampToValueAtTime(1800, now + 0.1);
-                gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now + 0.3);
-                osc.start(now); osc.stop(now + 0.3);
-            }
-        };
+        <!-- ================================
+             GLOBALES LEVEL / COINS HUD
+        =================================== -->
+        <div class="flex justify-between items-center mb-6">
 
-        const speak = (text) => {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                let clean = text.replace(/'/g, '').replace(/(\d)\.(\d)/g, '$1 Komma $2').replace(/(\d)\./g, '$1 ')
-                    .replace(/\+/g, ' plus ').replace(/-/g, ' minus ').replace(/·/g, ' mal ').replace(/:/g, ' geteilt durch ').replace(/Fr\./g, ' Franken ').replace(/Rp\./g, ' Rappen ').replace(/=/g, ' gleich ').replace(/</g, ' kleiner als ').replace(/>/g, ' grösser als ');
-                const msg = new SpeechSynthesisUtterance(clean); msg.lang = 'de-DE'; msg.rate = 0.95;
-                window.speechSynthesis.speak(msg);
-            }
-        };
-
-        // --- COMPONENTS ---
-        
-        const GeometryShape = ({ type }) => {
-            const canvasRef = useRef(null);
-            useEffect(() => {
-                const cvs = canvasRef.current; const ctx = cvs.getContext('2d');
-                ctx.clearRect(0,0,200,200); ctx.lineWidth = 4; ctx.strokeStyle = '#3b82f6'; ctx.fillStyle = '#dbeafe';
-                ctx.beginPath();
-                if (type === 'quadrat') ctx.rect(50, 50, 100, 100);
-                else if (type === 'rechteck') ctx.rect(30, 60, 140, 80);
-                else if (type === 'kreis') ctx.arc(100, 100, 60, 0, 2*Math.PI);
-                else if (type === 'dreieck') { ctx.moveTo(100, 40); ctx.lineTo(160, 150); ctx.lineTo(40, 150); ctx.closePath(); }
-                else if (type === 'winkel') { ctx.moveTo(150, 50); ctx.lineTo(50, 50); ctx.lineTo(50, 150); ctx.moveTo(50, 70); ctx.lineTo(70, 70); ctx.lineTo(70, 50); ctx.stroke(); ctx.beginPath(); ctx.arc(60, 60, 2, 0, 2*Math.PI); ctx.fill(); return; }
-                ctx.fill(); ctx.stroke();
-            }, [type]);
-            return <canvas ref={canvasRef} width={200} height={200} className="mx-auto" />;
-        };
-
-        const Clock = ({ h, m }) => {
-            const mDeg = m * 6; const hDeg = h * 30 + m * 0.5;
-            return (
-                <div className="relative w-32 h-32 rounded-full border-4 border-slate-700 bg-white shadow-lg mx-auto my-4">
-                    {[...Array(12)].map((_, i) => <div key={i} className="absolute w-1 h-2 bg-slate-400 left-1/2 top-1 origin-bottom transform -translate-x-1/2" style={{transform: `rotate(${i*30}deg) translateY(2px)`}}></div>)}
-                    <div className="absolute w-1 h-10 bg-slate-800 left-1/2 top-1/2 origin-bottom transform -translate-x-1/2 -translate-y-full rounded" style={{transform: `translateX(-50%) rotate(${hDeg}deg) translateY(-50%)`}}></div>
-                    <div className="absolute w-0.5 h-12 bg-red-500 left-1/2 top-1/2 origin-bottom transform -translate-x-1/2 -translate-y-full rounded" style={{transform: `translateX(-50%) rotate(${mDeg}deg) translateY(-50%)`}}></div>
-                    <div className="absolute w-2 h-2 bg-slate-800 rounded-full left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+            <div>
+                <div class="font-fun text-3xl font-black text-slate-800">
+                    Mathe – Rechen-Quest 🧮
                 </div>
-            );
+                <div class="text-slate-600 font-bold">Werde stärker, indem du Aufgaben löst!</div>
+            </div>
+
+            <div class="text-right">
+                <div class="badge badge-blue mb-1">Level: <span id="level">1</span></div><br>
+                <div class="badge badge-yellow">Coins: <span id="coins">0</span></div>
+            </div>
+
+        </div>
+
+        <!-- XP-Bar -->
+        <div class="xp-bar mb-8">
+            <div class="xp-bar-fill" id="xpBar"></div>
+        </div>
+
+
+        <!-- ================================
+             MATHE – QUIZ BEREICH
+        =================================== -->
+
+        <div class="glass-panel p-6 mt-4">
+            <h2 class="font-fun text-2xl font-black mb-4">Neue Aufgabe:</h2>
+
+            <div id="task" class="text-4xl font-black text-center my-6"></div>
+
+            <input 
+                id="answer"
+                type="number" 
+                class="w-full text-center text-3xl p-4 rounded-xl border-4 border-slate-300 focus:border-blue-500 outline-none transition-all"
+                placeholder="Deine Antwort..."
+            >
+
+            <button id="submitAnswer" class="btn-action btn-green w-full mt-5 py-4 text-xl">
+                Antwort prüfen
+            </button>
+
+            <div id="feedback" class="text-center font-fun text-xl mt-4"></div>
+        </div>
+
+
+        <!-- ================================
+             LEVEL-UP POPUP
+        =================================== -->
+
+        <div id="levelUpPopup" class="modal-overlay hidden">
+            <div class="glass-panel p-10 text-center pop-in">
+
+                <h2 class="font-fun text-4xl font-black text-green-400 mb-4">LEVEL UP!</h2>
+                <p class="text-xl text-white mb-6">Du bist jetzt Level <span id="newLevel"></span>! ⭐</p>
+
+                <button id="closePopup" class="btn-action btn-blue w-full py-3 text-xl">Weiter</button>
+            </div>
+        </div>
+
+    </div> <!-- wrapper end -->
+
+
+    <!-- ================================
+         GLOBAL GAME ENGINE (XP / LEVEL)
+    =================================== -->
+
+    <script>
+        /* =============================
+           SPEICHER / RPG SYSTEM
+        ============================== */
+
+        const player = {
+            level: parseInt(localStorage.getItem("lc_level")) || 1,
+            xp: parseInt(localStorage.getItem("lc_xp")) || 0,
+            coins: parseInt(localStorage.getItem("lc_coins")) || 0,
         };
 
-        // LEHRER KOMPONENTE (ERWEITERT FÜR ALLE TYPEN)
-        const VisualTeacher = ({ type, a, b, hint, onClose }) => {
-            const [step, setStep] = useState(0);
-            const steps = [];
-            let title = "Erklärung";
-            let grid = null;
+        function requiredXP(level) {
+            // RPG-Levelkurve (leicht steigend)
+            return Math.floor(30 * Math.pow(1.45, level - 1));
+        }
 
-            if (type === 'add' || type === 'sub') {
-                // SCHRIFTLICH
-                title = type === 'add' ? 'Schriftlich Plus' : 'Schriftlich Minus';
-                const sA = a.toString().split('').map(Number); const sB = b.toString().split('').map(Number);
-                const cols = Math.max(sA.length, sB.length) + 1;
-                const pad = (arr) => { const p = Array(cols).fill(null); for(let i=0; i<arr.length; i++) p[cols-1-i] = arr[arr.length-1-i]; return p; };
-                const pA = pad(sA); const pB = pad(sB);
-                let c = 0;
-                for(let i=cols-1; i>=0; i--) {
-                    const va = pA[i] || 0; const vb = pB[i] || 0;
-                    if (type === 'add') {
-                        const sum = va + vb + c; const digit = sum % 10; const nextC = Math.floor(sum / 10);
-                        if (i===0 && sum===0) continue;
-                        let txt = `Wir rechnen Einer: ${va} plus ${vb}`; if (c > 0) txt += ` plus ${c} (Behalte)`; txt += ` gibt ${sum}. Schreibe ${digit}, behalte ${nextC}.`;
-                        steps.push({ col: i, text: txt, carry: nextC, res: digit }); c = nextC;
-                    } else {
-                        let l = vb + c; let u = va; let nextC = 0;
-                        if (i===0 && l===0 && u===0) continue;
-                        let txt = l > u ? `Von ${l} bis ${u+10} sind ${u+10-l}. Behalte 1.` : `Von ${l} bis ${u} sind ${u-l}.`;
-                        steps.push({ col: i, text: txt, carry: (l>u?1:0), res: (l>u ? u+10-l : u-l) }); c = (l>u?1:0);
-                    }
-                }
-                // Grid Render Logic
-                grid = (
-                    <div className="grid gap-1 justify-center" style={{gridTemplateColumns: `repeat(${cols}, 40px)`}}>
-                        {type==='add' && Array(cols).fill(0).map((_,i) => <div key={'c'+i} className="h-8 flex items-end justify-center text-red-500 text-sm font-bold">{step>0 && steps[step-1] && steps[step-1].col===i+1 && steps[step-1].carry>0 ? steps[step-1].carry : ''}</div>)}
-                        {pA.map((val,i) => <div key={'a'+i} className="flex justify-center text-2xl font-bold">{val!==undefined?val:''}</div>)}
-                        {pB.map((val,i) => <div key={'b'+i} className="flex justify-center text-2xl font-bold relative">{i===0 && <span className="absolute -left-6 text-slate-400">{type==='add'?'+':'-'}</span>}{val!==undefined?val:''}</div>)}
-                        {type==='sub' && Array(cols).fill(0).map((_,i) => <div key={'c'+i} className="h-8 flex items-start justify-center text-red-500 text-sm font-bold">{step>0 && steps[step-1] && steps[step-1].col===i+1 && steps[step-1].carry>0 ? steps[step-1].carry : ''}</div>)}
-                        <div className="col-span-full h-1 bg-slate-800 rounded"></div>
-                        {Array(cols).fill(0).map((_,i) => { const s = steps.find(x=>x.col===i); const show = s && step>steps.indexOf(s); return <div key={'r'+i} className="flex justify-center text-blue-600 font-bold text-2xl">{show ? s.res : ''}</div> })}
-                    </div>
-                );
-            } else if (type === 'mul') {
-                // 1x1 VISUALISIERUNG
-                title = 'Mal-Rechnen';
-                if (a <= 10 && b <= 10) {
-                    steps.push({ text: `${a} mal ${b} bedeutet: ${a} Reihen mit je ${b} Punkten.` });
-                    steps.push({ text: `Zähle alle Punkte zusammen: Das sind ${a*b}.` });
-                    grid = (
-                        <div className="flex flex-col gap-1 items-center">
-                             {[...Array(a)].map((_,r) => <div key={r} className="flex gap-1">{[...Array(b)].map((_,c) => <div key={c} className="w-4 h-4 bg-blue-500 rounded-full"></div>)}</div>)}
-                        </div>
-                    );
-                } else {
-                    // Zerlegen
-                    const hb = Math.floor(b/100)*100; const zb = Math.floor((b-hb)/10)*10; const eb = b-hb-zb;
-                    steps.push({ text: `Zerlege die grosse Zahl ${b} in Hunderter, Zehner und Einer.` });
-                    if(hb>0) steps.push({ text: `${a} · ${hb} = ${a*hb}` });
-                    if(zb>0) steps.push({ text: `${a} · ${zb} = ${a*zb}` });
-                    if(eb>0) steps.push({ text: `${a} · ${eb} = ${a*eb}` });
-                    steps.push({ text: `Alles zusammen: ${a*b}` });
-                    grid = <div className="text-2xl font-mono">{a} · {b}</div>;
-                }
-            } else if (type === 'calc') {
-                // Sonstige
-                title = 'Tipp';
-                steps.push({ text: hint || "Lies die Aufgabe genau und zerlege sie in kleine Schritte." });
+        function saveData() {
+            localStorage.setItem("lc_level", player.level);
+            localStorage.setItem("lc_xp", player.xp);
+            localStorage.setItem("lc_coins", player.coins);
+        }
+
+        function updateHUD() {
+            document.getElementById("level").textContent = player.level;
+            document.getElementById("coins").textContent = player.coins;
+
+            const req = requiredXP(player.level);
+            const percent = Math.min(100, (player.xp / req) * 100);
+            document.getElementById("xpBar").style.width = percent + "%";
+        }
+
+        function addXP(amount) {
+            player.xp += amount;
+            player.coins += Math.floor(amount / 5); // Bonus Coins
+            checkLevelUp();
+            saveData();
+            updateHUD();
+        }
+
+        function checkLevelUp() {
+            const req = requiredXP(player.level);
+            while (player.xp >= req) {
+                player.xp -= req;
+                player.level++;
+                showLevelUpPopup(player.level);
+            }
+        }
+
+        function showLevelUpPopup(lvl) {
+            document.getElementById("newLevel").textContent = lvl;
+            document.getElementById("levelUpPopup").classList.remove("hidden");
+        }
+
+        document.getElementById("closePopup").addEventListener("click", () => {
+            document.getElementById("levelUpPopup").classList.add("hidden");
+        });
+
+
+        /* =============================
+           MATHE – AUFGABEN SYSTEM
+        ============================== */
+
+        let currentAnswer = 0;
+
+        function newTask() {
+            const a = Math.floor(Math.random() * 20 + 1);
+            const b = Math.floor(Math.random() * 20 + 1);
+
+            const ops = ["+", "-", "×"];
+            const op = ops[Math.floor(Math.random() * ops.length)];
+
+            let result = 0;
+
+            if (op === "+") result = a + b;
+            if (op === "-") result = a - b;
+            if (op === "×") result = a * b;
+
+            currentAnswer = result;
+
+            document.getElementById("task").textContent = `${a} ${op} ${b}`;
+        }
+
+        document.getElementById("submitAnswer").addEventListener("click", () => {
+            const user = parseInt(document.getElementById("answer").value);
+            const feedback = document.getElementById("feedback");
+
+            if (isNaN(user)) {
+                feedback.textContent = "Bitte gib eine Zahl ein!";
+                feedback.className = "text-red-500 font-fun text-xl";
+                return;
+            }
+
+            if (user === currentAnswer) {
+
+                // XP je nach Schwierigkeit
+                let xpGain = 5;
+
+                if (Math.abs(currentAnswer) > 20) xpGain = 8;
+                if (Math.abs(currentAnswer) > 50) xpGain = 12;
+
+                feedback.textContent = `Richtig! 🎉 (+${xpGain} XP)`;
+                feedback.className = "text-green-500 font-fun text-xl";
+
+                addXP(xpGain);
+
             } else {
-                title = "Hilfe";
-                steps.push({ text: hint || "Du schaffst das!" });
+                feedback.textContent = "Falsch! Versuch es nochmal! ❌";
+                feedback.className = "text-red-500 font-fun text-xl shake";
             }
 
-            const cur = steps[step];
-            const finished = step >= steps.length;
-            useEffect(() => { if(cur && !finished) speak(cur.text); }, [step]);
+            document.getElementById("answer").value = "";
+            setTimeout(newTask, 700);
+        });
 
-            return (
-                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white p-6 rounded-3xl w-full max-w-lg shadow-2xl border-4 border-yellow-400 pop-in text-center relative">
-                        <button onClick={onClose} className="absolute top-2 right-2 text-slate-400 font-bold text-2xl hover:text-red-500">×</button>
-                        <h2 className="font-bold text-xl text-yellow-600 mb-4 uppercase tracking-wider">💡 {title}</h2>
-                        <div className="bg-blue-50 p-4 rounded-xl mb-6 min-h-[80px] flex items-center justify-center font-bold text-slate-700 text-lg">{finished ? "Alles klar? Jetzt du!" : cur?.text}</div>
-                        <div className="flex justify-center mb-6">{grid}</div>
-                        <button onClick={step>=steps.length ? onClose : ()=>setStep(s=>s+1)} className="w-full bg-blue-600 text-white py-3 rounded-xl text-lg shadow-lg active:scale-95 font-bold">{step>=steps.length ? "Verstanden!" : "Weiter ▶"}</button>
-                    </div>
-                </div>
-            );
-        };
-
-        const WrittenCalculator = ({ type, a, b, onCorrect }) => {
-            const sA = a.toString().split('').map(Number); const sB = b.toString().split('').map(Number);
-            const cols = Math.max(sA.length, sB.length) + 1;
-            const [res, setRes] = useState(Array(cols).fill('')); const [carry, setCarry] = useState(Array(cols).fill(''));
-            const [teacher, setTeacher] = useState(false);
-            const handleInput = (arr, setArr, i, val) => { if(!/^\d*$/.test(val)) return; const n=[...arr]; n[i]=val.slice(-1); setArr(n); };
-            const check = () => {
-                const userRes = parseInt(res.join(''));
-                const trueRes = type === 'add' ? a + b : a - b;
-                if (userRes === trueRes) onCorrect(); else { playSound('wrong'); alert("Noch nicht ganz richtig. Prüfe deine Rechnung!"); }
-            };
-            return (
-                <div className="bg-white/90 p-6 rounded-xl border-4 border-blue-200 shadow-xl inline-block relative">
-                    <button onClick={()=>setTeacher(true)} className="absolute -top-4 -right-4 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full font-bold shadow-lg border-2 border-yellow-200 z-10 text-sm flex gap-1 items-center hover:scale-110 transition">💡 Hilfe</button>
-                    {teacher && <VisualTeacher type={type} a={a} b={b} onClose={()=>setTeacher(false)} />}
-                    <div className="grid gap-1 justify-center mb-6" style={{gridTemplateColumns: `repeat(${cols}, 45px)`}}>
-                        {type==='add' && carry.map((v,i) => <div key={'c'+i} className="flex justify-center items-end h-[30px]">{i<cols-1 && <input className="grid-cell carry" value={v} onChange={e=>handleInput(carry, setCarry, i, e.target.value)} placeholder="¹"/>}</div>)}
-                        {Array(cols).fill(0).map((_,i) => <div key={'a'+i} className="grid-cell readonly flex items-center justify-center text-2xl">{sA[sA.length-(cols-i)] ?? ''}</div>)}
-                        {Array(cols).fill(0).map((_,i) => <div key={'b'+i} className="grid-cell readonly flex items-center justify-center text-2xl relative">{i===0 && <span className="absolute -left-6 font-bold text-slate-400 text-3xl">{type==='add'?'+':'-'}</span>}{sB[sB.length-(cols-i)] ?? ''}</div>)}
-                        {type==='sub' && carry.map((v,i) => <div key={'c'+i} className="flex justify-center items-start h-[30px]">{i<cols-1 && <input className="grid-cell carry" value={v} onChange={e=>handleInput(carry, setCarry, i, e.target.value)} placeholder="1"/>}</div>)}
-                        <div className="col-span-full h-1 bg-slate-800 rounded"></div>
-                        {res.map((v,i) => <input key={'r'+i} className="grid-cell font-bold text-blue-600 border-2 border-blue-200" value={v} onChange={e=>handleInput(res, setRes, i, e.target.value)} />)}
-                    </div>
-                    <button onClick={check} className="w-full bg-blue-600 text-white font-bold py-2 rounded-lg shadow hover:bg-blue-700 active:scale-95 text-xl">Prüfen ✅</button>
-                </div>
-            );
-        };
-
-        // --- MAIN APP ---
-        const App = () => {
-            const [user, setUser] = useState({name:'Gast', coins:0, xp:0, level:1, avatar:'bear', mastery:{}});
-            const [view, setView] = useState('menu');
-            const [problem, setProblem] = useState(null);
-            const [input, setInput] = useState('');
-            const [feedback, setFeedback] = useState(null);
-            const [teacher, setTeacher] = useState(false);
-
-            useEffect(() => { const s = localStorage.getItem('math_inf_v14'); if(s) setUser(JSON.parse(s)); }, []);
-            const save = (u) => { setUser(u); localStorage.setItem('math_inf_v14', JSON.stringify(u)); };
-
-            const updateProgress = (correct, topic) => {
-                const u = { ...user };
-                if(correct) { 
-                    u.coins+=15; u.xp+=20; 
-                    if(topic) u.mastery[topic] = (u.mastery[topic]||0)+1;
-                    if(u.xp >= LEVELS[u.level]) { u.level++; alert("LEVEL UP! 🎉"); }
-                    safeConfetti();
-                } else u.coins+=2;
-                save(u);
-            };
-
-            const startProblem = (t) => {
-                const r = randomInt; let p = { topic: t };
-                if(t==='add') { const a=r(100,50000); const b=r(100,40000); p={...p, q:`${formatCH(a)} + ${formatCH(b)}`, type:'written', op:'add', a, b}; }
-                else if(t==='sub') { const a=r(1000,90000); const b=r(100,a-100); p={...p, q:`${formatCH(a)} - ${formatCH(b)}`, type:'written', op:'sub', a, b}; }
-                else if(t==='mul') { const a=r(100,900); const b=r(2,9); p={...p, q:`${a} · ${b}`, a:a*b, type:'calc', op:'mul', hint:`Tipp: Rechne ${a} mal ${b}.`}; } 
-                else if(t==='1x1') { const a=r(2,9); const b=r(2,9); p={...p, q:`${a} · ${b}`, a:a*b, type:'calc', op:'mul', hint:`${a} Reihen mit ${b} Punkten.`}; }
-                else if(t==='div') { const d=r(2,9); const res=r(10,200); p={...p, q:`${d*res} : ${d}`, a:res, type:'calc', op:'div', hint:`Wie oft passt die ${d} in ${d*res}?`}; }
-                else if(t==='money') { const p1=(r(1, 50) + r(0,9)*0.10).toFixed(2); const g=Math.ceil(p1/10)*10; p={...p, q:`Preis: Fr. ${p1}. Du gibst Fr. ${g}.00`, a:(g-p1).toFixed(2), type:'calc', unit:'Fr.', hint:"Ergänze zum nächsten Franken."}; }
-                else if(t==='geo') { const shapes = ['quadrat','rechteck','kreis','dreieck','winkel']; const s = shapes[r(0,4)]; p={...p, type:'geo', target:s, q:"Welche Form ist das?", opts:[...shapes.filter(x=>x!==s).sort(()=>Math.random()-0.5).slice(0,3), s].sort(()=>Math.random()-0.5)}; }
-                
-                // Weitere Typen (Länge, Gewicht, etc. - alle 'calc' Typen)
-                else if(t==='len') { const m=r(1,3); if(m===1){const k=r(1,10); p={...p, q:`${k} km = ... m`, a:k*1000, type:'calc', unit:'m', hint:"1 km = 1000 m"};} else{const c=r(10,200); p={...p, q:`${c} cm = ... mm`, a:c*10, type:'calc', unit:'mm', hint:"1 cm = 10 mm"};} }
-                else if(t==='weight') { const m=r(1,2); if(m===1){const t=r(1,10); p={...p, q:`${t} t = ... kg`, a:t*1000, type:'calc', unit:'kg', hint:"1 t = 1000 kg"};} else{const k=r(1,10); p={...p, q:`${k} kg = ... g`, a:k*1000, type:'calc', unit:'g', hint:"1 kg = 1000 g"};} }
-                else if(t==='time') { const h=r(1,11); const min=r(0,11)*5; p={...p, q:<Clock h={h} m={min}/>, text:"Wie spät ist es?", a:`${h}:${min.toString().padStart(2,'0')}`, type:'time', hint:"Kleiner Zeiger = Stunde"}; }
-
-                setProblem(p); setView('game'); setInput(''); setFeedback(null); setTeacher(false);
-            };
-
-            const handleSuccess = () => { setFeedback('correct'); updateProgress(true, problem.topic); playSound('correct'); };
-            const checkSimple = (val) => {
-                const userVal = val ? val : input.replace(',','.');
-                const sol = problem.a ? problem.a.toString() : problem.target;
-                let correct = false;
-                if (problem.type === 'time') { if (userVal == sol || userVal == '0'+sol) correct = true; }
-                else if (userVal.toLowerCase() == sol.toLowerCase()) correct = true;
-                if (correct) handleSuccess(); else { setFeedback('wrong'); playSound('wrong'); updateProgress(false, problem.topic); }
-            };
-
-            const Stars = ({t}) => { const m = (user.mastery?.[t]||0); return <div className="flex text-xs gap-0.5">{[...Array(3)].map((_,i)=><i key={i} className={`fa-solid fa-star ${i<(m>5?3:m>2?2:0)?'text-yellow-400':'text-slate-300'}`}></i>)}</div>; };
-
-            if(view==='menu') return (
-                <div className="p-4 max-w-3xl mx-auto">
-                    <header className="flex justify-between items-center mb-8 bg-white p-4 rounded-2xl shadow-sm">
-                        <div className="flex items-center gap-3"><div className="text-3xl">{AVATARS.find(a=>a.id===user.avatar)?.icon}</div><div className="font-bold text-lg">{user.coins} 💰</div></div>
-                        <a href="index.html" className="text-slate-500 font-bold">🏠 Startseite</a>
-                    </header>
-                    <div className="grid gap-3">
-                        <button onClick={()=>startProblem('add')} className="bg-blue-100 p-5 rounded-xl font-bold text-blue-800 text-left shadow-sm flex justify-between"><span>➕ Schriftlich Plus</span><Stars t='add'/></button>
-                        <button onClick={()=>startProblem('sub')} className="bg-red-100 p-5 rounded-xl font-bold text-red-800 text-left shadow-sm flex justify-between"><span>➖ Schriftlich Minus</span><Stars t='sub'/></button>
-                        <button onClick={()=>startProblem('mul')} className="bg-purple-100 p-5 rounded-xl font-bold text-purple-800 text-left shadow-sm flex justify-between"><span>✖️ Mal (Gross)</span><Stars t='mul'/></button>
-                        <button onClick={()=>startProblem('1x1')} className="bg-yellow-100 p-5 rounded-xl font-bold text-yellow-800 text-left shadow-sm flex justify-between"><span>⚡ 1x1 Training</span><Stars t='1x1'/></button>
-                        <button onClick={()=>startProblem('div')} className="bg-pink-100 p-5 rounded-xl font-bold text-pink-800 text-left shadow-sm flex justify-between"><span>➗ Geteilt</span><Stars t='div'/></button>
-                        <button onClick={()=>startProblem('money')} className="bg-green-100 p-5 rounded-xl font-bold text-green-800 text-left shadow-sm flex justify-between"><span>💰 Geld</span><Stars t='money'/></button>
-                        <button onClick={()=>startProblem('geo')} className="bg-orange-100 p-5 rounded-xl font-bold text-orange-800 text-left shadow-sm flex justify-between"><span>📐 Geometrie</span><Stars t='geo'/></button>
-                        <button onClick={()=>startProblem('time')} className="bg-indigo-100 p-5 rounded-xl font-bold text-indigo-800 text-left shadow-sm flex justify-between"><span>⏱️ Zeit</span><Stars t='time'/></button>
-                        <button onClick={()=>startProblem('len')} className="bg-teal-100 p-5 rounded-xl font-bold text-teal-800 text-left shadow-sm flex justify-between"><span>📏 Längen</span><Stars t='len'/></button>
-                        <button onClick={()=>startProblem('weight')} className="bg-emerald-100 p-5 rounded-xl font-bold text-emerald-800 text-left shadow-sm flex justify-between"><span>⚖️ Gewicht</span><Stars t='weight'/></button>
-                        <button onClick={()=>startProblem('liq')} className="bg-cyan-100 p-5 rounded-xl font-bold text-cyan-800 text-left shadow-sm flex justify-between"><span>🥛 Hohlmasse</span><Stars t='liq'/></button>
-                    </div>
-                </div>
-            );
-
-            if(view==='game') return (
-                <div className="min-h-screen flex flex-col items-center justify-center p-4">
-                    <div className="w-full max-w-lg bg-white rounded-3xl shadow-xl p-6 relative pop-in">
-                        <button onClick={()=>setView('menu')} className="absolute top-4 left-4 text-slate-400 font-bold text-xl">✕</button>
-                        <button onClick={()=>speak(problem.q)} className="absolute top-4 right-4 text-2xl">🔊</button>
-                        
-                        {/* LEHRER POPUP */}
-                        {teacher && <VisualTeacher type={problem.op || problem.type} a={problem.a} b={problem.b} hint={problem.hint} onClose={()=>setTeacher(false)} />}
-
-                        {feedback ? (
-                            <div className="pop-in text-center py-8">
-                                {feedback==='correct' ? (
-                                    <div><div className="text-6xl mb-4">🎉</div><h2 className="text-3xl font-bold text-green-500 mb-6">Richtig!</h2><button onClick={()=>startProblem(problem.topic)} className="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold text-xl shadow-lg active:scale-95">Weiter ➜</button></div>
-                                ) : (
-                                    <div><div className="text-6xl mb-4">🧐</div><h2 className="text-3xl font-bold text-red-500 mb-4">Falsch</h2><button onClick={()=>{setFeedback(null);setInput('')}} className="bg-slate-200 font-bold px-8 py-3 rounded-xl">Nochmal</button></div>
-                                )}
-                            </div>
-                        ) : (
-                            problem.type === 'written' ? (
-                                <div className="text-center mt-8"><h2 className="text-2xl font-bold text-slate-700 mb-6 font-mono">{problem.q}</h2><WrittenCalculator type={problem.op} a={problem.a} b={problem.b} onCorrect={handleSuccess} /></div>
-                            ) : (
-                                <div className="text-center mt-10">
-                                    {/* HILFE BUTTON HIER */}
-                                    <button onClick={()=>setTeacher(true)} className="mb-4 bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full font-bold shadow-sm text-sm">💡 Hilfe</button>
-                                    
-                                    {problem.type === 'geo' && <GeometryShape type={problem.target} />}
-                                    <h2 className="text-3xl font-bold text-slate-800 mb-6 font-mono bg-slate-50 p-4 rounded-xl mt-4">{problem.q}</h2>
-                                    {problem.text && <p className="mb-4 text-lg text-slate-600">{problem.text}</p>}
-                                    
-                                    {problem.opts ? (
-                                        <div className="grid grid-cols-1 gap-3">{problem.opts.map(o => <button key={o} onClick={()=>checkSimple(o)} className="bg-white text-blue-600 font-bold text-lg py-4 rounded-xl border-2 border-blue-100 hover:border-blue-500 shadow-sm capitalize">{o}</button>)}</div>
-                                    ) : (
-                                        <div className="flex flex-col gap-4">
-                                            <div className="flex gap-2 justify-center"><input value={input} onChange={e=>setInput(e.target.value)} className="text-center text-3xl p-4 border-4 border-blue-100 rounded-2xl outline-none focus:border-blue-500 w-full font-bold text-slate-700" autoFocus type="text" placeholder="?" />{problem.unit && <span className="flex items-center font-bold text-slate-400 text-2xl">{problem.unit}</span>}</div>
-                                            <button onClick={()=>checkSimple()} className="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 text-xl">Prüfen</button>
-                                        </div>
-                                    )}
-                                </div>
-                            )
-                        )}
-                    </div>
-                </div>
-            );
-        };
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        // START
+        updateHUD();
+        newTask();
     </script>
+
 </body>
 </html>
