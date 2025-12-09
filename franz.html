@@ -1,1320 +1,1177 @@
 <!DOCTYPE html>
 <html lang="de-CH">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Französisch Galaxy</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Französisch Abenteuer – 4. Klasse</title>
 
-    <!-- ENGINE -->
+    <!-- Tailwind + React + Babel -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <!-- Icons + Fonts -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&family=Nunito:wght@400;700;900&display=swap"
+          rel="stylesheet" />
 
     <style>
-        :root {
-            --primary: #6366f1;
-            --secondary: #a855f7;
-            --bg-dark: #0f172a;
-        }
-
         body {
-            font-family: 'Nunito', sans-serif;
-            background-color: var(--bg-dark);
-            color: #f8fafc;
-            user-select: none;
+            font-family: "Nunito", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            background: radial-gradient(circle at top, #1f2937 0%, #020617 50%, #000 100%);
+            color: #e5e7eb;
             -webkit-tap-highlight-color: transparent;
             overflow-x: hidden;
         }
 
-        .font-game { font-family: 'Baloo 2', cursive; }
+        .font-game {
+            font-family: "Baloo 2", system-ui, sans-serif;
+        }
 
-        /* Hintergrund */
+        /* Hintergrundsterne */
         .stars {
             position: fixed;
             inset: 0;
             z-index: -1;
             pointer-events: none;
-            background: radial-gradient(circle at bottom, #1e293b 0%, #020617 100%);
+            background: radial-gradient(circle at bottom, #0f172a 0%, #020617 60%, #000 100%);
         }
         .star {
             position: absolute;
             background: white;
             border-radius: 50%;
-            opacity: 0.5;
+            opacity: 0.6;
             animation: twinkle 4s infinite;
         }
         @keyframes twinkle {
-            0%,100% { opacity: 0.2; transform: scale(0.8); }
-            50% { opacity: 1; transform: scale(1.2); }
+            0%, 100% { opacity: 0.2; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.4); }
         }
 
-        /* UI */
-        .glass-panel {
-            background: rgba(30,41,59,0.75);
-            backdrop-filter: blur(16px);
+        .glass {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(18px);
             border-radius: 24px;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.8);
         }
 
-        .btn-action {
-            transition: all 0.1s;
-            border-radius: 16px;
+        .btn-main {
+            border-radius: 999px;
+            padding: 0.8rem 1.5rem;
             font-weight: 800;
+            letter-spacing: 0.05em;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 6px 0 rgba(15, 23, 42, 0.9);
+            transition: transform 0.08s, box-shadow 0.08s;
+        }
+        .btn-main:active {
+            transform: translateY(3px);
+            box-shadow: 0 0 0 rgba(15, 23, 42, 0.9);
+        }
+
+        /* Memory */
+        .memory-grid {
+            display: grid;
+            gap: 0.8rem;
+        }
+        @media (min-width: 640px) {
+            .memory-grid {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+        }
+        @media (max-width: 639px) {
+            .memory-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        .memory-card {
+            position: relative;
+            border-radius: 18px;
+            overflow: hidden;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: transform 0.35s;
+            height: 110px;
+        }
+        .memory-card-inner {
+            position: absolute;
+            inset: 0;
+            transform-style: preserve-3d;
+            transition: transform 0.35s;
+        }
+        .memory-card.flipped .memory-card-inner {
+            transform: rotateY(180deg);
+        }
+        .memory-face {
+            position: absolute;
+            inset: 0;
+            backface-visibility: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            box-shadow: 0 6px 0 rgba(0,0,0,0.3);
-            border-bottom-width: 6px;
-            cursor: pointer;
+            padding: 0.75rem;
+            border-radius: 18px;
         }
-        .btn-action:active {
-            transform: translateY(3px);
-            box-shadow: none;
-            border-bottom-width: 2px;
+        .memory-front {
+            background: linear-gradient(135deg, #6366f1, #a855f7);
         }
-        .btn-blue   { background:#3b82f6; border-color:#1d4ed8; color:white; }
-        .btn-green  { background:#22c55e; border-color:#15803d; color:white; }
-        .btn-purple { background:#a855f7; border-color:#6d28d9; color:white; }
-        .btn-yellow { background:#eab308; border-color:#a16207; color:black; }
-        .btn-red    { background:#ef4444; border-color:#b91c1c; color:white; }
+        .memory-back {
+            background: #020617;
+            border: 2px solid #4f46e5;
+            transform: rotateY(180deg);
+        }
+        .memory-text {
+            font-size: 1.4rem;
+            text-align: center;
+            font-weight: 800;
+            line-height: 1.1;
+        }
 
-        /* Memory */
-        .scene { perspective: 1000px; height: 110px; cursor: pointer; }
-        .card {
-            width: 100%; height: 100%;
+        .rarity-common { border-color: #9ca3af; }
+        .rarity-rare { border-color: #3b82f6; box-shadow: 0 0 16px rgba(59, 130, 246, 0.45); }
+        .rarity-epic { border-color: #a855f7; box-shadow: 0 0 20px rgba(168, 85, 247, 0.6); }
+        .rarity-legendary {
+            border-color: #eab308;
+            box-shadow: 0 0 28px rgba(234, 179, 8, 0.8);
+            background-image: linear-gradient(135deg, #facc15, #f97316);
+        }
+
+        .spin-wheel {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            border: 8px solid rgba(148, 163, 184, 0.6);
             position: relative;
-            transition: transform 0.5s;
-            transform-style: preserve-3d;
+            overflow: hidden;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.8);
         }
-        .card.flipped { transform: rotateY(180deg); }
-        .card.matched { animation: popOut 0.5s forwards; }
-
-        .face {
-            position:absolute; inset:0;
-            display:flex; align-items:center; justify-content:center;
-            border-radius:18px;
-            -webkit-backface-visibility:hidden;
-            backface-visibility:hidden;
-            box-shadow:0 4px 6px rgba(0,0,0,0.3);
-            border:3px solid rgba(255,255,255,0.2);
-            text-align:center;
-            padding:6px;
-        }
-        .front {
-            background:linear-gradient(135deg,#6366f1,#a855f7);
-            color:white;
-            font-size:2.8rem;
-        }
-        .back {
-            transform:rotateY(180deg);
-            font-weight:800;
-            font-size:1.1rem;
-        }
-        .type-fr .back { background:#172554; color:#bfdbfe; border-color:#3b82f6; }
-        .type-de .back { background:#431407; color:#fed7aa; border-color:#f97316; }
-
-        /* Match / Quiz */
-        .match-card {
-            background:#0f172a;
-            border-radius:18px;
-            border:3px solid #1e293b;
-            padding:12px;
-            font-weight:800;
-            cursor:pointer;
-            box-shadow:0 4px 0 #020617;
-            text-align:center;
-        }
-        .match-card.selected {
-            border-color:#3b82f6;
-            background:#1d4ed8;
-            color:white;
-            transform:scale(1.05);
-        }
-        .match-card.matched {
-            animation: popOut 0.4s forwards;
+        .spin-pointer {
+            width: 0;
+            height: 0;
+            border-left: 14px solid transparent;
+            border-right: 14px solid transparent;
+            border-bottom: 22px solid #fbbf24;
         }
 
-        /* Shop */
-        .shop-card {
-            border-radius:18px;
-            padding:12px;
-            border-width:3px;
-            cursor:pointer;
-            transition:all 0.2s;
-            text-align:center;
+        .shake {
+            animation: shake 0.35s;
         }
-        .shop-card:active { transform:scale(0.95); }
-
-        .rarity-common    { border-color:#94a3b8; background:#f1f5f9; color:#0f172a; }
-        .rarity-rare      { border-color:#3b82f6; background:#eff6ff; color:#1e3a8a; box-shadow:0 0 10px rgba(59,130,246,0.4); }
-        .rarity-epic      { border-color:#a855f7; background:#faf5ff; color:#581c87; box-shadow:0 0 14px rgba(168,85,247,0.6); }
-        .rarity-legendary { border-color:#eab308; background:linear-gradient(135deg,#422006,#713f12); color:#facc15; box-shadow:0 0 18px rgba(234,179,8,0.7); }
-
-        /* Animations */
-        @keyframes popOut {
-            0% { transform:scale(1); opacity:1; }
-            50% { transform:scale(1.2); opacity:1; }
-            100% { transform:scale(0); opacity:0; }
-        }
-        .pop-in { animation: popIn 0.3s cubic-bezier(0.175,0.885,0.32,1.275); }
-        @keyframes popIn {
-            from { transform:scale(0.6); opacity:0; }
-            to   { transform:scale(1); opacity:1; }
-        }
-
-        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
         @keyframes shake {
-            10%,90% { transform:translate3d(-1px,0,0); }
-            20%,80% { transform:translate3d(2px,0,0); }
-            30%,50%,70% { transform:translate3d(-4px,0,0); }
-            40%,60% { transform:translate3d(4px,0,0); }
-        }
-
-        /* XP-Bar */
-        .xp-track {
-            height:16px;
-            background:rgba(15,23,42,0.8);
-            border-radius:999px;
-            overflow:hidden;
-            border:1px solid rgba(148,163,184,0.6);
-        }
-        .xp-fill {
-            height:100%;
-            background:linear-gradient(90deg,#22c55e,#4ade80);
-            transition:width 0.8s ease-out;
-        }
-
-        /* Loading */
-        #loading {
-            position:fixed;
-            inset:0;
-            background:#020617;
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            justify-content:center;
-            z-index:9999;
-        }
-
-        /* Modal */
-        .modal-overlay {
-            position:fixed;
-            inset:0;
-            background:rgba(0,0,0,0.8);
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            z-index:100;
-            backdrop-filter:blur(5px);
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
         }
     </style>
 </head>
-<body class="min-h-screen pb-20">
-    <div class="stars" id="stars"></div>
+<body class="min-h-screen pb-10">
+<div class="stars" id="stars"></div>
+<div id="root" class="max-w-5xl mx-auto px-4 pt-4 pb-6"></div>
 
-    <div id="loading">
-        <div class="text-6xl mb-4 animate-bounce">🇫🇷</div>
-        <div class="text-2xl font-black text-blue-400 tracking-[0.3em] font-game">LADE...</div>
-    </div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
 
-    <div id="root"></div>
+/* ==== HINTERGRUNDSTERNE ==== */
+(function initStars() {
+    const cont = document.getElementById("stars");
+    if (!cont) return;
+    for (let i = 0; i < 60; i++) {
+        const s = document.createElement("div");
+        s.className = "star";
+        const size = Math.random() * 2 + 1;
+        s.style.width = size + "px";
+        s.style.height = size + "px";
+        s.style.top = Math.random() * 100 + "%";
+        s.style.left = Math.random() * 100 + "%";
+        s.style.animationDelay = Math.random() * 5 + "s";
+        cont.appendChild(s);
+    }
+})();
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
+/* ==== DATEN ==== */
+// Wichtig: hier kannst du später beliebig erweitern.
+// Wenn wir eine JSON-Datei nutzen wollen, können wir diese Daten dort hin verschieben.
+const WORDS = [
+    // Basisbegrüssung
+    { fr: "Bonjour", de: "Guten Tag", thema: "Basis" },
+    { fr: "Salut", de: "Hallo", thema: "Basis" },
+    { fr: "Au revoir", de: "Auf Wiedersehen", thema: "Basis" },
+    { fr: "Merci", de: "Danke", thema: "Basis" },
+    { fr: "S'il te plaît", de: "Bitte", thema: "Basis" },
+    { fr: "Oui", de: "Ja", thema: "Basis" },
+    { fr: "Non", de: "Nein", thema: "Basis" },
 
-        // Sterne
-        const starCont = document.getElementById('stars');
-        for (let i = 0; i < 60; i++) {
-            const s = document.createElement('div');
-            s.className = 'star';
-            s.style.top = Math.random()*100 + '%';
-            s.style.left = Math.random()*100 + '%';
-            const size = 1 + Math.random()*2;
-            s.style.width = size + 'px';
-            s.style.height = size + 'px';
-            s.style.animationDelay = Math.random()*5 + 's';
-            starCont.appendChild(s);
+    // Schule
+    { fr: "L'école", de: "Die Schule", thema: "Schule" },
+    { fr: "La classe", de: "Die Klasse", thema: "Schule" },
+    { fr: "Le cahier", de: "Das Heft", thema: "Schule" },
+    { fr: "Le livre", de: "Das Buch", thema: "Schule" },
+    { fr: "Le crayon", de: "Der Bleistift", thema: "Schule" },
+    { fr: "La gomme", de: "Der Gummi", thema: "Schule" },
+
+    // Tiere
+    { fr: "Le chien", de: "Der Hund", thema: "Tiere" },
+    { fr: "Le chat", de: "Die Katze", thema: "Tiere" },
+    { fr: "La souris", de: "Die Maus", thema: "Tiere" },
+    { fr: "Le cheval", de: "Das Pferd", thema: "Tiere" },
+    { fr: "La vache", de: "Die Kuh", thema: "Tiere" },
+    { fr: "Le cochon", de: "Das Schwein", thema: "Tiere" },
+    { fr: "L'oiseau", de: "Der Vogel", thema: "Tiere" },
+
+    // Verben / Aktionen
+    { fr: "Jouer", de: "Spielen", thema: "Verben" },
+    { fr: "Manger", de: "Essen", thema: "Verben" },
+    { fr: "Boire", de: "Trinken", thema: "Verben" },
+    { fr: "Dormir", de: "Schlafen", thema: "Verben" },
+    { fr: "Parler", de: "Sprechen", thema: "Verben" },
+    { fr: "Écouter", de: "Zuhören", thema: "Verben" },
+
+    // Farben
+    { fr: "Rouge", de: "Rot", thema: "Farben" },
+    { fr: "Bleu", de: "Blau", thema: "Farben" },
+    { fr: "Vert", de: "Grün", thema: "Farben" },
+    { fr: "Jaune", de: "Gelb", thema: "Farben" },
+    { fr: "Noir", de: "Schwarz", thema: "Farben" },
+    { fr: "Blanc", de: "Weiss", thema: "Farben" },
+];
+
+const LEVELS = [0, 200, 500, 1000, 2000, 4000, 7000, 11000, 16000];
+
+/* Shop mit Tieren (Bär & Fuchs ganz hinten, Special Edition) */
+const SHOP_ITEMS = [
+    { id: "mouse",    name: "Mimi Maus",        emoji: "🐭", cost: 80,   rarity: "common",    type: "pet" },
+    { id: "hamster",  name: "Hugo Hamster",     emoji: "🐹", cost: 100,  rarity: "common",    type: "pet" },
+    { id: "bunny",    name: "Bella Hase",       emoji: "🐰", cost: 120,  rarity: "common",    type: "pet" },
+    { id: "bird",     name: "Pico Vogel",       emoji: "🐦", cost: 150,  rarity: "common",    type: "pet" },
+    { id: "turtle",   name: "Turbo Schildkröte",emoji: "🐢", cost: 180,  rarity: "common",    type: "pet" },
+
+    { id: "cat",      name: "Captain Katze",    emoji: "🐱", cost: 250,  rarity: "rare",      type: "pet" },
+    { id: "dog",      name: "Ranger Hund",      emoji: "🐶", cost: 260,  rarity: "rare",      type: "pet" },
+    { id: "panda",    name: "Panda Pixel",      emoji: "🐼", cost: 320,  rarity: "rare",      type: "pet" },
+    { id: "penguin",  name: "Pingui",           emoji: "🐧", cost: 350,  rarity: "rare",      type: "pet" },
+
+    { id: "lion",     name: "Leo Löwe",         emoji: "🦁", cost: 500,  rarity: "epic",      type: "pet" },
+    { id: "dragon",   name: "Drago",            emoji: "🐲", cost: 650,  rarity: "epic",      type: "pet" },
+    { id: "unicorn",  name: "Luna Einhorn",     emoji: "🦄", cost: 700,  rarity: "epic",      type: "pet" },
+
+    // Lern-Items
+    { id: "hintToken", name: "Tipp-Token",       emoji: "💡", cost: 120, rarity: "rare",      type: "item", effect: "hint" },
+    { id: "extraHeart",name: "Extra Herz",       emoji: "❤️", cost: 200, rarity: "rare",      type: "item", effect: "heart" },
+    { id: "xpBoost",   name: "XP-Booster (Runde)",emoji: "⚡", cost: 300, rarity: "epic",     type: "item", effect: "xp" },
+
+    // Ganz am Schluss – Special Edition
+    { id: "foxLegend", name: "Legendärer Fuchs", emoji: "🦊", cost: 1000, rarity: "legendary", type: "pet" },
+    { id: "bearLegend",name: "Galaktischer Bär", emoji: "🐻", cost: 1200, rarity: "legendary", type: "pet" },
+];
+
+/* Glücksrad-Belohnungen */
+const SPIN_REWARDS = [
+    { label: "+50 Münzen", type: "coins", amount: 50, weight: 30 },
+    { label: "+100 Münzen", type: "coins", amount: 100, weight: 20 },
+    { label: "+20 XP", type: "xp", amount: 20, weight: 20 },
+    { label: "+50 XP", type: "xp", amount: 50, weight: 10 },
+    { label: "Tipp-Token", type: "item", itemId: "hintToken", weight: 8 },
+    { label: "Extra Herz", type: "item", itemId: "extraHeart", weight: 7 },
+    { label: "XP-Booster", type: "item", itemId: "xpBoost", weight: 5 },
+];
+
+/* ==== HILFSFUNKTIONEN ==== */
+
+function speak(text, lang) {
+    if (!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = lang;
+    u.rate = lang.startsWith("fr") ? 0.85 : 0.95;
+    window.speechSynthesis.speak(u);
+}
+
+function norm(str) {
+    return (str || "")
+        .toString()
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, " ");
+}
+
+function calcLevel(xp) {
+    let lvl = 1;
+    for (let i = LEVELS.length - 1; i >= 0; i--) {
+        if (xp >= LEVELS[i]) {
+            lvl = i + 1;
+            break;
         }
-        setTimeout(() => {
-            const l = document.getElementById('loading');
-            if (l) l.style.display = 'none';
-        }, 900);
+    }
+    return lvl;
+}
 
-        // --- DATEN ---
-        const MAX_LEVEL = 20;
-        const RANKS = ["Kadett", "Entdecker", "Pilot", "Captain", "Commander", "Admiral", "Galactic Hero"];
+function pickRandom(array, count) {
+    const copy = [...array];
+    const result = [];
+    while (copy.length && result.length < count) {
+        const idx = Math.floor(Math.random() * copy.length);
+        result.push(copy.splice(idx, 1)[0]);
+    }
+    return result;
+}
 
-        const WORLDS = [
-            {
-                id: 1, name: "Basislager – Begrüssung", icon: "👋", reqLvl: 1,
-                words: [
-                    { fr: "Bonjour", de: "Guten Tag" },
-                    { fr: "Salut", de: "Hallo" },
-                    { fr: "Au revoir", de: "Auf Wiedersehen" },
-                    { fr: "Merci", de: "Danke" },
-                    { fr: "S'il vous plaît", de: "Bitte" },
-                    { fr: "Oui", de: "Ja" },
-                    { fr: "Non", de: "Nein" },
-                    { fr: "Je", de: "Ich" },
-                    { fr: "Tu", de: "Du" },
-                    { fr: "Il", de: "Er" },
-                    { fr: "Elle", de: "Sie" },
-                    { fr: "Nous", de: "Wir" },
-                    { fr: "Vous", de: "Ihr / Sie" },
-                    { fr: "Ils", de: "Sie (m.)" },
-                    { fr: "Elles", de: "Sie (w.)" }
-                ]
-            },
-            {
-                id: 2, name: "Geschichten-Wörter", icon: "📚", reqLvl: 1,
-                words: [
-                    { fr: "L'histoire", de: "Die Geschichte" },
-                    { fr: "La bande dessinée", de: "Der Comic" },
-                    { fr: "Organiser", de: "Organisieren" },
-                    { fr: "Raconter", de: "Erzählen" },
-                    { fr: "Inviter", de: "Einladen" },
-                    { fr: "Le secret", de: "Das Geheimnis" },
-                    { fr: "Cacher", de: "Verstecken" },
-                    { fr: "D'abord", de: "Zuerst" },
-                    { fr: "Puis", de: "Dann" },
-                    { fr: "Après", de: "Danach" },
-                    { fr: "Finalement", de: "Schliesslich" },
-                    { fr: "Peut-être", de: "Vielleicht" }
-                ]
-            },
-            {
-                id: 3, name: "Tiere & Freunde", icon: "🦊", reqLvl: 2,
-                words: [
-                    { fr: "La souris", de: "Die Maus" },
-                    { fr: "Le lapin", de: "Der Hase" },
-                    { fr: "La tortue", de: "Die Schildkröte" },
-                    { fr: "Le chien", de: "Der Hund" },
-                    { fr: "Le chat", de: "Die Katze" },
-                    { fr: "Le lion", de: "Der Löwe" },
-                    { fr: "Le cochon", de: "Das Schwein" },
-                    { fr: "La vache", de: "Die Kuh" },
-                    { fr: "Le cheval", de: "Das Pferd" }
-                ]
-            },
-            {
-                id: 4, name: "Unterwegs – slowUp", icon: "🚴", reqLvl: 3,
-                words: [
-                    { fr: "Le parcours", de: "Die Strecke / Runde" },
-                    { fr: "À pied", de: "Zu Fuss" },
-                    { fr: "La voiture", de: "Das Auto" },
-                    { fr: "Le train", de: "Der Zug" },
-                    { fr: "Jusqu'à", de: "Bis" },
-                    { fr: "La maison", de: "Das Haus" },
-                    { fr: "La forêt", de: "Der Wald" },
-                    { fr: "La gare", de: "Der Bahnhof" }
-                ]
-            },
-            {
-                id: 5, name: "Farben & Zahlen", icon: "🎨", reqLvl: 4,
-                words: [
-                    { fr: "Rouge", de: "Rot" },
-                    { fr: "Bleu", de: "Blau" },
-                    { fr: "Vert", de: "Grün" },
-                    { fr: "Jaune", de: "Gelb" },
-                    { fr: "Noir", de: "Schwarz" },
-                    { fr: "Blanc", de: "Weiss" },
-                    { fr: "Gris", de: "Grau" },
-                    { fr: "Orange", de: "Orange" },
-                    { fr: "Onze", de: "Elf" },
-                    { fr: "Dix-huit", de: "Achtzehn" },
-                    { fr: "Dix-sept", de: "Siebzehn" },
-                    { fr: "Treize", de: "Dreizehn" },
-                    { fr: "Seize", de: "Sechzehn" }
-                ]
-            }
-        ];
+function weightedRandom(list) {
+    const sum = list.reduce((a, r) => a + (r.weight || 1), 0);
+    let x = Math.random() * sum;
+    for (const r of list) {
+        x -= r.weight || 1;
+        if (x <= 0) return r;
+    }
+    return list[list.length - 1];
+}
 
-        const DICTIONARY = {};
-        WORLDS.forEach(w => w.words.forEach(p => { DICTIONARY[p.fr] = p.de; }));
+/* ==== COMPONENTS ==== */
 
-        const AVATARS = [
-            { id: 'kid',   icon: '🧑', name: 'Schüler',  cost: 0,    rarity: 'common' },
-            { id: 'mouse', icon: '🐭', name: 'Mausi',    cost: 80,   rarity: 'common' },
-            { id: 'turtle',icon: '🐢', name: 'Torti',    cost: 120,  rarity: 'common' },
-            { id: 'rabbit',icon: '🐰', name: 'Hoppel',   cost: 150,  rarity: 'common' },
-            { id: 'cat',   icon: '🐱', name: 'Mimi',     cost: 200,  rarity: 'rare' },
-            { id: 'dog',   icon: '🐶', name: 'Rex',      cost: 220,  rarity: 'rare' },
-            { id: 'cow',   icon: '🐮', name: 'Moo',      cost: 260,  rarity: 'rare' },
-            { id: 'lion',  icon: '🦁', name: 'Leo',      cost: 320,  rarity: 'epic' },
-            { id: 'dragon',icon: '🐲', name: 'Drago',    cost: 420,  rarity: 'epic' },
-            { id: 'unicorn',icon:'🦄',name:'Sparkle',   cost: 550,  rarity: 'epic' },
-            { id: 'alien', icon: '👽', name: 'Zorg',     cost: 700,  rarity: 'legendary' },
-            { id: 'robot', icon: '🤖', name: 'Robo',     cost: 900,  rarity: 'legendary' },
-            // SPECIAL EDITION am Schluss:
-            { id: 'bear',  icon: '🐻', name: 'Bruno (SE)', cost: 1200, rarity: 'legendary' },
-            { id: 'fox',   icon: '🦊', name: 'Foxy (SE)',  cost: 1500, rarity: 'legendary' }
-        ];
+function XPBar({ xp }) {
+    const lvl = calcLevel(xp);
+    const currentBase = LEVELS[lvl - 1] || 0;
+    const nextBase = LEVELS[lvl] || (currentBase + 1000);
+    const progress = Math.min(
+        100,
+        ((xp - currentBase) / (nextBase - currentBase)) * 100
+    );
+    return (
+        <div className="w-full space-y-1">
+            <div className="flex justify-between text-xs text-slate-300">
+                <span>Level {lvl}</span>
+                <span>{xp} XP</span>
+            </div>
+            <div className="h-3 w-full bg-slate-800/80 rounded-full overflow-hidden border border-slate-700">
+                <div
+                    className="h-full bg-gradient-to-r from-emerald-400 via-sky-400 to-indigo-500"
+                    style={{ width: progress + "%" }}
+                ></div>
+            </div>
+        </div>
+    );
+}
 
-        const ARTICLES = ["der","die","das","den","dem","des","ein","eine","einen","einem"];
+/* Haupt-Menü: Memory / Hör zu / Schreiben / Shop */
+function ModeMenu({ onSelectMode, xp, coins }) {
+    return (
+        <div className="glass p-5 sm:p-6 mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                <div>
+                    <div className="text-xs uppercase tracking-[0.15em] text-indigo-300 font-semibold">
+                        Französisch Abenteuer · 4. Klasse
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                        <h1 className="font-game text-2xl sm:text-3xl text-slate-50">
+                            Wähle deinen Modus
+                        </h1>
+                    </div>
+                </div>
+                <div className="flex flex-col items-end gap-1 text-sm">
+                    <div className="flex items-center gap-2">
+                        <span className="text-amber-300">
+                            <i className="fa-solid fa-coins"></i>
+                        </span>
+                        <span className="font-bold text-amber-100">{coins} Münzen</span>
+                    </div>
+                </div>
+            </div>
+            <XPBar xp={xp} />
 
-        // --- HELFER ---
-        const speak = (txt) => {
-            if (!('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel();
-            const u = new SpeechSynthesisUtterance(txt);
-            u.lang = 'fr-FR';
-            u.rate = 0.9;
-            window.speechSynthesis.speak(u);
-        };
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                <button
+                    onClick={() => onSelectMode("memory")}
+                    className="glass border border-indigo-500/40 bg-gradient-to-br from-indigo-900/60 to-violet-800/50 p-4 rounded-2xl hover:-translate-y-1 transition transform text-left"
+                >
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 rounded-full bg-indigo-500/70 flex items-center justify-center text-2xl">
+                            🧠
+                        </div>
+                        <div>
+                            <div className="font-game text-lg text-indigo-100">
+                                Memory
+                            </div>
+                            <div className="text-xs text-slate-300">
+                                Paare finden (Französisch – Deutsch)
+                            </div>
+                        </div>
+                    </div>
+                </button>
 
-        const playSound = (type) => {
-            const Ctx = window.AudioContext || window.webkitAudioContext;
-            if (!Ctx) return;
-            const ctx = new Ctx();
-            const osc = ctx.createOscillator();
-            const g = ctx.createGain();
-            osc.connect(g);
-            g.connect(ctx.destination);
-            const now = ctx.currentTime;
+                <button
+                    onClick={() => onSelectMode("listen")}
+                    className="glass border border-emerald-500/40 bg-gradient-to-br from-emerald-900/60 to-teal-800/50 p-4 rounded-2xl hover:-translate-y-1 transition transform text-left"
+                >
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 rounded-full bg-emerald-500/70 flex items-center justify-center text-2xl">
+                            👂
+                        </div>
+                        <div>
+                            <div className="font-game text-lg text-emerald-100">
+                                Hör zu
+                            </div>
+                            <div className="text-xs text-slate-300">
+                                Hör das Wort, wähle die richtige Übersetzung.
+                            </div>
+                        </div>
+                    </div>
+                </button>
 
-            if (type === 'correct') {
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(600, now);
-                osc.frequency.linearRampToValueAtTime(1000, now + 0.1);
-                g.gain.setValueAtTime(0.2, now);
-                g.gain.linearRampToValueAtTime(0, now + 0.4);
-            } else if (type === 'wrong') {
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(200, now);
-                g.gain.setValueAtTime(0.25, now);
-                g.gain.linearRampToValueAtTime(0, now + 0.3);
-            } else if (type === 'win') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(400, now);
-                osc.frequency.linearRampToValueAtTime(800, now + 0.5);
-                g.gain.setValueAtTime(0.3, now);
-                g.gain.linearRampToValueAtTime(0, now + 1);
-            }
-            osc.start(now);
-            osc.stop(now + 1);
-        };
+                <button
+                    onClick={() => onSelectMode("write")}
+                    className="glass border border-sky-500/40 bg-gradient-to-br from-sky-900/60 to-cyan-800/50 p-4 rounded-2xl hover:-translate-y-1 transition transform text-left"
+                >
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 rounded-full bg-sky-500/70 flex items-center justify-center text-2xl">
+                            ✍️
+                        </div>
+                        <div>
+                            <div className="font-game text-lg text-sky-100">
+                                Schreiben
+                            </div>
+                            <div className="text-xs text-slate-300">
+                                Französisches Wort sehen, Deutsch schreiben.
+                            </div>
+                        </div>
+                    </div>
+                </button>
 
-        const safeConfetti = () => {
-            if (window.confetti) {
-                window.confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
-            }
-        };
+                <button
+                    onClick={() => onSelectMode("shop")}
+                    className="glass border border-amber-500/40 bg-gradient-to-br from-amber-900/60 to-orange-800/50 p-4 rounded-2xl hover:-translate-y-1 transition transform text-left"
+                >
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 rounded-full bg-amber-400/80 flex items-center justify-center text-2xl">
+                            🛒
+                        </div>
+                        <div>
+                            <div className="font-game text-lg text-amber-100">
+                                Shop & Glücksrad
+                            </div>
+                            <div className="text-xs text-slate-300">
+                                Tiere & Items kaufen, Glücksrad drehen.
+                            </div>
+                        </div>
+                    </div>
+                </button>
+            </div>
+        </div>
+    );
+}
 
-        const getRankTitle = lvl =>
-            RANKS[Math.min(Math.floor((lvl - 1) / 3), RANKS.length - 1)];
+/* Memory-Modus */
+function MemoryGame({ words, onBack, onReward }) {
+    const [cards, setCards] = useState([]);
+    const [flipped, setFlipped] = useState([]);
+    const [matchedIds, setMatchedIds] = useState([]);
+    const [hearts, setHearts] = useState(5);
+    const [lock, setLock] = useState(false);
+    const [message, setMessage] = useState("");
 
-        const getXPForLevel = lvl => 200 * lvl;
+    useEffect(() => {
+        const sample = pickRandom(words, Math.min(8, words.length));
+        const deck = sample
+            .flatMap((w, idx) => [
+                {
+                    id: `fr-${idx}`,
+                    side: "fr",
+                    text: w.fr,
+                    pairKey: w.fr,
+                },
+                {
+                    id: `de-${idx}`,
+                    side: "de",
+                    text: w.de,
+                    pairKey: w.fr,
+                },
+            ])
+            .sort(() => Math.random() - 0.5);
+        setCards(deck);
+        setFlipped([]);
+        setMatchedIds([]);
+        setHearts(5);
+        setMessage("");
+    }, [words]);
 
-        const stripArticle = (txt) => {
-            const parts = txt.trim().toLowerCase().split(/\s+/);
-            if (parts.length > 1 && ARTICLES.includes(parts[0])) {
-                return parts.slice(1).join(" ");
-            }
-            return txt.trim().toLowerCase();
-        };
+    function handleClick(cardId) {
+        if (lock) return;
+        if (matchedIds.includes(cardId)) return;
+        if (flipped.includes(cardId)) return;
 
-        // --- COMPONENTS ---
+        const newFlipped = [...flipped, cardId];
+        setFlipped(newFlipped);
 
-        // 1. MEMORY
-        const MemoryGame = ({ words, onFinish }) => {
-            const [cards, setCards] = useState([]);
-            const [flipped, setFlipped] = useState([]);
-            const [matched, setMatched] = useState([]);
-            const [lock, setLock] = useState(false);
+        const card = cards.find((c) => c.id === cardId);
+        if (card && card.side === "fr") {
+            speak(card.text, "fr-FR");
+        }
 
-            useEffect(() => {
-                const selection = [...words].sort(() => Math.random()-0.5).slice(0, 8);
-                const deck = selection.flatMap(p => ([
-                    { id: p.fr + "-fr", txt: p.fr, type: "fr", pair: p.fr },
-                    { id: p.fr + "-de", txt: DICTIONARY[p.fr], type: "de", pair: p.fr }
-                ])).sort(() => Math.random()-0.5);
-                setCards(deck);
-            }, [words]);
+        if (newFlipped.length === 2) {
+            setLock(true);
+            const [id1, id2] = newFlipped;
+            const c1 = cards.find((c) => c.id === id1);
+            const c2 = cards.find((c) => c.id === id2);
 
-            const click = (card) => {
-                if (lock || flipped.includes(card.id) || matched.includes(card.id)) return;
-                if (card.type === "fr") speak(card.txt);
+            if (c1.pairKey === c2.pairKey && c1.side !== c2.side) {
+                // Treffer
+                setTimeout(() => {
+                    const newMatched = [...matchedIds, id1, id2];
+                    setMatchedIds(newMatched);
+                    setFlipped([]);
+                    setLock(false);
+                    setMessage("Super! Richtiges Paar 👏");
+                    onReward({ xp: 15, coins: 8 });
 
-                const nf = [...flipped, card.id];
-                setFlipped(nf);
-
-                if (nf.length === 2) {
-                    setLock(true);
-                    const c1 = cards.find(c => c.id === nf[0]);
-                    const c2 = cards.find(c => c.id === nf[1]);
-                    if (c1.pair === c2.pair) {
-                        playSound('correct');
-                        setTimeout(() => {
-                            setMatched(prev => [...prev, c1.id, c2.id]);
-                            setFlipped([]);
-                            setLock(false);
-                            if (matched.length + 2 === cards.length) {
-                                setTimeout(onFinish, 600);
-                            }
-                        }, 400);
-                    } else {
-                        playSound('wrong');
-                        setTimeout(() => {
-                            setFlipped([]);
-                            setLock(false);
-                        }, 700);
+                    if (newMatched.length === cards.length) {
+                        setMessage("Alle Paare gefunden! 🎉");
+                        onReward({ xp: 40, coins: 20 });
                     }
-                }
-            };
+                }, 500);
+            } else {
+                // Falsch → Anti-Cheat: Herz verlieren
+                setTimeout(() => {
+                    setHearts((h) => Math.max(0, h - 1));
+                    setFlipped([]);
+                    setLock(false);
+                    setMessage("Nicht ganz richtig. Versuch es nochmals!");
+                }, 700);
+            }
+        }
+    }
 
-            return (
-                <div className="grid grid-cols-3 gap-3 w-full max-w-md mx-auto pop-in">
-                    {cards.map(c => (
-                        <div key={c.id} className="scene" onClick={() => click(c)}>
-                            <div className={
-                                "card " +
-                                (flipped.includes(c.id) ? "flipped " : "") +
-                                (matched.includes(c.id) ? "matched" : "")
-                            }>
-                                <div className="face front">?</div>
-                                <div className={`face back ${c.type === 'fr' ? 'type-fr' : 'type-de'}`}>
-                                    {c.txt}
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            );
-        };
+    const isGameOver = hearts <= 0;
 
-        // 2. LISTEN (fr hören, DE auswählen, Anti-Cheat: nach Fehlversuch -5 Münzen)
-        const ListenGame = ({ words, onFinish, onMistake }) => {
-            const [q, setQ] = useState(null);
-            const [count, setCount] = useState(0);
-
-            const next = () => {
-                if (count >= 6) { onFinish(); return; }
-                const t = words[Math.floor(Math.random()*words.length)];
-                const options = new Set([t.fr]);
-                while (options.size < 4 && options.size < words.length) {
-                    const r = words[Math.floor(Math.random()*words.length)].fr;
-                    options.add(r);
-                }
-                const opt = [...options].sort(() => Math.random()-0.5);
-                setQ({ target: t.fr, options: opt });
-                speak(t.fr);
-                setCount(c => c+1);
-            };
-            useEffect(next, []);
-
-            if (!q) return null;
-
-            const handleClick = (frChoice) => {
-                if (frChoice === q.target) {
-                    playSound('correct');
-                    next();
-                } else {
-                    playSound('wrong');
-                    if (onMistake) onMistake();
-                }
-            };
-
-            return (
-                <div className="w-full max-w-md mx-auto pop-in">
-                    <div className="glass-panel p-10 mb-6 flex flex-col items-center gap-3">
-                        <button
-                            onClick={() => speak(q.target)}
-                            className="w-24 h-24 rounded-full bg-pink-500 text-5xl flex items-center justify-center shadow-lg hover:scale-110 transition"
-                        >
-                            🔊
-                        </button>
-                        <div className="text-xs text-slate-300 font-bold uppercase tracking-wide">
-                            Höre das Wort und wähle die richtige deutsche Übersetzung.
-                        </div>
-                    </div>
-                    <div className="grid gap-3">
-                        {q.options.map(frOpt => (
-                            <button
-                                key={frOpt}
-                                onClick={() => handleClick(frOpt)}
-                                className="btn-action btn-blue w-full px-4 py-3 justify-start text-left"
-                            >
-                                {DICTIONARY[frOpt]}
-                            </button>
+    return (
+        <div className="space-y-4">
+            <div className="flex items-center justify-between gap-2">
+                <button
+                    onClick={onBack}
+                    className="btn-main bg-slate-800 text-slate-100 text-xs px-3 py-2"
+                >
+                    <i className="fa-solid fa-arrow-left"></i> zurück
+                </button>
+                <div className="flex items-center gap-2">
+                    <span className="text-xs text-slate-300">Leben:</span>
+                    <div className="flex gap-1">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                            <span key={i}>{i < hearts ? "❤️" : "🖤"}</span>
                         ))}
                     </div>
                 </div>
-            );
-        };
+            </div>
+            <div className="glass p-4">
+                <h2 className="font-game text-xl text-indigo-100 mb-2">
+                    Memory – Finde die Paare
+                </h2>
+                <p className="text-xs text-slate-300 mb-3">
+                    Tipp: Lies laut mit und sprich die Wörter nach. Klickst du auf die
+                    französische Karte, wird das Wort vorgelesen.
+                </p>
 
-        // 3. QUIZ (FR → 4× DE, aber alles sichtbar)
-        const QuizGame = ({ words, onFinish }) => {
-            const [q, setQ] = useState(null);
-            const [count, setCount] = useState(0);
-
-            const next = () => {
-                if (count >= 6) { onFinish(); return; }
-                const t = words[Math.floor(Math.random()*words.length)];
-                const options = new Set([t.fr]);
-                while (options.size < 4 && options.size < words.length) {
-                    const r = words[Math.floor(Math.random()*words.length)].fr;
-                    options.add(r);
-                }
-                const opt = [...options].sort(() => Math.random()-0.5);
-                setQ({ target: t.fr, options: opt });
-                setCount(c => c+1);
-            };
-            useEffect(next, []);
-
-            if (!q) return null;
-
-            const click = (frChoice) => {
-                if (frChoice === q.target) {
-                    playSound('correct');
-                    next();
-                } else {
-                    playSound('wrong');
-                }
-            };
-
-            return (
-                <div className="w-full max-w-md mx-auto pop-in">
-                    <div className="glass-panel p-6 mb-6 text-center">
-                        <h2 className="text-3xl font-black text-yellow-300 mb-2 font-game">
-                            {q.target}
-                        </h2>
-                        <button
-                            onClick={() => speak(q.target)}
-                            className="text-xs bg-yellow-500 text-black px-3 py-1 rounded-full font-bold"
-                        >
-                            🔊 Hören
-                        </button>
-                    </div>
-                    <div className="grid gap-3">
-                        {q.options.map(frOpt => (
-                            <button
-                                key={frOpt}
-                                onClick={() => click(frOpt)}
-                                className="btn-action btn-purple w-full px-4 py-3 justify-start text-left"
-                            >
-                                {DICTIONARY[frOpt]}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            );
-        };
-
-        // 4. WRITE – nur FR angezeigt, DE schreiben, tolerant bei Artikeln
-        const WriteGame = ({ words, onFinish, helpers, onUseHelper }) => {
-            const [q, setQ] = useState(null);
-            const [inp, setInp] = useState("");
-            const [count, setCount] = useState(0);
-            const [tip, setTip] = useState(null);
-
-            const next = () => {
-                if (count >= 6) { onFinish(); return; }
-                const t = words[Math.floor(Math.random()*words.length)];
-                setQ(t);
-                setInp("");
-                setTip(null);
-                speak(t.fr);
-                setCount(c => c+1);
-            };
-            useEffect(next, []);
-
-            if (!q) return null;
-
-            const solution = DICTIONARY[q.fr];
-
-            const check = () => {
-                const user = inp.trim().toLowerCase();
-                const sol = solution.trim().toLowerCase();
-
-                if (!user) return;
-
-                // komplett korrekt
-                if (user === sol) {
-                    playSound('correct');
-                    next();
-                    return;
-                }
-
-                // Artikel ignorieren
-                if (stripArticle(user) === stripArticle(sol)) {
-                    playSound('correct');
-                    alert("Inhalt richtig 👍\nAchte noch auf den richtigen Artikel (der/die/das) und Grossschreibung.");
-                    next();
-                } else {
-                    playSound('wrong');
-                    alert("Falsch.\nLösung: " + solution);
-                }
-            };
-
-            const useHelp = () => {
-                if (!onUseHelper || helpers <= 0) return;
-                onUseHelper();
-                const sol = stripArticle(solution);
-                if (sol.length > 0) {
-                    setTip("Tipp: Das Wort beginnt mit „" + sol[0].toUpperCase() + "…“");
-                }
-            };
-
-            return (
-                <div className="w-full max-w-md mx-auto pop-in">
-                    <div className="glass-panel p-8 mb-4 text-center">
-                        <h2 className="text-3xl font-black text-green-400 mb-2 font-game">
-                            {q.fr}
-                        </h2>
-                        <button
-                            onClick={() => speak(q.fr)}
-                            className="text-xs bg-green-600 px-3 py-1 rounded-full font-bold"
-                        >
-                            🔊 Nochmal hören
-                        </button>
-                    </div>
-
-                    <input
-                        value={inp}
-                        onChange={e => setInp(e.target.value)}
-                        onKeyDown={e => e.key === 'Enter' && check()}
-                        className="w-full p-4 rounded-2xl bg-slate-900 text-xl text-center border-2 border-slate-600 focus:border-green-400 outline-none mb-3"
-                        placeholder="Deutsch eingeben (z.B. Die Maus)"
-                        autoFocus
-                    />
-
-                    <div className="flex gap-2 justify-center mb-3">
-                        {['ä','ö','ü','ß'].map(c => (
-                            <button
-                                key={c}
-                                onClick={() => setInp(i => i + c)}
-                                className="w-9 h-9 rounded bg-slate-700 text-white font-bold"
-                            >
-                                {c}
-                            </button>
-                        ))}
-                    </div>
-
-                    {tip && <div className="text-xs text-yellow-300 text-center mb-2">{tip}</div>}
-
-                    <div className="flex gap-3">
-                        <button
-                            onClick={check}
-                            className="btn-action btn-green flex-1 py-3"
-                        >
-                            Prüfen
-                        </button>
-                        {helpers > 0 && (
-                            <button
-                                onClick={useHelp}
-                                className="btn-action btn-blue flex-1 py-3 text-xs leading-tight"
-                            >
-                                💡 Hilfe ({helpers})
-                            </button>
-                        )}
-                    </div>
-                </div>
-            );
-        };
-
-        // SHOP mit Glücksrad + Items
-        const Shop = ({ user, onBuyAvatar, onEquip, onClose, canSpin, onSpin, onBuyItem }) => {
-            return (
-                <div className="max-w-md mx-auto p-4 min-h-screen pb-20 flex flex-col gap-4">
-                    <div className="flex items-center justify-between mb-2">
-                        <button onClick={onClose} className="text-slate-300 text-sm font-bold">
-                            ◀ Zurück
-                        </button>
-                        <a href="index.html" className="text-xs text-slate-400 underline">
-                            🏠 Startseite
-                        </a>
-                    </div>
-
-                    <div className="glass-panel p-4 flex justify-between items-center">
-                        <div className="flex items-center gap-3">
-                            <div className="text-3xl bg-white/10 px-3 py-2 rounded-xl">
-                                {AVATARS.find(a => a.id === user.avatar)?.icon}
-                            </div>
-                            <div>
-                                <div className="font-bold text-white">{user.name}</div>
-                                <div className="text-xs text-blue-400 font-bold uppercase">
-                                    {getRankTitle(user.level)}
-                                </div>
-                            </div>
+                {isGameOver ? (
+                    <div className="text-center py-6 space-y-3">
+                        <div className="text-3xl mb-1">💥</div>
+                        <div className="font-game text-lg">
+                            Spiel vorbei – keine Herzen mehr.
                         </div>
-                        <div className="text-right text-xs">
-                            <div className="text-yellow-400 font-bold text-sm">{user.coins} Münzen</div>
-                            <div className="text-green-400 font-bold text-xs">Lvl {user.level}</div>
-                        </div>
-                    </div>
-
-                    {/* Glücksrad */}
-                    <div className="glass-panel p-4">
-                        <h2 className="font-game text-lg font-black mb-2 text-yellow-300">
-                            🎡 Tages-Glücksrad
-                        </h2>
-                        <p className="text-xs text-slate-300 mb-3">
-                            Einmal pro Tag drehen und zufällige Belohnungen gewinnen:
-                            Münzen, XP oder seltene Avatare.
-                        </p>
                         <button
-                            onClick={onSpin}
-                            disabled={!canSpin}
-                            className={
-                                "btn-action w-full py-3 " +
-                                (canSpin ? "btn-yellow" : "btn-blue opacity-60 cursor-not-allowed")
-                            }
+                            onClick={() => {
+                                // neu starten (einfach Komponente neu aufbauen, indem wir State reset in App machen könnten)
+                                window.location.reload();
+                            }}
+                            className="btn-main bg-indigo-500 text-white mt-3 px-5"
                         >
-                            {canSpin ? "Jetzt drehen!" : "Heute schon gedreht"}
+                            Neu starten
                         </button>
                     </div>
-
-                    {/* Avatare */}
-                    <div className="glass-panel p-4">
-                        <h2 className="font-game text-lg font-black mb-3">🐾 Avatar-Shop</h2>
-                        <div className="grid grid-cols-3 gap-3">
-                            {AVATARS.map(a => {
-                                const owned = user.unlocked.includes(a.id);
-                                const active = user.avatar === a.id;
+                ) : (
+                    <>
+                        <div className="memory-grid">
+                            {cards.map((card) => {
+                                const isFlipped =
+                                    flipped.includes(card.id) ||
+                                    matchedIds.includes(card.id);
                                 return (
                                     <div
-                                        key={a.id}
+                                        key={card.id}
                                         className={
-                                            "shop-card rarity-" + a.rarity +
-                                            (active ? " ring-4 ring-green-400" : "") +
-                                            (!owned && user.coins < a.cost ? " opacity-40" : "")
+                                            "memory-card " + (isFlipped ? "flipped" : "")
                                         }
-                                        onClick={() => {
-                                            if (owned) {
-                                                onEquip(a.id);
-                                                playSound('correct');
-                                            } else if (user.coins >= a.cost) {
-                                                onBuyAvatar(a);
-                                                playSound('win');
-                                                safeConfetti();
-                                            } else {
-                                                alert("Zu wenig Münzen.");
-                                            }
-                                        }}
+                                        onClick={() => handleClick(card.id)}
                                     >
-                                        <div className="text-3xl mb-1">{a.icon}</div>
-                                        <div className="text-xs font-bold">{a.name}</div>
-                                        {!owned && (
-                                            <div className="text-[10px] mt-1 font-bold">
-                                                {a.cost} 💰
+                                        <div className="memory-card-inner">
+                                            <div className="memory-face memory-front flex flex-col items-center justify-center">
+                                                <span className="text-3xl">❓</span>
                                             </div>
-                                        )}
-                                        {owned && !active && (
-                                            <div className="text-[10px] text-green-500 mt-1 font-bold">
-                                                Besitz
+                                            <div className="memory-face memory-back">
+                                                <div className="memory-text">
+                                                    {card.text}
+                                                </div>
                                             </div>
-                                        )}
-                                        {active && (
-                                            <div className="text-[10px] text-green-300 mt-1 font-bold">
-                                                Aktiv
-                                            </div>
-                                        )}
+                                        </div>
                                     </div>
                                 );
                             })}
                         </div>
-                        <div className="text-[10px] text-slate-400 mt-2">
-                            Legende: grau = häufig, blau = selten, lila = episch, gold = legendär.
-                        </div>
-                    </div>
-
-                    {/* Lern-Hilfen */}
-                    <div className="glass-panel p-4">
-                        <h2 className="font-game text-lg font-black mb-2">🧠 Lern-Helfer</h2>
-                        <div className="space-y-2 text-xs">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <div className="font-bold">Tipp-Jeton</div>
-                                    <div className="text-slate-300">
-                                        Zeigt im Schreib-Spiel einen Buchstaben-Hinweis.
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={() => onBuyItem('hints', 80)}
-                                    className="btn-action btn-blue px-3 py-2 text-[11px]"
-                                >
-                                    80 💰 kaufen
-                                </button>
+                        {message && (
+                            <div className="mt-3 text-sm text-center text-emerald-300">
+                                {message}
                             </div>
-                        </div>
-                        <div className="mt-2 text-[11px] text-slate-400">
-                            Du besitzt: {user.items?.hints || 0} Tipp-Jetons.
-                        </div>
-                    </div>
-                </div>
-            );
-        };
+                        )}
+                    </>
+                )}
+            </div>
+        </div>
+    );
+}
 
-        // Modal
-        const Modal = ({ title, children, type = "info", onClose }) => (
-            <div className="modal-overlay" onClick={onClose}>
-                <div
-                    className={
-                        "glass-panel p-6 max-w-sm w-full mx-4 pop-in border-4 " +
-                        (type === 'win' ? "border-yellow-400" :
-                         type === 'error' ? "border-red-500" : "border-blue-500")
-                    }
-                    onClick={e => e.stopPropagation()}
+/* Hör zu – Multiple Choice */
+function ListenGame({ words, onBack, onReward }) {
+    const [current, setCurrent] = useState(null);
+    const [options, setOptions] = useState([]);
+    const [feedback, setFeedback] = useState("");
+    const [attempts, setAttempts] = useState(0);
+
+    useEffect(() => {
+        nextQuestion();
+    }, [words]);
+
+    function nextQuestion() {
+        if (!words.length) return;
+        const w = words[Math.floor(Math.random() * words.length)];
+        const others = pickRandom(
+            words.filter((x) => x.de !== w.de),
+            3
+        );
+        const opts = [...others.map((o) => o.de), w.de].sort(
+            () => Math.random() - 0.5
+        );
+        setCurrent(w);
+        setOptions(opts);
+        setFeedback("");
+        setAttempts(0);
+    }
+
+    function handleAnswer(opt) {
+        if (!current) return;
+        const correct = opt === current.de;
+        const firstTry = attempts === 0;
+
+        if (correct) {
+            let xp = firstTry ? 20 : 10;
+            let coins = firstTry ? 10 : 5;
+            setFeedback(
+                firstTry
+                    ? "Perfekt! Erste Antwort war richtig. 🎯"
+                    : "Richtig, aber nicht beim ersten Versuch. 👍"
+            );
+            onReward({ xp, coins });
+            setTimeout(nextQuestion, 900);
+        } else {
+            setFeedback("Das war nicht richtig. Versuch es nochmal – aber überleg zuerst.");
+            setAttempts((a) => a + 1);
+            // Anti-Cheat: ab 2 Fehlversuchen keine Belohnung mehr
+        }
+    }
+
+    if (!current) {
+        return (
+            <div>
+                <button
+                    onClick={onBack}
+                    className="btn-main bg-slate-800 text-slate-100 text-xs px-3 py-2 mb-3"
                 >
-                    <h2 className={
-                        "text-2xl font-black font-game mb-3 " +
-                        (type === 'win' ? "text-yellow-300" :
-                         type === 'error' ? "text-red-400" : "text-white")
-                    }>
-                        {title}
-                    </h2>
-                    <div className="text-sm text-slate-200 mb-4">{children}</div>
-                    <button onClick={onClose} className="btn-action btn-blue w-full py-3">
-                        OK
-                    </button>
+                    <i className="fa-solid fa-arrow-left"></i> zurück
+                </button>
+                <div className="glass p-4">
+                    <p>Lade Wörter...</p>
                 </div>
             </div>
         );
+    }
 
-        // --- APP ---
-        const App = () => {
-            const [user, setUser] = useState({
-                name: 'Agent',
-                coins: 0,
-                xp: 0,
-                level: 1,
-                avatar: 'kid',
-                unlocked: ['kid'],
-                items: { hints: 0 },
-                lastSpin: null
-            });
-            const [view, setView] = useState('menu');   // menu, map, game, shop
-            const [mode, setMode] = useState(null);     // memory, listen, write, quiz
-            const [activeWorld, setActiveWorld] = useState(null);
-            const [modal, setModal] = useState(null);
+    return (
+        <div className="space-y-4">
+            <div className="flex items-center justify-between gap-2">
+                <button
+                    onClick={onBack}
+                    className="btn-main bg-slate-800 text-slate-100 text-xs px-3 py-2"
+                >
+                    <i className="fa-solid fa-arrow-left"></i> zurück
+                </button>
+            </div>
+            <div className="glass p-4 space-y-4">
+                <h2 className="font-game text-xl text-emerald-100">
+                    Hör zu – wähle die richtige Bedeutung
+                </h2>
+                <p className="text-xs text-slate-300">
+                    1. Hör das französische Wort. 2. Wähle die richtige Übersetzung.  
+                    Tipp: Lies die deutschen Wörter laut vor – klicke auf 🔊 für die
+                    Aussprache.
+                </p>
 
-            // Load
-            useEffect(() => {
-                const s = localStorage.getItem('franz_galaxy_v3');
-                if (s) {
-                    try {
-                        const parsed = JSON.parse(s);
-                        setUser(prev => ({ ...prev, ...parsed }));
-                    } catch(e) {
-                        console.error(e);
-                    }
-                }
-            }, []);
-
-            const save = (u) => {
-                setUser(u);
-                localStorage.setItem('franz_galaxy_v3', JSON.stringify(u));
-            };
-
-            const todayStr = new Date().toISOString().slice(0,10);
-            const canSpin = user.lastSpin !== todayStr;
-
-            const addProgress = (xpGain, coinGain) => {
-                let u = { ...user };
-                u.coins += coinGain;
-                if (u.level < MAX_LEVEL) {
-                    u.xp += xpGain;
-                    const next = getXPForLevel(u.level + 1);
-                    if (u.xp >= next) {
-                        u.level += 1;
-                        safeConfetti();
-                        playSound('win');
-                        setModal({
-                            title: "LEVEL UP!",
-                            text: `Du bist jetzt ${getRankTitle(u.level)} (Lvl ${u.level}).`
-                        });
-                    } else {
-                        playSound('win');
-                        setModal({
-                            title: "Mission erledigt!",
-                            text: `+${xpGain} XP | +${coinGain} Münzen`
-                        });
-                    }
-                } else {
-                    // Max-Level erreicht – nur Münzen
-                    u.xp = getXPForLevel(MAX_LEVEL);
-                    u.coins += 0;
-                    playSound('win');
-                    setModal({
-                        title: "Max-Level erreicht!",
-                        text: `Du bist schon bei Level ${MAX_LEVEL}.`
-                    });
-                }
-                save(u);
-                setView('menu');
-            };
-
-            const handleSpin = () => {
-                if (!canSpin) {
-                    alert("Heute schon gedreht.");
-                    return;
-                }
-                let u = { ...user };
-                const roll = Math.random();
-                let msg = "";
-                if (roll < 0.4) {
-                    u.coins += 100;
-                    msg = "+100 Münzen!";
-                } else if (roll < 0.7) {
-                    u.coins += 200;
-                    msg = "+200 Münzen!";
-                } else if (roll < 0.9) {
-                    u.xp += 200;
-                    msg = "+200 XP!";
-                } else {
-                    // rare Avatar (random legendary)
-                    const legendary = AVATARS.filter(a => a.rarity === 'legendary');
-                    const pick = legendary[Math.floor(Math.random()*legendary.length)];
-                    if (!u.unlocked.includes(pick.id)) {
-                        u.unlocked.push(pick.id);
-                        msg = "Legendärer Avatar freigeschaltet: " + pick.name;
-                    } else {
-                        u.coins += 300;
-                        msg = "Legendärer Avatar war schon frei – stattdessen +300 Münzen.";
-                    }
-                }
-                u.lastSpin = todayStr;
-                safeConfetti();
-                playSound('win');
-                save(u);
-                setModal({ title: "Glücksrad", text: msg });
-            };
-
-            const goMode = (m) => {
-                setMode(m);
-                setActiveWorld(null);
-                setView('map');
-            };
-
-            const resetAll = () => {
-                if (!confirm("Alles wirklich zurücksetzen? Level, Münzen, Avatare?")) return;
-                const fresh = {
-                    name: 'Agent',
-                    coins: 0,
-                    xp: 0,
-                    level: 1,
-                    avatar: 'kid',
-                    unlocked: ['kid'],
-                    items: { hints: 0 },
-                    lastSpin: null
-                };
-                save(fresh);
-                setMode(null);
-                setActiveWorld(null);
-                setView('menu');
-            };
-
-            // --- Views ---
-
-            // MENU – zuerst Spieltyp wählen
-            if (view === 'menu') {
-                const nextXP = getXPForLevel(user.level + 1);
-                const progress = Math.min(100, (user.xp / nextXP) * 100);
-                return (
-                    <div className="max-w-md mx-auto p-4 min-h-screen flex flex-col gap-4">
-                        <div className="flex justify-between items-center">
-                            <a href="index.html" className="text-xs text-slate-400 underline">
-                                🏠 Startseite
-                            </a>
-                            <button
-                                onClick={resetAll}
-                                className="text-[10px] text-red-400 underline"
-                            >
-                                Alles zurücksetzen
-                            </button>
-                        </div>
-
-                        <div className="glass-panel p-4 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="text-4xl bg-white/10 px-3 py-2 rounded-2xl">
-                                    {AVATARS.find(a => a.id === user.avatar)?.icon}
-                                </div>
-                                <div>
-                                    <div className="font-bold text-white">{user.name}</div>
-                                    <div className="text-[11px] text-blue-400 font-bold uppercase">
-                                        {getRankTitle(user.level)} • Lvl {user.level}
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="text-right text-xs">
-                                <div className="text-yellow-400 font-bold text-sm">
-                                    {user.coins} Münzen
-                                </div>
-                                <div className="mt-1 xp-track w-28 mx-auto">
-                                    <div className="xp-fill" style={{ width: progress + '%' }}></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <h1 className="text-center font-game text-2xl text-white font-black mt-2">
-                            Wähle dein Training
-                        </h1>
-
-                        <div className="grid grid-cols-2 gap-3">
-                            <button
-                                onClick={() => goMode('memory')}
-                                className="btn-action btn-green py-4 flex flex-col"
-                            >
-                                <span className="text-2xl mb-1">🃏</span>
-                                <span>Memory</span>
-                            </button>
-                            <button
-                                onClick={() => goMode('listen')}
-                                className="btn-action btn-yellow py-4 flex flex-col"
-                            >
-                                <span className="text-2xl mb-1">👂</span>
-                                <span>Hör zu</span>
-                            </button>
-                            <button
-                                onClick={() => goMode('write')}
-                                className="btn-action btn-red py-4 flex flex-col"
-                            >
-                                <span className="text-2xl mb-1">✍️</span>
-                                <span>Schreiben</span>
-                            </button>
-                            <button
-                                onClick={() => goMode('quiz')}
-                                className="btn-action btn-purple py-4 flex flex-col"
-                            >
-                                <span className="text-2xl mb-1">❓</span>
-                                <span>Quiz</span>
-                            </button>
-                        </div>
-
+                <div className="bg-slate-900/70 border border-emerald-500/40 rounded-2xl p-4 flex flex-col items-center gap-3">
+                    <div className="font-game text-lg text-emerald-100">
+                        Französisches Wort
+                    </div>
+                    <div className="text-2xl sm:text-3xl font-extrabold">
+                        {current.fr}
+                    </div>
+                    <div className="flex gap-2">
                         <button
-                            onClick={() => setView('shop')}
-                            className="btn-action btn-blue py-4 mt-2 flex flex-col"
+                            onClick={() => speak(current.fr, "fr-FR")}
+                            className="btn-main bg-emerald-500 text-white text-xs px-4"
                         >
-                            <span className="text-2xl mb-1">🛒</span>
-                            <span>Shop & Glücksrad</span>
+                            <i className="fa-solid fa-volume-high"></i> FR anhören
+                        </button>
+                        <button
+                            onClick={() => speak(current.de, "de-DE")}
+                            className="btn-main bg-slate-700 text-slate-50 text-xs px-4"
+                        >
+                            <i className="fa-solid fa-volume-high"></i> DE (Lösung) anhören
                         </button>
                     </div>
-                );
-            }
+                </div>
 
-            // MAP – Welt wählen, Modus steht schon fest
-            if (view === 'map') {
-                const nextXP = getXPForLevel(user.level + 1);
-                const progress = Math.min(100, (user.xp / nextXP) * 100);
-                const modeLabel = {
-                    memory: "Memory",
-                    listen: "Hör zu",
-                    write: "Schreiben",
-                    quiz: "Quiz"
-                }[mode] || "";
-
-                return (
-                    <div className="max-w-md mx-auto p-4 min-h-screen flex flex-col gap-4">
-                        <div className="flex justify-between items-center">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {options.map((opt) => (
+                        <button
+                            key={opt}
+                            onClick={() => handleAnswer(opt)}
+                            className="glass bg-slate-900/60 border border-slate-700 hover:border-emerald-400 px-4 py-3 rounded-2xl text-left flex items-center justify-between gap-3 text-sm"
+                        >
+                            <span>{opt}</span>
                             <button
-                                onClick={() => setView('menu')}
-                                className="text-slate-300 text-sm font-bold"
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    speak(opt, "de-DE");
+                                }}
+                                className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-xs text-emerald-300"
                             >
-                                ◀ Zurück
+                                🔊
                             </button>
-                            <a href="index.html" className="text-xs text-slate-400 underline">
-                                🏠 Startseite
-                            </a>
-                        </div>
+                        </button>
+                    ))}
+                </div>
 
-                        <div className="glass-panel p-4 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="text-3xl bg-white/10 px-3 py-2 rounded-xl">
-                                    {AVATARS.find(a => a.id === user.avatar)?.icon}
-                                </div>
-                                <div>
-                                    <div className="font-bold text-white">{user.name}</div>
-                                    <div className="text-[11px] text-blue-400 font-bold uppercase">
-                                        {getRankTitle(user.level)} • Lvl {user.level}
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="text-right text-xs">
-                                <div className="text-yellow-400 font-bold text-sm">
-                                    {user.coins} 💰
-                                </div>
-                                <div className="mt-1 xp-track w-24 mx-auto">
-                                    <div className="xp-fill" style={{ width: progress + '%' }}></div>
-                                </div>
-                            </div>
-                        </div>
+                {feedback && (
+                    <div className="mt-2 text-sm text-center text-emerald-300">
+                        {feedback}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
 
-                        <h2 className="font-game text-xl text-white text-center">
-                            Modus: {modeLabel}
+/* Schreiben – FR sehen, DE schreiben */
+function WriteGame({ words, onBack, onReward }) {
+    const [current, setCurrent] = useState(null);
+    const [input, setInput] = useState("");
+    const [feedback, setFeedback] = useState("");
+    const [shake, setShake] = useState(false);
+
+    useEffect(() => {
+        nextWord();
+    }, [words]);
+
+    function nextWord() {
+        if (!words.length) return;
+        const w = words[Math.floor(Math.random() * words.length)];
+        setCurrent(w);
+        setInput("");
+        setFeedback("");
+    }
+
+    function check() {
+        if (!current) return;
+        const correct = norm(current.de);
+        const user = norm(input);
+        if (!user) return;
+
+        if (correct === user) {
+            setFeedback("Perfekt! Alles stimmt. 🌟");
+            onReward({ xp: 25, coins: 12 });
+            setTimeout(nextWord, 900);
+        } else {
+            setFeedback(
+                `Nicht ganz. Richtig wäre: "${current.de}". Schreib es noch einmal sauber.`
+            );
+            onReward({ xp: 5, coins: 0 }); // minimale Belohnung, Anti-Cheat
+            setShake(true);
+            setTimeout(() => setShake(false), 350);
+        }
+    }
+
+    if (!current) {
+        return (
+            <div>
+                <button
+                    onClick={onBack}
+                    className="btn-main bg-slate-800 text-slate-100 text-xs px-3 py-2 mb-3"
+                >
+                    <i className="fa-solid fa-arrow-left"></i> zurück
+                </button>
+                <div className="glass p-4">
+                    <p>Lade Wörter...</p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-4">
+            <div className="flex items-center justify-between gap-2">
+                <button
+                    onClick={onBack}
+                    className="btn-main bg-slate-800 text-slate-100 text-xs px-3 py-2"
+                >
+                    <i className="fa-solid fa-arrow-left"></i> zurück
+                </button>
+            </div>
+
+            <div className="glass p-4 space-y-4">
+                <h2 className="font-game text-xl text-sky-100">
+                    Schreiben – Übersetze ins Deutsche
+                </h2>
+                <p className="text-xs text-slate-300">
+                    Du siehst ein französisches Wort. Schreibe die deutsche Bedeutung
+                    (inkl. Artikel, z.&nbsp;B. "der Hund"). GROSS-/klein wird nicht
+                    bestraft, aber versuch es trotzdem richtig. 😉
+                </p>
+
+                <div className="bg-slate-900/70 rounded-2xl border border-sky-500/40 p-4 flex flex-col items-center gap-3">
+                    <div className="font-game text-lg text-sky-100">
+                        Französisches Wort
+                    </div>
+                    <div className="text-2xl sm:text-3xl font-extrabold">
+                        {current.fr}
+                    </div>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => speak(current.fr, "fr-FR")}
+                            className="btn-main bg-sky-500 text-white text-xs px-4"
+                        >
+                            <i className="fa-solid fa-volume-high"></i> FR anhören
+                        </button>
+                        <button
+                            onClick={() => speak(current.de, "de-DE")}
+                            className="btn-main bg-slate-700 text-slate-50 text-xs px-4"
+                        >
+                            <i className="fa-solid fa-volume-high"></i> DE (Lösung) anhören
+                        </button>
+                    </div>
+                </div>
+
+                <input
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Schreibe hier das deutsche Wort..."
+                    className={
+                        "w-full bg-slate-900/80 border border-slate-700 rounded-2xl px-4 py-3 text-base outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-500/50 " +
+                        (shake ? "shake" : "")
+                    }
+                />
+
+                <div className="flex flex-wrap gap-2">
+                    <button
+                        onClick={check}
+                        className="btn-main bg-sky-500 text-white text-xs px-4"
+                    >
+                        Prüfen
+                    </button>
+                    <button
+                        onClick={nextWord}
+                        className="btn-main bg-slate-700 text-slate-100 text-xs px-4"
+                    >
+                        Überspringen
+                    </button>
+                </div>
+
+                {feedback && (
+                    <div className="mt-1 text-sm text-center text-sky-200">
+                        {feedback}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+/* Shop + Glücksrad */
+function Shop({ profile, setProfile, onBack }) {
+    const [spinState, setSpinState] = useState({ spinning: false, lastReward: null });
+
+    function buy(item) {
+        if (profile.coins < item.cost) {
+            alert("Du hast nicht genug Münzen.");
+            return;
+        }
+        if (profile.owned.includes(item.id)) {
+            alert("Dieses Tier/Item hast du bereits.");
+            return;
+        }
+        setProfile((p) => ({
+            ...p,
+            coins: p.coins - item.cost,
+            owned: [...p.owned, item.id],
+        }));
+    }
+
+    function spin() {
+        if (spinState.spinning) return;
+        // Einfach: 1x pro Seitenaufruf
+        if (spinState.lastReward) {
+            alert("Glücksrad: Heute schon gedreht. (Für mehr: Seite neu laden oder später erweitern mit Datum)");
+            return;
+        }
+        setSpinState((s) => ({ ...s, spinning: true }));
+        const reward = weightedRandom(SPIN_REWARDS);
+        setTimeout(() => {
+            setSpinState({ spinning: false, lastReward: reward });
+            if (reward.type === "coins") {
+                setProfile((p) => ({ ...p, coins: p.coins + reward.amount }));
+            } else if (reward.type === "xp") {
+                setProfile((p) => ({ ...p, xp: p.xp + reward.amount }));
+            } else if (reward.type === "item") {
+                setProfile((p) => {
+                    if (p.owned.includes(reward.itemId)) return p;
+                    return { ...p, owned: [...p.owned, reward.itemId] };
+                });
+            }
+        }, 1500);
+    }
+
+    function resetAll() {
+        if (!confirm("Wirklich alles zurücksetzen? Level, Münzen, Shop?")) return;
+        setProfile({
+            xp: 0,
+            coins: 0,
+            owned: [],
+        });
+        localStorage.removeItem("franzProfile_v2");
+    }
+
+    return (
+        <div className="space-y-4">
+            <div className="flex items-center justify-between gap-2">
+                <button
+                    onClick={onBack}
+                    className="btn-main bg-slate-800 text-slate-100 text-xs px-3 py-2"
+                >
+                    <i className="fa-solid fa-arrow-left"></i> zurück
+                </button>
+                <button
+                    onClick={resetAll}
+                    className="btn-main bg-rose-600 text-white text-xs px-3 py-2"
+                >
+                    <i className="fa-solid fa-rotate-left"></i> alles zurücksetzen
+                </button>
+            </div>
+
+            <div className="glass p-4 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h2 className="font-game text-xl text-amber-100">
+                            Shop & Glücksrad
                         </h2>
+                        <p className="text-xs text-slate-300">
+                            Münzen sammelst du in allen Modi. Kaufe Tiere & Lern-Items oder
+                            drehe am Glücksrad.
+                        </p>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 text-sm">
+                        <div className="flex items-center gap-2">
+                            <i className="fa-solid fa-coins text-amber-300"></i>
+                            <span className="font-bold text-amber-100">
+                                {profile.coins} Münzen
+                            </span>
+                        </div>
+                        <XPBar xp={profile.xp} />
+                    </div>
+                </div>
 
-                        <div className="space-y-3">
-                            {WORLDS.map(world => {
-                                const locked = user.level < world.reqLvl;
+                {/* Glücksrad */}
+                <div className="flex flex-col md:flex-row gap-4 items-center">
+                    <div className="flex flex-col items-center gap-3">
+                        <div className="spin-wheel relative bg-slate-900/80 rounded-full flex items-center justify-center">
+                            <div className="absolute -top-4">
+                                <div className="spin-pointer mx-auto"></div>
+                            </div>
+                            <div
+                                className={
+                                    "w-[180px] h-[180px] rounded-full border-4 border-slate-700 flex items-center justify-center text-center text-xs text-slate-200 " +
+                                    (spinState.spinning ? "animate-spin" : "")
+                                }
+                                style={{ animationDuration: "1.3s" }}
+                            >
+                                🎁 Glücksrad
+                                <br />
+                                Münzen, XP oder Items
+                            </div>
+                        </div>
+                        <button
+                            onClick={spin}
+                            className="btn-main bg-amber-400 text-slate-900 text-xs px-4 mt-1"
+                        >
+                            {spinState.spinning ? "Dreht..." : "Jetzt drehen"}
+                        </button>
+                        {spinState.lastReward && (
+                            <div className="text-xs text-amber-100 text-center">
+                                Gewinn: {spinState.lastReward.label}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Shop-Liste */}
+                    <div className="flex-1 w-full">
+                        <h3 className="font-game text-lg text-slate-100 mb-2">
+                            Tiere & Lern-Items
+                        </h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[280px] overflow-y-auto pr-1">
+                            {SHOP_ITEMS.map((item) => {
+                                const owned = profile.owned.includes(item.id);
                                 return (
-                                    <div key={world.id} className="glass-panel p-3 flex items-center gap-3">
-                                        <div className="text-3xl">{locked ? '🔒' : world.icon}</div>
+                                    <div
+                                        key={item.id}
+                                        className={
+                                            "glass border-2 p-3 rounded-2xl flex items-center gap-3 bg-slate-900/70 " +
+                                            (item.rarity === "common"
+                                                ? "rarity-common"
+                                                : item.rarity === "rare"
+                                                ? "rarity-rare"
+                                                : item.rarity === "epic"
+                                                ? "rarity-epic"
+                                                : "rarity-legendary")
+                                        }
+                                    >
+                                        <div className="w-12 h-12 rounded-2xl bg-slate-950/60 flex items-center justify-center text-2xl">
+                                            {item.emoji}
+                                        </div>
                                         <div className="flex-1">
-                                            <div className="font-bold text-white text-sm">
-                                                {world.name}
+                                            <div className="font-game text-sm text-slate-50">
+                                                {item.name}
                                             </div>
-                                            <div className="text-[11px] text-slate-400">
-                                                {world.words.length} Wörter • ab Level {world.reqLvl}
+                                            <div className="text-[10px] uppercase tracking-[0.16em] text-slate-300">
+                                                {item.type === "pet"
+                                                    ? "Tier"
+                                                    : "Lern-Item"}{" "}
+                                                • {item.rarity.toUpperCase()}
+                                            </div>
+                                            <div className="text-xs text-amber-100 mt-1">
+                                                <i className="fa-solid fa-coins mr-1"></i>
+                                                {item.cost} Münzen
                                             </div>
                                         </div>
                                         <button
-                                            disabled={locked}
-                                            onClick={() => {
-                                                setActiveWorld(world);
-                                                setView('game');
-                                            }}
+                                            onClick={() => buy(item)}
+                                            disabled={owned}
                                             className={
-                                                "btn-action py-2 px-4 text-xs " +
-                                                (locked ? "btn-blue opacity-40 cursor-not-allowed" : "btn-green")
+                                                "btn-main text-[10px] px-3 py-2 " +
+                                                (owned
+                                                    ? "bg-slate-700 text-slate-300"
+                                                    : "bg-emerald-500 text-white")
                                             }
                                         >
-                                            Start
+                                            {owned ? "Besitzt" : "Kaufen"}
                                         </button>
                                     </div>
                                 );
                             })}
                         </div>
                     </div>
-                );
+                </div>
+            </div>
+        </div>
+    );
+}
+
+/* ==== APP ==== */
+
+function App() {
+    const [mode, setMode] = useState("menu"); // menu | memory | listen | write | shop
+    const [profile, setProfile] = useState({ xp: 0, coins: 0, owned: [] });
+
+    useEffect(() => {
+        const stored = localStorage.getItem("franzProfile_v2");
+        if (stored) {
+            try {
+                const data = JSON.parse(stored);
+                setProfile({
+                    xp: data.xp || 0,
+                    coins: data.coins || 0,
+                    owned: Array.isArray(data.owned) ? data.owned : [],
+                });
+            } catch (e) {
+                console.error(e);
             }
+        }
+    }, []);
 
-            // GAME
-            if (view === 'game' && activeWorld) {
-                const finish = () => {
-                    // je nach Modus unterschiedliche Belohnung
-                    if (mode === 'memory')      addProgress(60, 30);
-                    else if (mode === 'listen') addProgress(50, 25);
-                    else if (mode === 'write')  addProgress(70, 35);
-                    else if (mode === 'quiz')   addProgress(50, 25);
-                    else addProgress(40, 20);
-                };
+    useEffect(() => {
+        localStorage.setItem("franzProfile_v2", JSON.stringify(profile));
+    }, [profile]);
 
-                const handleMistake = () => {
-                    let u = { ...user };
-                    u.coins = Math.max(0, u.coins - 5);
-                    save(u);
-                };
+    function reward({ xp = 0, coins = 0 }) {
+        if (!xp && !coins) return;
+        setProfile((p) => ({
+            ...p,
+            xp: p.xp + xp,
+            coins: p.coins + coins,
+        }));
+    }
 
-                const useHint = () => {
-                    let u = { ...user };
-                    if ((u.items?.hints || 0) <= 0) return;
-                    u.items = { ...(u.items || {}), hints: (u.items.hints || 0) - 1 };
-                    save(u);
-                };
+    return (
+        <div className="space-y-4">
+            {/* Top-Bar mit Startseite-Link */}
+            <div className="flex items-center justify-between mb-2">
+                <a
+                    href="index.html"
+                    className="btn-main bg-slate-900/80 text-slate-100 text-xs px-3 py-2"
+                >
+                    <i className="fa-solid fa-house"></i> Startseite
+                </a>
+                <div className="text-xs text-slate-300">
+                    Französisch 4. Klasse · Lern-Campus
+                </div>
+            </div>
 
-                return (
-                    <div className="min-h-screen p-4 flex flex-col">
-                        <div className="flex justify-between items-center mb-4">
-                            <button
-                                onClick={() => setView('map')}
-                                className="glass-panel w-10 h-10 flex items-center justify-center text-xl"
-                            >
-                                ✕
-                            </button>
-                            <div className="text-xs text-slate-300">
-                                {activeWorld.name}
-                            </div>
-                            <a
-                                href="index.html"
-                                className="glass-panel w-10 h-10 flex items-center justify-center text-lg"
-                            >
-                                🏠
-                            </a>
-                        </div>
+            <ModeMenu
+                onSelectMode={setMode}
+                xp={profile.xp}
+                coins={profile.coins}
+            />
 
-                        <div className="flex-1 flex items-center justify-center">
-                            {mode === 'memory' && (
-                                <MemoryGame
-                                    words={activeWorld.words}
-                                    onFinish={finish}
-                                />
-                            )}
-                            {mode === 'listen' && (
-                                <ListenGame
-                                    words={activeWorld.words}
-                                    onFinish={finish}
-                                    onMistake={handleMistake}
-                                />
-                            )}
-                            {mode === 'quiz' && (
-                                <QuizGame
-                                    words={activeWorld.words}
-                                    onFinish={finish}
-                                />
-                            )}
-                            {mode === 'write' && (
-                                <WriteGame
-                                    words={activeWorld.words}
-                                    onFinish={finish}
-                                    helpers={user.items?.hints || 0}
-                                    onUseHelper={useHint}
-                                />
-                            )}
-                        </div>
-                    </div>
-                );
-            }
+            {mode === "memory" && (
+                <MemoryGame words={WORDS} onBack={() => setMode("menu")} onReward={reward} />
+            )}
+            {mode === "listen" && (
+                <ListenGame words={WORDS} onBack={() => setMode("menu")} onReward={reward} />
+            )}
+            {mode === "write" && (
+                <WriteGame words={WORDS} onBack={() => setMode("menu")} onReward={reward} />
+            )}
+            {mode === "shop" && (
+                <Shop profile={profile} setProfile={setProfile} onBack={() => setMode("menu")} />
+            )}
 
-            // SHOP
-            if (view === 'shop') {
-                return (
-                    <>
-                        <Shop
-                            user={user}
-                            onClose={() => setView('menu')}
-                            canSpin={canSpin}
-                            onSpin={handleSpin}
-                            onBuyAvatar={(avatar) => {
-                                const u = { ...user };
-                                u.coins -= avatar.cost;
-                                if (!u.unlocked.includes(avatar.id)) {
-                                    u.unlocked = [...u.unlocked, avatar.id];
-                                }
-                                u.avatar = avatar.id;
-                                save(u);
-                            }}
-                            onEquip={(id) => {
-                                const u = { ...user, avatar: id };
-                                save(u);
-                            }}
-                            onBuyItem={(type, cost) => {
-                                if (user.coins < cost) {
-                                    alert("Zu wenig Münzen.");
-                                    return;
-                                }
-                                const u = { ...user };
-                                u.coins -= cost;
-                                const items = { ...(u.items || {}) };
-                                items[type] = (items[type] || 0) + 1;
-                                u.items = items;
-                                save(u);
-                            }}
-                        />
-                        {modal && (
-                            <Modal
-                                title={modal.title}
-                                type="info"
-                                onClose={() => setModal(null)}
-                            >
-                                {modal.text}
-                            </Modal>
-                        )}
-                    </>
-                );
-            }
+            <footer className="text-center text-[10px] text-slate-500 mt-6">
+                © 2025 Lern-Campus · Französisch Abenteuer 4. Klasse
+            </footer>
+        </div>
+    );
+}
 
-            return null;
-        };
-
-        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-    </script>
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App />);
+</script>
 </body>
 </html>
