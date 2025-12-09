@@ -1,80 +1,104 @@
-/* =============================
-   LERN-CAMPUS GLOBAL STYLES
-   ========================== */
+/* ================================
+   Global Styles – LernCampus
+   ================================ */
 
-/* --- Grund-Setup & Variablen --- */
-:root {
-    --lc-font-main: 'Nunito', sans-serif;
-    --lc-font-fun: 'Fredoka', sans-serif;
-
-    --lc-bg-grad-start: #e0f7fa;
-    --lc-bg-grad-end:   #e1f5fe;
-
-    --lc-text-main: #1e293b;
-    --lc-shadow-soft: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
-
-    --lc-blue:   #3b82f6;
-    --lc-blue-dark: #1d4ed8;
-    --lc-red:    #ef4444;
-    --lc-green:  #22c55e;
-    --lc-yellow: #eab308;
-    --lc-purple: #8b5cf6;
-
-    --lc-card-radius: 30px;
-}
-
-/* Reset-Light */
+/* Basic Reset */
 *,
 *::before,
 *::after {
     box-sizing: border-box;
-}
-
-body {
     margin: 0;
-    font-family: var(--lc-font-main);
-    background: linear-gradient(180deg, var(--lc-bg-grad-start) 0%, var(--lc-bg-grad-end) 100%);
-    color: var(--lc-text-main);
+    padding: 0;
+}
+
+/* Farb-Variablen */
+:root {
+    --bg-top: #e0f7fa;
+    --bg-bottom: #e1f5fe;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+
+    --blue-light: #93c5fd;
+    --blue-main: #3b82f6;
+
+    --red-light: #fca5a5;
+    --red-main: #ef4444;
+
+    --green-light: #4ade80;
+    --green-main: #16a34a;
+
+    --yellow-light: #fcd34d;
+    --yellow-main: #f59e0b;
+}
+
+/* Standard-Body für ALLE Seiten (Index, Mathe, Franz, Agent) */
+body { 
+    font-family: 'Nunito', system-ui, -apple-system, BlinkMacSystemFont, sans-serif; 
+    background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+    color: var(--text-main);
     overflow-x: hidden;
+    min-height: 100vh;
 }
 
-a {
-    color: inherit;
-    text-decoration: none;
+/* Alternativer Dark-Lernmodus (falls gebraucht)
+   In mathe.html / franz.html kannst du einfach <body class="page-dark"> machen,
+   dann übernimmt dieser Hintergrund. */
+.page-dark {
+    background: radial-gradient(circle at top, #1e293b 0%, #020617 100%);
+    color: #e5e7eb;
 }
 
-img {
-    max-width: 100%;
-    height: auto;
+/* Überschriften / Fun-Font */
+h1,
+h2,
+.font-fun {
+    font-family: 'Fredoka', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-h1, h2, .font-fun {
-    font-family: var(--lc-font-fun);
-}
+/* ================================
+   Hintergrund-Deko (Wolken + Blobs)
+   ================================ */
 
-/* =============================
-   STARTSEITE / PORTAL
-   ========================== */
-
-/* Wolken-Hintergrund Animation (Index) */
 .cloud {
     position: absolute;
-    background: white;
+    background: #ffffff;
     border-radius: 50%;
     opacity: 0.8;
     animation: floatCloud 20s infinite linear;
     box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
 }
-.cloud::after,
-.cloud::before {
+
+/* Cloud-Bubbles */
+.cloud::before,
+.cloud::after {
     content: '';
     position: absolute;
-    background: white;
+    background: #ffffff;
     border-radius: 50%;
 }
+
+/* Kleine Anpassung, damit Wolken wirklich wie Wolken aussehen */
+.cloud::before {
+    width: 60%;
+    height: 60%;
+    top: -30%;
+    left: 10%;
+}
+
+.cloud::after {
+    width: 70%;
+    height: 70%;
+    top: -20%;
+    right: 5%;
+}
+
 @keyframes floatCloud {
-    from { transform: translateX(-100vw); }
-    to   { transform: translateX(100vw); }
+    from { 
+        transform: translateX(-110vw); 
+    }
+    to { 
+        transform: translateX(110vw); 
+    }
 }
 
 /* Farbige Blobs im Hintergrund */
@@ -85,25 +109,33 @@ h1, h2, .font-fun {
     z-index: -1;
 }
 
-/* Karten-Design für die Startseite */
+/* ================================
+   Karten / App-Buttons (Index)
+   ================================ */
+
 .app-card {
-    border-radius: var(--lc-card-radius);
+    border-radius: 30px;
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     cursor: pointer;
     position: relative;
     overflow: hidden;
-    border: 4px solid white;
-    box-shadow: var(--lc-shadow-soft);
+    border: 4px solid #ffffff;
+    box-shadow: 
+        0 10px 25px -5px rgba(0,0,0,0.1),
+        0 8px 10px -6px rgba(0,0,0,0.1);
 }
+
 .app-card:hover {
     transform: translateY(-10px) scale(1.02);
     box-shadow: 0 20px 30px -5px rgba(0,0,0,0.2);
     z-index: 10;
 }
+
 .app-card:active {
     transform: scale(0.98);
 }
 
+/* Icon-Kreis in den Karten */
 .card-icon {
     width: 80px;
     height: 80px;
@@ -112,621 +144,178 @@ h1, h2, .font-fun {
     align-items: center;
     justify-content: center;
     font-size: 3rem;
-    background: white;
+    background: #ffffff;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     margin-bottom: 1rem;
     transition: transform 0.3s;
 }
+
 .app-card:hover .card-icon {
     transform: rotate(10deg) scale(1.1);
 }
 
-/* Spezifische Karten-Themes */
+/* Karten-Themes für die vier Kacheln */
 .card-mathe {
-    background: linear-gradient(135deg, #93c5fd 0%, #3b82f6 100%);
-    color: white;
-}
-.card-franz {
-    background: linear-gradient(135deg, #fca5a5 0%, #ef4444 100%);
-    color: white;
-}
-.card-agent {
-    background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%);
-    color: white;
-}
-.card-jump {
-    background: linear-gradient(135deg, #fcd34d 0%, #f59e0b 100%);
-    color: white;
+    background: linear-gradient(135deg, var(--blue-light) 0%, var(--blue-main) 100%);
+    color: #ffffff;
 }
 
-/* Titel Animation */
+.card-franz {
+    background: linear-gradient(135deg, var(--red-light) 0%, var(--red-main) 100%);
+    color: #ffffff;
+}
+
+.card-agent {
+    background: linear-gradient(135deg, var(--green-light) 0%, var(--green-main) 100%);
+    color: #ffffff;
+}
+
+.card-jump {
+    background: linear-gradient(135deg, var(--yellow-light) 0%, var(--yellow-main) 100%);
+    color: #ffffff;
+}
+
+/* ================================
+   Titel-Animation / Buttons
+   ================================ */
+
 .title-bounce {
     animation: bounce-in 1s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+
 @keyframes bounce-in {
-    0%   { transform: scale(0.5); opacity: 0; }
-    60%  { transform: scale(1.1); opacity: 1; }
-    100% { transform: scale(1); }
+    0% { 
+        transform: scale(0.5); 
+        opacity: 0; 
+    }
+    60% { 
+        transform: scale(1.1); 
+        opacity: 1; 
+    }
+    100% { 
+        transform: scale(1); 
+    }
 }
 
-/* Start-Buttons auf der Startseite */
+/* Haupt-Button unter den Karten */
 .play-btn {
-    background: white;
+    background: #ffffff;
     color: #334155;
     font-weight: 900;
     padding: 10px 25px;
-    border-radius: 99px;
+    border-radius: 999px;
     box-shadow: 0 4px 0 rgba(0,0,0,0.2);
     transition: all 0.1s;
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    text-decoration: none;
 }
+
 .play-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 0 rgba(0,0,0,0.2);
 }
+
 .play-btn:active {
     transform: translateY(2px);
     box-shadow: 0 0 0 rgba(0,0,0,0.2);
 }
 
-/* =============================
-   GENERISCHE BUTTONS & BADGES
-   (für alle Spiele: Mathe / Franz / Agent)
-   ========================== */
+/* ================================
+   Gemeinsame Klassen für Unterseiten
+   ================================ */
 
-/* Basisklasse für „fette“ Buttons (Franz + Mathe) */
-.btn-action {
-    transition: all 0.1s;
-    border-radius: 16px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+/* Option, um Inhalt auf Unterseiten optisch einzugrenzen */
+.app-page-wrapper {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 2rem;
+}
+
+/* Level- / XP-Bar (falls du sie in mehreren Spielen brauchst) */
+.xp-bar {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto 1rem auto;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 999px;
+    overflow: hidden;
+    border: 2px solid rgba(148, 163, 184, 0.8);
+}
+
+.xp-bar-fill {
+    height: 16px;
+    background: linear-gradient(90deg, #22c55e, #16a34a);
+    width: 0%;
+    transition: width 0.8s ease-out;
+}
+
+/* Shop-Karte generisch verwendbar (Mathe + Franz) */
+.shop-card {
+    border-radius: 20px;
+    padding: 14px 16px;
+    border: 3px solid rgba(148, 163, 184, 0.9);
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 6px 12px rgba(15, 23, 42, 0.18);
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
-    box-shadow: 0 6px 0 rgba(0,0,0,0.3);
+    gap: 10px;
     cursor: pointer;
-    border-bottom-width: 6px;
-    border-style: solid;
-    position: relative;
-    overflow: hidden;
-}
-.btn-action:active {
-    transform: translateY(4px);
-    border-bottom-width: 2px;
-    box-shadow: none;
+    transition: transform 0.1s ease, box-shadow 0.1s ease, border-color 0.1s ease;
 }
 
-/* Farbvarianten (Französisch-Shop, Modals etc.) */
-.btn-blue {
-    background: #3b82f6;
-    border-color: #1d4ed8;
-    color: white;
-}
-.btn-green {
-    background: #22c55e;
-    border-color: #15803d;
-    color: white;
-}
-.btn-purple {
-    background: #8b5cf6;
-    border-color: #6d28d9;
-    color: white;
-}
-.btn-yellow {
-    background: #eab308;
-    border-color: #a16207;
-    color: white;
-}
-.btn-red {
-    background: #ef4444;
-    border-color: #b91c1c;
-    color: white;
+.shop-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 18px rgba(15, 23, 42, 0.25);
+    border-color: #3b82f6;
 }
 
-/* Kleine Badges für Level / Coins */
+.shop-card:active {
+    transform: translateY(1px) scale(0.98);
+}
+
+/* Kleine Badge z.B. für "Neu", "Selten" */
 .badge {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
+    justify-content: center;
+    padding: 2px 8px;
     border-radius: 999px;
-    font-size: 0.75rem;
-    font-weight: 800;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
-.badge-level {
-    background: rgba(59,130,246,0.1);
+
+/* Verschiedene Badge-Farben */
+.badge-blue {
+    background: rgba(59, 130, 246, 0.15);
     color: #1d4ed8;
 }
-.badge-coins {
-    background: rgba(234,179,8,0.1);
-    color: #854d0e;
+
+.badge-green {
+    background: rgba(34, 197, 94, 0.15);
+    color: #15803d;
 }
 
-/* =============================
-   XP-BAR / LEVEL-SYSTEM (global)
-   ========================== */
-
-.xp-track {
-    height: 16px;
-    background: rgba(0,0,0,0.08);
-    border-radius: 8px;
-    overflow: hidden;
-    position: relative;
-    border: 1px solid rgba(148, 163, 184, 0.6);
-}
-.xp-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #4ade80, #22c55e);
-    transition: width 1s ease-out;
+.badge-purple {
+    background: rgba(168, 85, 247, 0.15);
+    color: #6d28d9;
 }
 
-/* =============================
-   MODALS & OVERLAYS (Franz / Mathe)
-   ========================== */
-
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 100;
-    backdrop-filter: blur(5px);
+.badge-yellow {
+    background: rgba(234, 179, 8, 0.15);
+    color: #92400e;
 }
 
-/* Loading Screens */
-#loading {
-    position: fixed;
-    inset: 0;
-    background: #0f172a;
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-/* =============================
-   ANIMATIONEN (gemeinsam)
-   ========================== */
-
-.pop-in {
-    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-@keyframes popIn {
-    from { transform: scale(0.5); opacity: 0; }
-    to   { transform: scale(1); opacity: 1; }
-}
-
-.shake {
-    animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
-}
-@keyframes shake {
-    10%, 90% { transform: translate3d(-1px, 0, 0); }
-    20%, 80% { transform: translate3d(2px, 0, 0); }
-    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-    40%, 60% { transform: translate3d(4px, 0, 0); }
-}
-
-/* Sterne (Mathe) */
-.star-filled {
-    color: #fbbf24;
-    filter: drop-shadow(0 0 2px orange);
-}
-.star-empty {
-    color: #e2e8f0;
-}
-
-/* =============================
-   MATHE-SPEZIFISCHE KLASSEN
-   (Schriftliche Rechnungen etc.)
-   ========================== */
-
-/* Schriftliche Rechnungsfelder */
-.grid-cell {
-    width: 45px;
-    height: 55px;
-    border: 2px solid #cbd5e1;
-    background: white;
-    color: #334155;
-    font-family: 'Patrick Hand', cursive;
-    font-size: 1.8rem;
+/* Footer allgemein einheitlich */
+.app-footer {
+    margin-top: auto;
+    padding: 2rem 1rem;
     text-align: center;
-    border-radius: 8px;
-    outline: none;
-    transition: all 0.2s;
-    box-shadow: 2px 2px 0px rgba(0,0,0,0.05);
-}
-.grid-cell:focus {
-    border-color: #3b82f6;
-    transform: scale(1.1);
-    z-index: 10;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-}
-.grid-cell.readonly {
-    background: transparent;
-    border-color: transparent;
-    box-shadow: none;
-    font-weight: bold;
-    cursor: default;
-}
-.grid-cell.carry {
-    height: 30px;
-    width: 45px;
-    font-size: 1.2rem;
-    color: #ef4444;
-    border: 1px dashed #fca5a5;
-    background: #fff1f2;
-    margin-bottom: 2px;
-}
-
-/* Shop-Karten in Mathe */
-.item-card {
-    transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
-    border-width: 4px;
-}
-.item-card:active {
-    transform: scale(0.95);
-}
-
-/* „Lehrer“-Highlight */
-.highlight-step {
-    background-color: #fef08a !important;
-    border-color: #eab308 !important;
-    transform: scale(1.15);
-    z-index: 20;
-    box-shadow: 0 0 15px rgba(234, 179, 8, 0.6);
-}
-
-/* =============================
-   FRANZÖSISCH – MEMORY & MATCH
-   ========================== */
-
-/* Karten im Memory */
-.scene {
-    perspective: 1000px;
-    height: 100px;
-    cursor: pointer;
-}
-.card {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    transition: transform 0.6s;
-    transform-style: preserve-3d;
-}
-.card.flipped {
-    transform: rotateY(180deg);
-}
-.card.matched {
-    animation: popOut 0.5s forwards;
-    pointer-events: none;
-}
-
-.face {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-    border: 3px solid rgba(255,255,255,0.2);
-}
-.front {
-    background: linear-gradient(135deg, #6366f1, #a855f7);
-    font-size: 2.5rem;
-    z-index: 2;
-    color: white;
-}
-.back {
-    background: #1e293b;
-    transform: rotateY(180deg);
-    z-index: 1;
-    padding: 5px;
-    text-align: center;
-    font-weight: 800;
-    font-size: 0.95rem;
-}
-.type-fr .back {
-    border-color: #3b82f6;
-    color: #60a5fa;
-    background: #172554;
-}
-.type-de .back {
-    border-color: #f97316;
-    color: #fdba74;
-    background: #431407;
-}
-
-/* Verbinden-Spiel */
-.match-card {
-    background: #1e293b;
-    border: 3px solid #334155;
-    border-radius: 16px;
-    padding: 12px;
-    font-weight: 800;
-    cursor: pointer;
-    transition: all 0.2s;
-    min-height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    box-shadow: 0 4px 0 #0f172a;
-    font-size: 1.1rem;
-}
-.match-card:active {
-    transform: translateY(4px);
-    box-shadow: none;
-}
-.match-card.fr {
-    border-left: 6px solid #3b82f6;
-    color: #93c5fd;
-}
-.match-card.de {
-    border-right: 6px solid #f97316;
-    color: #fdba74;
-}
-.match-card.selected {
-    background: #1e3a8a;
-    border-color: #3b82f6;
-    transform: scale(1.05);
-    z-index: 10;
-    color: white;
-    box-shadow: 0 0 20px rgba(59,130,246,0.5);
-}
-.match-card.matched {
-    animation: popOut 0.4s forwards;
-}
-
-/* PopOut-Animation für Match/Memory */
-@keyframes popOut {
-    0%   { transform: scale(1); opacity: 1; }
-    50%  { transform: scale(1.2); opacity: 1; }
-    100% { transform: scale(0); opacity: 0; }
-}
-
-/* Glas-Panels & Shop-Karten (Franz-Avatar-Shop) */
-.glass-panel {
-    background: rgba(30, 41, 59, 0.75);
-    backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-    border-radius: 24px;
-}
-
-.shop-card {
-    transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
-    cursor: pointer;
-    border-width: 3px;
-}
-.shop-card:active {
-    transform: scale(0.95);
-}
-
-/* Rarity-Styles */
-.rarity-common {
-    border-color: #94a3b8;
-    background: #f1f5f9;
-    color: #334155;
-}
-.rarity-rare {
-    border-color: #3b82f6;
-    background: #eff6ff;
-    color: #1e3a8a;
-    box-shadow: 0 0 10px rgba(59,130,246,0.3);
-}
-.rarity-epic {
-    border-color: #a855f7;
-    background: #faf5ff;
-    color: #581c87;
-    box-shadow: 0 0 15px rgba(168,85,247,0.5);
-    animation: pulse 2s infinite;
-}
-.rarity-legendary {
-    border-color: #eab308;
-    background: linear-gradient(135deg, #422006, #713f12);
-    box-shadow: 0 0 20px rgba(234,179,8,0.6);
-    animation: shine 2s infinite;
-}
-
-@keyframes shine {
-    0%   { filter: brightness(1); }
-    50%  { filter: brightness(1.2); }
-    100% { filter: brightness(1); }
-}
-@keyframes pulse {
-    0%   { box-shadow: 0 0 0 0 rgba(168,85,247,0.4); }
-    70%  { box-shadow: 0 0 0 10px rgba(168,85,247,0); }
-    100% { box-shadow: 0 0 0 0 rgba(168,85,247,0); }
-}
-
-/* Input-Feld im Franz-Quiz */
-.input-galaxy {
-    background: #0f172a;
-    border: 3px solid #334155;
-    color: white;
-    text-align: center;
-    font-size: 1.5rem;
-    padding: 1rem;
-    border-radius: 16px;
-    outline: none;
-    width: 100%;
-}
-.input-galaxy:focus {
-    border-color: #6366f1;
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.3);
-}
-
-/* Sterne-Hintergrund (Franz) */
-.stars {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: -1;
-    pointer-events: none;
-    background: radial-gradient(circle at bottom, #1e293b 0%, #020617 100%);
-}
-.star {
-    position: absolute;
-    background: white;
-    border-radius: 50%;
-    opacity: 0.5;
-    animation: twinkle 4s infinite;
-}
-@keyframes twinkle {
-    0%, 100% { opacity: 0.2; transform: scale(0.8); }
-    50%      { opacity: 1;   transform: scale(1.2); }
-}
-
-/* =============================
-   AGENTEN-MISSION UI
-   ========================== */
-
-/* Hintergrund-Matrix */
-.matrix-bg {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: -1;
-    background: radial-gradient(circle at center, #001a00 0%, #000000 100%);
-}
-.grid-overlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: -1;
-    background-image:
-        linear-gradient(rgba(0, 255, 0, 0.1) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 255, 0, 0.1) 1px, transparent 1px);
-    background-size: 50px 50px;
-    opacity: 0.3;
-}
-
-/* Radar-Map */
-.radar-container {
-    position: relative;
-    background: radial-gradient(circle, rgba(0,20,0,0.9) 0%, rgba(0,0,0,1) 100%);
-    border: 2px solid #15803d;
-    border-radius: 50%;
-    box-shadow: 0 0 20px rgba(21, 128, 61, 0.5), inset 0 0 30px rgba(0,0,0,0.8);
-    overflow: hidden;
-    margin: 0 auto;
-}
-.radar-grid {
-    position: absolute;
-    inset: 0;
-    background-image:
-        radial-gradient(transparent 65%, rgba(0, 255, 0, 0.2) 70%),
-        linear-gradient(0deg, transparent 49%, rgba(0, 255, 0, 0.2) 50%, transparent 51%),
-        linear-gradient(90deg, transparent 49%, rgba(0, 255, 0, 0.2) 50%, transparent 51%);
-    background-size: 100% 100%, 100% 100%, 100% 100%;
-    border-radius: 50%;
-}
-.radar-sweep {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: conic-gradient(from 0deg, transparent 0deg, rgba(34, 197, 94, 0.4) 360deg);
-    border-radius: 50%;
-    animation: sweep 4s linear infinite;
-    opacity: 0.5;
-}
-@keyframes sweep {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
-}
-
-.map-node {
-    position: absolute;
-    transform: translate(-50%, -50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 20;
-    transition: all 0.5s;
-}
-.node-icon {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #000;
-    border: 1px solid #4ade80;
-    color: #4ade80;
-    font-size: 12px;
-}
-.node-active .node-icon {
-    background: #22c55e;
-    color: black;
-    box-shadow: 0 0 15px #22c55e;
-    transform: scale(1.3);
-}
-.node-visited .node-icon {
-    background: #064e3b;
-    border-color: #065f46;
-    color: #34d399;
-}
-
-/* Agenten-Buttons */
-.cyber-btn {
-    background: rgba(0, 30, 0, 0.8);
-    border: 1px solid #22c55e;
-    color: #4ade80;
-    font-family: 'Share Tech Mono', monospace;
-    transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
-}
-.cyber-btn:hover {
-    background: #22c55e;
-    color: black;
-    box-shadow: 0 0 20px #22c55e;
-}
-.cyber-btn:active {
-    transform: scale(0.98);
-}
-
-.hack-btn {
-    background: rgba(50, 0, 0, 0.8);
-    border: 1px solid #ef4444;
-    color: #fca5a5;
-    animation: pulse-red 2s infinite;
-}
-.hack-btn:hover {
-    background: #ef4444;
-    color: white;
-    box-shadow: 0 0 20px #ef4444;
-}
-@keyframes pulse-red {
-    0%   { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-    70%  { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-}
-
-/* Typewriter-Cursor */
-.typing::after {
-    content: '█';
-    animation: blink 1s infinite;
-    color: #22c55e;
-}
-@keyframes blink {
-    0%, 100% { opacity: 1; }
-    50%      { opacity: 0; }
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #94a3b8;
 }
