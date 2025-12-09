@@ -1,1577 +1,779 @@
 <!DOCTYPE html>
 <html lang="de-CH">
 <head>
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-  />
-  <title>Französisch Galaxy • 4. Klasse</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Französisch Abenteuer – 4. Klasse</title>
 
-  <!-- ENGINE -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script
-    src="https://unpkg.com/react@18/umd/react.production.min.js"
-    crossorigin
-  ></script>
-  <script
-    src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
-    crossorigin
-  ></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Tailwind & React -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-  <link
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    rel="stylesheet"
-  />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&family=Nunito:wght@400;700;900&display=swap"
-    rel="stylesheet"
-  />
+    <!-- Extras -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 
-  <style>
-    :root {
-      --primary: #6366f1;
-      --secondary: #a855f7;
-      --bg-dark: #0f172a;
-    }
+    <style>
+        body{
+            font-family:'Nunito',sans-serif;
+            background:linear-gradient(180deg,#0f172a 0%,#020617 60%,#0b1120 100%);
+            color:#e5e7eb;
+        }
+        .font-fun{font-family:'Fredoka',sans-serif;}
 
-    body {
-      font-family: "Nunito", sans-serif;
-      background-color: var(--bg-dark);
-      color: #f8fafc;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-      overflow-x: hidden;
-    }
+        /* Karten für Memory */
+        .memory-scene{perspective:1000px;height:110px;cursor:pointer;}
+        .memory-card{
+            width:100%;height:100%;position:relative;
+            transform-style:preserve-3d;
+            transition:transform .45s;
+        }
+        .memory-card.flipped{transform:rotateY(180deg);}
+        .memory-face{
+            position:absolute;inset:0;
+            backface-visibility:hidden;
+            border-radius:18px;
+            display:flex;align-items:center;justify-content:center;
+            box-shadow:0 4px 10px rgba(0,0,0,.4);
+            border:3px solid rgba(148,163,184,.6);
+        }
+        .memory-front{
+            background:linear-gradient(135deg,#4f46e5,#ec4899);
+            color:white;font-size:2.4rem;
+        }
+        .memory-back{
+            transform:rotateY(180deg);
+            background:#0f172a;
+            font-size:1.2rem;
+            font-weight:800;
+            text-align:center;
+            padding:6px;
+        }
 
-    .font-game {
-      font-family: "Baloo 2", cursive;
-    }
+        .memory-back-fr{border-color:#60a5fa;color:#bfdbfe;}
+        .memory-back-de{border-color:#f97316;color:#fed7aa;}
 
-    /* --- HINTERGRUND --- */
-    .stars {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-      pointer-events: none;
-      background: radial-gradient(
-        circle at bottom,
-        #1e293b 0%,
-        #020617 100%
-      );
-    }
+        /* Buttons */
+        .btn-main{
+            border-radius:999px;
+            font-weight:800;
+            text-transform:uppercase;
+            letter-spacing:.05em;
+            padding:.7rem 1.4rem;
+            display:inline-flex;
+            align-items:center;
+            gap:.5rem;
+            box-shadow:0 6px 0 rgba(15,23,42,.9);
+            transition:transform .1s, box-shadow .1s;
+        }
+        .btn-main:active{
+            transform:translateY(4px);
+            box-shadow:0 0 0 rgba(15,23,42,.9);
+        }
 
-    .star {
-      position: absolute;
-      background: white;
-      border-radius: 50%;
-      opacity: 0.5;
-      animation: twinkle 4s infinite;
-    }
+        /* Shop-Karten */
+        .shop-card{
+            border-radius:18px;
+            padding:12px;
+            border-width:3px;
+            border-style:solid;
+            background:#020617;
+            display:flex;
+            flex-direction:column;
+            gap:6px;
+            cursor:pointer;
+            transition:transform .15s, box-shadow .15s, border-color .15s;
+        }
+        .shop-card:hover{
+            transform:translateY(-3px);
+            box-shadow:0 12px 25px rgba(0,0,0,.7);
+        }
+        .shop-common{border-color:#9ca3af;}
+        .shop-rare{border-color:#3b82f6;box-shadow:0 0 12px rgba(59,130,246,.5);}
+        .shop-epic{border-color:#a855f7;box-shadow:0 0 16px rgba(168,85,247,.6);}
+        .shop-legendary{
+            border-color:#eab308;
+            box-shadow:0 0 22px rgba(234,179,8,.7);
+            background:linear-gradient(135deg,#111827,#422006);
+        }
 
-    @keyframes twinkle {
-      0%,
-      100% {
-        opacity: 0.2;
-        transform: scale(0.8);
-      }
-      50% {
-        opacity: 1;
-        transform: scale(1.2);
-      }
-    }
-
-    /* --- UI COMPONENTS --- */
-    .glass-panel {
-      background: rgba(30, 41, 59, 0.75);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-      border-radius: 24px;
-    }
-
-    .btn-action {
-      transition: all 0.1s;
-      border-radius: 16px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      box-shadow: 0 6px 0 rgba(0, 0, 0, 0.3);
-      cursor: pointer;
-      border-bottom-width: 6px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .btn-action:active {
-      transform: translateY(4px);
-      border-bottom-width: 2px;
-      box-shadow: none;
-    }
-
-    .btn-blue {
-      background: #3b82f6;
-      border-color: #1d4ed8;
-      color: white;
-    }
-    .btn-green {
-      background: #22c55e;
-      border-color: #15803d;
-      color: white;
-    }
-    .btn-purple {
-      background: #8b5cf6;
-      border-color: #6d28d9;
-      color: white;
-    }
-    .btn-yellow {
-      background: #eab308;
-      border-color: #a16207;
-      color: white;
-    }
-    .btn-red {
-      background: #ef4444;
-      border-color: #b91c1c;
-      color: white;
-    }
-
-    /* --- MEMORY KARTEN --- */
-    .scene {
-      perspective: 1000px;
-      height: 130px; /* höher */
-      cursor: pointer;
-    }
-
-    .card {
-      width: 100%;
-      height: 100%;
-      position: relative;
-      transition: transform 0.6s;
-      transform-style: preserve-3d;
-    }
-
-    .card.flipped {
-      transform: rotateY(180deg);
-    }
-
-    .card.matched {
-      animation: popOut 0.5s forwards;
-      pointer-events: none;
-    }
-
-    .face {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      -webkit-backface-visibility: hidden;
-      backface-visibility: hidden;
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-      border: 3px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .front {
-      background: linear-gradient(135deg, #6366f1, #a855f7);
-      font-size: 3rem;
-      z-index: 2;
-      color: white;
-    }
-
-    .back {
-      background: #1e293b;
-      transform: rotateY(180deg);
-      z-index: 1;
-      padding: 6px;
-      text-align: center;
-      font-weight: 800;
-      font-size: 1.1rem; /* grösser */
-      line-height: 1.2;
-    }
-
-    .type-fr .back {
-      border-color: #3b82f6;
-      color: #60a5fa;
-      background: #172554;
-    }
-
-    .type-de .back {
-      border-color: #f97316;
-      color: #fdba74;
-      background: #431407;
-    }
-
-    /* --- VERBINDEN KARTEN --- */
-    .match-card {
-      background: #1e293b;
-      border: 3px solid #334155;
-      border-radius: 16px;
-      padding: 12px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: all 0.2s;
-      min-height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      box-shadow: 0 4px 0 #0f172a;
-      font-size: 1.1rem;
-    }
-
-    .match-card:active {
-      transform: translateY(4px);
-      box-shadow: none;
-    }
-
-    .match-card.fr {
-      border-left: 6px solid #3b82f6;
-      color: #93c5fd;
-    }
-
-    .match-card.de {
-      border-right: 6px solid #f97316;
-      color: #fdba74;
-    }
-
-    .match-card.selected {
-      background: #1e3a8a;
-      border-color: #3b82f6;
-      transform: scale(1.05);
-      z-index: 10;
-      color: white;
-      box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
-    }
-
-    .match-card.matched {
-      animation: popOut 0.4s forwards;
-    }
-
-    /* --- SHOP --- */
-    .shop-card {
-      transition: all 0.2s;
-      position: relative;
-      overflow: hidden;
-      cursor: pointer;
-      border-width: 3px;
-    }
-
-    .shop-card:active {
-      transform: scale(0.95);
-    }
-
-    .rarity-common {
-      border-color: #94a3b8;
-      background: #f1f5f9;
-      color: #334155;
-    }
-
-    .rarity-rare {
-      border-color: #3b82f6;
-      background: #eff6ff;
-      color: #1e3a8a;
-      box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
-    }
-
-    .rarity-epic {
-      border-color: #a855f7;
-      background: #faf5ff;
-      color: #581c87;
-      box-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
-      animation: pulse 2s infinite;
-    }
-
-    .rarity-legendary {
-      border-color: #eab308;
-      background: linear-gradient(135deg, #422006, #713f12);
-      box-shadow: 0 0 20px rgba(234, 179, 8, 0.6);
-      animation: shine 2s infinite;
-    }
-
-    /* --- ANIMATIONS --- */
-    @keyframes popOut {
-      0% {
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(1.2);
-        opacity: 1;
-      }
-      100% {
-        transform: scale(0);
-        opacity: 0;
-      }
-    }
-
-    @keyframes shine {
-      0% {
-        filter: brightness(1);
-      }
-      50% {
-        filter: brightness(1.2);
-      }
-      100% {
-        filter: brightness(1);
-      }
-    }
-
-    @keyframes pulse {
-      0% {
-        box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.4);
-      }
-      70% {
-        box-shadow: 0 0 0 10px rgba(168, 85, 247, 0);
-      }
-      100% {
-        box-shadow: 0 0 0 0 rgba(168, 85, 247, 0);
-      }
-    }
-
-    .pop-in {
-      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-
-    @keyframes popIn {
-      from {
-        transform: scale(0.5);
-        opacity: 0;
-      }
-      to {
-        transform: scale(1);
-        opacity: 1;
-      }
-    }
-
-    .shake {
-      animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
-    }
-
-    @keyframes shake {
-      10%,
-      90% {
-        transform: translate3d(-1px, 0, 0);
-      }
-      20%,
-      80% {
-        transform: translate3d(2px, 0, 0);
-      }
-      30%,
-      50%,
-      70% {
-        transform: translate3d(-4px, 0, 0);
-      }
-      40%,
-      60% {
-        transform: translate3d(4px, 0, 0);
-      }
-    }
-
-    /* LOADING */
-    #loading {
-      position: fixed;
-      inset: 0;
-      background: #0f172a;
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-
-    /* XP Bar */
-    .xp-track {
-      height: 16px;
-      background: rgba(0, 0, 0, 0.3);
-      border-radius: 8px;
-      overflow: hidden;
-      position: relative;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .xp-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #4ade80, #22c55e);
-      transition: width 1s ease-out;
-    }
-
-    /* Modal */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.8);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 100;
-      backdrop-filter: blur(5px);
-    }
-
-    /* Herzen */
-    .heart {
-      font-size: 1.4rem;
-    }
-  </style>
+        /* Overlay */
+        .modal-overlay{
+            position:fixed;inset:0;
+            background:rgba(15,23,42,.85);
+            display:flex;align-items:center;justify-content:center;
+            z-index:50;
+            backdrop-filter:blur(6px);
+        }
+    </style>
 </head>
-<body class="min-h-screen pb-20">
-  <div class="stars" id="stars"></div>
+<body class="min-h-screen">
 
-  <div id="loading">
-    <div class="text-6xl mb-6 animate-bounce">🇫🇷</div>
-    <div
-      class="text-2xl font-black text-blue-500 tracking-[0.3em] font-game"
-    >
-      LADE GALAXY...
-    </div>
-  </div>
+<div id="root"></div>
 
-  <div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef} = React;
 
-  <script type="text/babel">
-    // --- INIT HINTERGRUND ---
-    const starCont = document.getElementById("stars");
-    for (let i = 0; i < 50; i++) {
-      const s = document.createElement("div");
-      s.className = "star";
-      s.style.top = Math.random() * 100 + "%";
-      s.style.left = Math.random() * 100 + "%";
-      s.style.width = Math.random() * 3 + "px";
-      s.style.height = s.style.width;
-      s.style.animationDelay = Math.random() * 5 + "s";
-      starCont.appendChild(s);
+/* ---------- HILFSFUNKTIONEN ---------- */
+
+const speakFR = (text)=>{
+    if(!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'fr-FR';
+    u.rate = 0.9;
+    window.speechSynthesis.speak(u);
+};
+
+const fireConfetti = ()=>{
+    if(window.confetti){
+        window.confetti({particleCount:80,spread:70,origin:{y:0.6}});
     }
+};
 
-    setTimeout(() => {
-      document.getElementById("loading").style.opacity = "0";
-      document.getElementById("loading").style.pointerEvents = "none";
-    }, 800);
+const normalize = s => s.toLowerCase().trim();
+const stripFrArticle = s=>{
+    s = normalize(s);
+    if(s.startsWith("l'")) return s.slice(2);
+    const arts = ["le ","la ","les "];
+    for(const a of arts) if(s.startsWith(a)) return s.slice(a.length);
+    return s;
+};
+const stripDeArticle = s=>{
+    s = normalize(s);
+    const arts = ["der ","die ","das "];
+    for(const a of arts) if(s.startsWith(a)) return s.slice(a.length);
+    return s;
+};
 
-    const { useState, useEffect, useRef } = React;
+/* ---------- STANDARD-WÖRTER (Fallback, falls JSON fehlt) ---------- */
 
-    // --- DATEN (vereinfachte Wortliste, kann später erweitert werden) ---
-    const WORLDS = [
-      {
-        id: 1,
-        name: "Basis Lager",
-        icon: "🚀",
-        reqLvl: 1,
-        words: [
-          { fr: "Bonjour", de: "Guten Tag" },
-          { fr: "Salut", de: "Hallo" },
-          { fr: "Au revoir", de: "Auf Wiedersehen" },
-          { fr: "Merci", de: "Danke" },
-          { fr: "S'il vous plaît", de: "Bitte" },
-          { fr: "Oui", de: "Ja" },
-          { fr: "Non", de: "Nein" },
-          { fr: "Je", de: "Ich" },
-          { fr: "Tu", de: "Du" },
-          { fr: "Il", de: "Er" },
-          { fr: "Elle", de: "Sie" }
-        ]
-      },
-      {
-        id: 2,
-        name: "Struktur Wörter",
-        icon: "🧩",
-        reqLvl: 1,
-        words: [
-          { fr: "D'abord", de: "Zuerst" },
-          { fr: "Puis", de: "Dann" },
-          { fr: "Après", de: "Danach" },
-          { fr: "Finalement", de: "Schliesslich" },
-          { fr: "Peut-être", de: "Vielleicht" },
-          { fr: "Toujours", de: "Immer" },
-          { fr: "Jamais", de: "Nie" }
-        ]
-      },
-      {
-        id: 3,
-        name: "Die Schule",
-        icon: "🏫",
-        reqLvl: 2,
-        words: [
-          { fr: "L'école", de: "Die Schule" },
-          { fr: "Le livre", de: "Das Buch" },
-          { fr: "Le cahier", de: "Das Heft" },
-          { fr: "Le crayon", de: "Der Bleistift" },
-          { fr: "La gomme", de: "Der Gummi" },
-          { fr: "La trousse", de: "Das Etui" },
-          { fr: "La classe", de: "Die Klasse" },
-          { fr: "Les devoirs", de: "Die Hausaufgaben" }
-        ]
-      },
-      {
-        id: 4,
-        name: "Tier-Planet",
-        icon: "🦁",
-        reqLvl: 3,
-        words: [
-          { fr: "Le chien", de: "Der Hund" },
-          { fr: "Le chat", de: "Die Katze" },
-          { fr: "La souris", de: "Die Maus" },
-          { fr: "Le lapin", de: "Der Hase" },
-          { fr: "La tortue", de: "Die Schildkröte" },
-          { fr: "Le lion", de: "Der Löwe" },
-          { fr: "Le cochon", de: "Das Schwein" }
-        ]
-      },
-      {
-        id: 5,
-        name: "Zahlen & Geld",
-        icon: "💰",
-        reqLvl: 4,
-        words: [
-          { fr: "Onze", de: "Elf" },
-          { fr: "Douze", de: "Zwölf" },
-          { fr: "Treize", de: "Dreizehn" },
-          { fr: "Quatorze", de: "Vierzehn" },
-          { fr: "Quinze", de: "Fünfzehn" },
-          { fr: "Seize", de: "Sechzehn" },
-          { fr: "Dix-huit", de: "Achtzehn" },
-          { fr: "Vingt", de: "Zwanzig" }
-        ]
-      }
-    ];
+const fallbackWords = [
+    // Pronomen
+    {fr:"je",de:"ich",topic:"pronomen"},
+    {fr:"tu",de:"du",topic:"pronomen"},
+    {fr:"il",de:"er",topic:"pronomen"},
+    {fr:"elle",de:"sie",topic:"pronomen"},
+    {fr:"nous",de:"wir",topic:"pronomen"},
+    {fr:"vous",de:"ihr",topic:"pronomen"},
+    {fr:"ils",de:"sie (m)",topic:"pronomen"},
+    {fr:"elles",de:"sie (w)",topic:"pronomen"},
+    // slowUp / Transport
+    {fr:"le train",de:"der Zug",topic:"slowup"},
+    {fr:"la voiture",de:"das Auto",topic:"slowup"},
+    {fr:"le parcours",de:"die Strecke",topic:"slowup"},
+    {fr:"à pied",de:"zu Fuss",topic:"slowup"},
+    {fr:"jusqu'à",de:"bis",topic:"slowup"},
+    // Tiere
+    {fr:"la souris",de:"die Maus",topic:"tiere"},
+    {fr:"le lapin",de:"der Hase",topic:"tiere"},
+    {fr:"la tortue",de:"die Schildkröte",topic:"tiere"},
+    {fr:"le chien",de:"der Hund",topic:"tiere"},
+    {fr:"le chat",de:"die Katze",topic:"tiere"},
+    {fr:"l'écureuil",de:"das Eichhörnchen",topic:"tiere"},
+    // Schule / Alltag
+    {fr:"la bibliothèque",de:"die Bibliothek",topic:"schule"},
+    {fr:"l'école",de:"die Schule",topic:"schule"},
+    {fr:"le secret",de:"das Geheimnis",topic:"schule"},
+    {fr:"la pomme",de:"der Apfel",topic:"schule"},
+    {fr:"la bande dessinée",de:"der Comic",topic:"schule"},
+    // Verben
+    {fr:"organiser",de:"organisieren",topic:"verben"},
+    {fr:"raconter",de:"erzählen",topic:"verben"},
+    {fr:"inviter",de:"einladen",topic:"verben"},
+    {fr:"cacher",de:"verstecken",topic:"verben"},
+    {fr:"garder",de:"(für sich) behalten",topic:"verben"},
+    // Zahlen rund ums Geld
+    {fr:"onze",de:"elf",topic:"zahlen"},
+    {fr:"douze",de:"zwölf",topic:"zahlen"},
+    {fr:"treize",de:"dreizehn",topic:"zahlen"},
+    {fr:"seize",de:"sechzehn",topic:"zahlen"},
+    {fr:"dix-huit",de:"achtzehn",topic:"zahlen"},
+    {fr:"vingt",de:"zwanzig",topic:"zahlen"},
+    {fr:"dix-sept",de:"siebzehn",topic:"zahlen"}
+];
 
-    // Dictionary für schnellen Zugriff
-    const DICTIONARY = {};
-    WORLDS.forEach((w) =>
-      w.words.forEach((p) => {
-        DICTIONARY[p.fr] = p.de;
-      })
+/* ---------- LEVEL & PROFIL ---------- */
+
+const MAX_LEVEL = 20;
+const xpForLevel = lvl => 150 + (lvl-1)*80;
+const calcLevel = (xp)=>{
+    let lvl=1, rest=xp;
+    while(lvl<MAX_LEVEL && rest>=xpForLevel(lvl)){
+        rest-=xpForLevel(lvl);
+        lvl++;
+    }
+    const next = lvl<MAX_LEVEL ? xpForLevel(lvl) : 0;
+    return {level:lvl,progress: lvl===MAX_LEVEL?1:rest/next};
+};
+
+const defaultProfile = {
+    xp:0,
+    coins:0,
+    avatar:"🐻",
+    bought:[],
+};
+
+const loadProfile = ()=>{
+    try{
+        const raw = localStorage.getItem("franz_profile_v1");
+        if(!raw) return defaultProfile;
+        return {...defaultProfile,...JSON.parse(raw)};
+    }catch(e){
+        return defaultProfile;
+    }
+};
+
+const saveProfile = (p)=>{
+    try{
+        localStorage.setItem("franz_profile_v1",JSON.stringify(p));
+    }catch(e){}
+};
+
+/* ---------- SHOP-DATEN ---------- */
+
+const shopItems = [
+    // Avatare
+    {id:"bear",type:"avatar",emoji:"🐻",name:"Bär Bruno",desc:"Der gemütliche Beschützer.",price:0,rarity:"common"},
+    {id:"fox",type:"avatar",emoji:"🦊",name:"Fuchs Foxy",desc:"Superschnell beim Denken.",price:80,rarity:"rare"},
+    {id:"owl",type:"avatar",emoji:"🦉",name:"Eule Luna",desc:"Hilft beim Konzentrieren.",price:120,rarity:"rare"},
+    {id:"turtle",type:"avatar",emoji:"🐢",name:"Schildkröte Turbo",desc:"Langsam, aber fehlerfrei.",price:180,rarity:"epic"},
+    {id:"dragon",type:"avatar",emoji:"🐲",name:"Drache Draco",desc:"Legendärer Lernmeister.",price:350,rarity:"legendary"},
+    // Lern-Hilfen
+    {id:"hint",type:"boost",emoji:"💡",name:"Hinweis-Ticket",desc:"+1 Hinweis im Schreib-Modus.",price:40,rarity:"common"},
+    {id:"doublexp",type:"boost",emoji:"⚡",name:"Doppel-XP (1 Runde)",desc:"Nächste Runde +100% XP.",price:120,rarity:"epic"},
+    {id:"heart",type:"boost",emoji:"❤️",name:"Extra Herz",desc:"Ein Fehler mehr erlaubt in Hör zu.",price:70,rarity:"rare"},
+    // Kosmetik
+    {id:"theme-forest",type:"theme",emoji:"🌲",name:"Wald-Thema",desc:"Grüner Hintergrund.",price:90,rarity:"rare"},
+    {id:"theme-space",type:"theme",emoji:"✨",name:"Galaxy-Thema",desc:"Leuchtende Sterne.",price:90,rarity:"rare"}
+];
+
+/* ---------- COMPONENTS ---------- */
+
+function Header({profile,onReset}) {
+    const {level,progress} = calcLevel(profile.xp);
+    return (
+        <header className="px-4 pt-4 pb-3 border-b border-slate-800 bg-slate-950/60 backdrop-blur">
+            <div className="max-w-5xl mx-auto flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div className="flex items-center gap-3">
+                    <a href="index.html" className="btn-main bg-white text-slate-800 text-xs md:text-sm">
+                        <i className="fa-solid fa-house"></i>
+                        Startseite
+                    </a>
+                    <div>
+                        <h1 className="font-fun text-2xl md:text-3xl text-white flex items-center gap-2">
+                            <span className="text-3xl">{profile.avatar}</span>
+                            <span>Französisch-Abenteuer</span>
+                        </h1>
+                        <p className="text-slate-400 text-xs md:text-sm">
+                            4. Klasse • Wörter, Hören, Schreiben & Shop
+                        </p>
+                    </div>
+                </div>
+                <div className="flex flex-col md:items-end gap-1 text-xs md:text-sm">
+                    <div className="flex items-center gap-4">
+                        <div>
+                            <div className="flex justify-between text-slate-400 text-[11px] mb-1">
+                                <span>Level {level}</span>
+                                <span>{Math.round(progress*100)}%</span>
+                            </div>
+                            <div className="w-40 h-2 bg-slate-800 rounded-full overflow-hidden">
+                                <div className="h-full bg-gradient-to-r from-emerald-400 to-lime-400"
+                                     style={{width:`${progress*100}%`}}></div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <span className="flex items-center gap-1 text-amber-300">
+                                <i className="fa-solid fa-coins text-amber-400"></i>
+                                {profile.coins}
+                            </span>
+                            <button
+                                onClick={onReset}
+                                className="text-xs text-red-300 hover:text-red-400 underline decoration-dotted">
+                                Alles zurücksetzen
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
     );
+}
 
-    const RANKS = [
-      "Kadett",
-      "Entdecker",
-      "Pilot",
-      "Captain",
-      "Commander",
-      "Admiral",
-      "Galactic Hero"
-    ];
-    const MAX_LEVEL = 20;
+function ModeTabs({mode,setMode}) {
+    const tab = (id,label,icon) => (
+        <button
+            key={id}
+            onClick={()=>setMode(id)}
+            className={`flex-1 px-3 py-2 rounded-full text-xs md:text-sm font-bold flex items-center justify-center gap-2
+                        transition ${mode===id
+                        ? "bg-indigo-500 text-white shadow-lg"
+                        : "bg-slate-800/60 text-slate-300 hover:bg-slate-700"}`}>
+            <i className={`fa-solid ${icon}`}></i>{label}
+        </button>
+    );
+    return (
+        <div className="max-w-5xl mx-auto px-4 mt-4">
+            <div className="bg-slate-900/70 border border-slate-800 rounded-full p-1 flex gap-1">
+                {tab("memory","Memory","fa-table-cells")}
+                {tab("listen","Hör zu","fa-headphones")}
+                {tab("write","Schreiben","fa-pen")}
+                {tab("shop","Shop","fa-store")}
+            </div>
+        </div>
+    );
+}
 
-    // AVATARE & LERN-ITEMS
-    const SHOP_ITEMS = [
-      { id: "bear", icon: "🐻", name: "Bär Bruno", cost: 0, rarity: "common" },
-      { id: "fox", icon: "🦊", name: "Fuchs Flix", cost: 150, rarity: "common" },
-      { id: "cat", icon: "🐱", name: "Katze Mimi", cost: 200, rarity: "common" },
-      { id: "dog", icon: "🐶", name: "Hund Rex", cost: 250, rarity: "common" },
-      { id: "owl", icon: "🦉", name: "Schlaue Eule", cost: 400, rarity: "rare" },
-      { id: "panda", icon: "🐼", name: "Panda Prof", cost: 600, rarity: "rare" },
-      { id: "robot", icon: "🤖", name: "Lern-Roboter", cost: 900, rarity: "epic" },
-      { id: "dragon", icon: "🐲", name: "Vokabel-Drache", cost: 1500, rarity: "epic" },
-      { id: "wizardbook", icon: "📘", name: "Magisches Wörterbuch", cost: 500, rarity: "rare" },
-      { id: "lamp", icon: "💡", name: "Lern-Lampe", cost: 700, rarity: "rare" },
-      { id: "crown", icon: "👑", name: "Wort-König", cost: 3000, rarity: "legendary" }
-    ];
+/* ----- Memory ----- */
 
-    // --- HILFSFUNKTIONEN ---
-    const getXPForLevel = (lvl) => 200 * lvl;
-    const getRankTitle = (lvl) =>
-      RANKS[Math.min(Math.floor((lvl - 1) / 2), RANKS.length - 1)];
+function MemoryGame({words,onReward}) {
+    const [cards,setCards] = useState([]);
+    const [open,setOpen] = useState([]);
+    const [matched,setMatched] = useState([]);
+    const [roundFinished,setRoundFinished] = useState(false);
 
-    const speak = (txt) => {
-      if ("speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(txt);
-        u.lang = "fr-FR";
-        u.rate = 0.9;
-        window.speechSynthesis.speak(u);
-      }
-    };
-
-    const playSound = (type) => {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContext) return;
-      const ctx = new AudioContext();
-      const osc = ctx.createOscillator();
-      const g = ctx.createGain();
-      osc.connect(g);
-      g.connect(ctx.destination);
-      const now = ctx.currentTime;
-
-      if (type === "correct") {
-        osc.type = "triangle";
-        osc.frequency.setValueAtTime(600, now);
-        osc.frequency.linearRampToValueAtTime(1000, now + 0.15);
-        g.gain.setValueAtTime(0.2, now);
-        g.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-      } else if (type === "wrong") {
-        osc.type = "sawtooth";
-        osc.frequency.setValueAtTime(200, now);
-        g.gain.setValueAtTime(0.25, now);
-        g.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-      } else if (type === "win") {
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(400, now);
-        osc.frequency.linearRampToValueAtTime(900, now + 0.6);
-        g.gain.setValueAtTime(0.2, now);
-        g.gain.exponentialRampToValueAtTime(0.01, now + 1);
-      } else if (type === "cash") {
-        osc.type = "square";
-        osc.frequency.setValueAtTime(800, now);
-        g.gain.setValueAtTime(0.2, now);
-        g.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-      }
-      osc.start(now);
-      osc.stop(now + 1);
-    };
-
-    const safeConfetti = () => {
-      if (window.confetti)
-        window.confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-    };
-
-    // --- GAME COMPONENTS ---
-
-    // 1. MEMORY GAME
-    const MemoryGame = ({ words, onFinish }) => {
-      const [cards, setCards] = useState([]);
-      const [flipped, setFlipped] = useState([]);
-      const [matched, setMatched] = useState([]);
-      const [locked, setLocked] = useState(false);
-
-      useEffect(() => {
-        const selection = [...words].sort(() => Math.random() - 0.5).slice(0, 6);
-        const deck = selection
-          .flatMap((p) => [
-            { id: p.fr + "-fr", txt: p.fr, type: "fr", pair: p.fr },
-            { id: p.fr + "-de", txt: DICTIONARY[p.fr], type: "de", pair: p.fr }
-          ])
-          .sort(() => Math.random() - 0.5);
+    useEffect(()=>{
+        const base = [...words].sort(()=>Math.random()-0.5).slice(0,8);
+        const deck = base.flatMap((w,idx)=>[
+            {id:`${idx}-fr`,pair:idx,txt:w.fr,lang:"fr"},
+            {id:`${idx}-de`,pair:idx,txt:w.de,lang:"de"}
+        ]).sort(()=>Math.random()-0.5);
         setCards(deck);
-      }, [words]);
+        setOpen([]);
+        setMatched([]);
+        setRoundFinished(false);
+    },[words]);
 
-      const click = (card) => {
-        if (locked || flipped.includes(card.id) || matched.includes(card.id))
-          return;
-        if (card.type === "fr") speak(card.txt);
-
-        const newFlipped = [...flipped, card.id];
-        setFlipped(newFlipped);
-
-        if (newFlipped.length === 2) {
-          setLocked(true);
-          const c1 = cards.find((x) => x.id === newFlipped[0]);
-          const c2 = cards.find((x) => x.id === newFlipped[1]);
-          if (c1.pair === c2.pair) {
-            playSound("correct");
-            setTimeout(() => {
-              setMatched((m) => [...m, c1.id, c2.id]);
-              setFlipped([]);
-              setLocked(false);
-            }, 400);
-          } else {
-            playSound("wrong");
-            setTimeout(() => {
-              setFlipped([]);
-              setLocked(false);
-            }, 800);
-          }
-        }
-      };
-
-      useEffect(() => {
-        if (cards.length > 0 && matched.length === cards.length) {
-          setTimeout(() => onFinish(true), 500);
-        }
-      }, [matched, cards.length, onFinish]);
-
-      return (
-        <div className="w-full max-w-md mx-auto">
-          <div className="flex justify-between items-center mb-3 text-slate-300 text-xs">
-            <span>🃏 Finde alle Paare.</span>
-            <span>{matched.length / 2} / {cards.length / 2} Paare</span>
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            {cards.map((c) => (
-              <div
-                key={c.id}
-                className={`scene ${
-                  matched.includes(c.id) ? "pointer-events-none" : ""
-                }`}
-                onClick={() => click(c)}
-              >
-                <div
-                  className={`card ${
-                    flipped.includes(c.id) ? "flipped" : ""
-                  } ${matched.includes(c.id) ? "matched" : ""}`}
-                >
-                  <div className="face front">?</div>
-                  <div className={`face back type-${c.type}`}>{c.txt}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    };
-
-    // 2. MATCHING GAME (Verbindungen)
-    const MatchGame = ({ words, onFinish }) => {
-      const [left, setLeft] = useState([]);
-      const [right, setRight] = useState([]);
-      const [sel, setSel] = useState(null);
-      const [solved, setSolved] = useState([]);
-
-      useEffect(() => {
-        const s = [...words].sort(() => Math.random() - 0.5).slice(0, 5);
-        setLeft(s.map((w) => ({ id: w.fr, txt: w.fr, pair: w.fr, type: "fr" })));
-        setRight(
-          s
-            .map((w) => ({
-              id: w.fr + "d",
-              txt: DICTIONARY[w.fr],
-              pair: w.fr,
-              type: "de"
-            }))
-            .sort(() => Math.random() - 0.5)
-        );
-      }, [words]);
-
-      const click = (item) => {
-        if (solved.includes(item.pair)) return;
-        if (item.type === "fr") speak(item.txt);
-
-        if (!sel) {
-          setSel(item);
-        } else {
-          if (sel.id === item.id) {
-            setSel(null);
-            return;
-          }
-          if (sel.pair === item.pair) {
-            playSound("correct");
-            setSolved((s) => [...s, item.pair]);
-            setSel(null);
-          } else {
-            playSound("wrong");
-            setSel(null);
-          }
-        }
-      };
-
-      useEffect(() => {
-        if (left.length && solved.length === left.length) {
-          setTimeout(() => onFinish(true), 500);
-        }
-      }, [solved, left.length, onFinish]);
-
-      return (
-        <div className="flex gap-4 w-full max-w-2xl px-2 items-center">
-          <div className="w-1/2 flex flex-col gap-3 justify-center">
-            {left.map((l) => (
-              <div
-                key={l.id}
-                onClick={() => click(l)}
-                className={`match-card fr ${
-                  sel?.id === l.id ? "selected" : ""
-                } ${solved.includes(l.pair) ? "matched" : ""}`}
-              >
-                {l.txt}
-              </div>
-            ))}
-          </div>
-          <div className="w-1/2 flex flex-col gap-3 justify-center">
-            {right.map((r) => (
-              <div
-                key={r.id}
-                onClick={() => click(r)}
-                className={`match-card de ${
-                  sel?.id === r.id ? "selected" : ""
-                } ${solved.includes(r.pair) ? "matched" : ""}`}
-              >
-                {r.txt}
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    };
-
-    // Hilfsfunktion: Antwort vergleichen (für Schreiben)
-    const normalizeAnswer = (txt) =>
-      txt
-        .toLowerCase()
-        .trim()
-        .replace(/^l['’]\s*/i, "")
-        .replace(/^(le|la|les|der|die|das)\s+/i, "");
-
-    // 3. QUIZ (franz -> deutsch, 4 Antwortmöglichkeiten, Anti-Cheat)
-    const QuizGame = ({ words, onFinish }) => {
-      const [order, setOrder] = useState([]);
-      const [index, setIndex] = useState(0);
-      const [hearts, setHearts] = useState(3);
-      const [correctCount, setCorrectCount] = useState(0);
-
-      useEffect(() => {
-        const shuffled = [...words].sort(() => Math.random() - 0.5);
-        setOrder(shuffled);
-      }, [words]);
-
-      if (!order.length) return null;
-
-      const current = order[index];
-
-      const makeOptions = () => {
-        const others = words
-          .filter((w) => w.fr !== current.fr)
-          .sort(() => Math.random() - 0.5)
-          .slice(0, 3)
-          .map((w) => DICTIONARY[w.fr]);
-        const all = [...others, DICTIONARY[current.fr]];
-        return all.sort(() => Math.random() - 0.5);
-      };
-
-      const [options, setOptions] = useState(makeOptions);
-
-      useEffect(() => {
-        setOptions(makeOptions());
-      }, [index]);
-
-      const handle = (opt) => {
-        if (opt === DICTIONARY[current.fr]) {
-          playSound("correct");
-          setCorrectCount((c) => c + 1);
-          if (index + 1 === order.length) {
-            onFinish(true, { correct: correctCount + 1, total: order.length });
-          } else {
-            setIndex((i) => i + 1);
-          }
-        } else {
-          playSound("wrong");
-          setHearts((h) => {
-            const nh = h - 1;
-            if (nh <= 0) {
-              onFinish(false, { correct: correctCount, total: order.length });
-            }
-            return nh;
-          });
-        }
-      };
-
-      return (
-        <div className="w-full max-w-md mx-auto text-center pop-in">
-          <div className="flex justify-between items-center mb-4 text-xs text-slate-300">
-            <span>
-              Frage {index + 1} / {order.length}
-            </span>
-            <span>
-              {Array.from({ length: 3 }).map((_, i) => (
-                <span key={i} className="heart">
-                  {i < hearts ? "❤️" : "🖤"}
-                </span>
-              ))}
-            </span>
-          </div>
-          <div className="glass-panel p-8 mb-6">
-            <h2 className="text-3xl font-black text-yellow-300 mb-2">
-              {current.fr}
-            </h2>
-            <button
-              onClick={() => speak(current.fr)}
-              className="text-xs bg-yellow-500 text-black px-3 py-1 rounded-full font-bold"
-            >
-              🔊 Anhören
-            </button>
-          </div>
-          <div className="space-y-3">
-            {options.map((o) => (
-              <button
-                key={o}
-                onClick={() => handle(o)}
-                className="btn-action btn-purple w-full py-3 text-sm"
-              >
-                {o}
-              </button>
-            ))}
-          </div>
-        </div>
-      );
-    };
-
-    // 4. LISTEN GAME (nur hören + Auswahl, Anti-Cheat)
-    const ListenGame = ({ words, onFinish }) => {
-      const [order, setOrder] = useState([]);
-      const [index, setIndex] = useState(0);
-      const [hearts, setHearts] = useState(3);
-
-      useEffect(() => {
-        const shuffled = [...words].sort(() => Math.random() - 0.5);
-        setOrder(shuffled);
-      }, [words]);
-
-      if (!order.length) return null;
-      const current = order[index];
-
-      const makeOptions = () => {
-        const others = words
-          .filter((w) => w.fr !== current.fr)
-          .sort(() => Math.random() - 0.5)
-          .slice(0, 3)
-          .map((w) => DICTIONARY[w.fr]);
-        const all = [...others, DICTIONARY[current.fr]];
-        return all.sort(() => Math.random() - 0.5);
-      };
-
-      const [options, setOptions] = useState(makeOptions);
-
-      useEffect(() => {
-        setOptions(makeOptions());
-        speak(current.fr);
-      }, [index]);
-
-      const handle = (opt) => {
-        if (opt === DICTIONARY[current.fr]) {
-          playSound("correct");
-          if (index + 1 === order.length) {
-            onFinish(true);
-          } else {
-            setIndex((i) => i + 1);
-          }
-        } else {
-          playSound("wrong");
-          setHearts((h) => {
-            const nh = h - 1;
-            if (nh <= 0) {
-              onFinish(false);
-            }
-            return nh;
-          });
-        }
-      };
-
-      return (
-        <div className="w-full max-w-md mx-auto text-center pop-in">
-          <div className="flex justify-between items-center mb-4 text-xs text-slate-300">
-            <span>
-              Karte {index + 1} / {order.length}
-            </span>
-            <span>
-              {Array.from({ length: 3 }).map((_, i) => (
-                <span key={i} className="heart">
-                  {i < hearts ? "❤️" : "🖤"}
-                </span>
-              ))}
-            </span>
-          </div>
-          <div className="glass-panel p-8 mb-6">
-            <h2 className="text-2xl font-black text-green-300 mb-3">
-              Hör gut zu!
-            </h2>
-            <button
-              onClick={() => speak(current.fr)}
-              className="btn-action btn-green w-full py-3"
-            >
-              🔊 Wort abspielen
-            </button>
-          </div>
-          <div className="space-y-3">
-            {options.map((o) => (
-              <button
-                key={o}
-                onClick={() => handle(o)}
-                className="btn-action btn-yellow w-full py-3 text-sm text-black"
-              >
-                {o}
-              </button>
-            ))}
-          </div>
-        </div>
-      );
-    };
-
-    // 5. WRITE GAME (Übersetzung schreiben, tolerant)
-    const WriteGame = ({ words, onFinish }) => {
-      const [order, setOrder] = useState([]);
-      const [index, setIndex] = useState(0);
-      const [value, setValue] = useState("");
-      const [result, setResult] = useState(null);
-      const [stats, setStats] = useState({
-        correct: 0,
-        partial: 0,
-        wrong: 0
-      });
-      const [hearts, setHearts] = useState(3);
-
-      useEffect(() => {
-        const shuffled = [...words].sort(() => Math.random() - 0.5);
-        setOrder(shuffled);
-      }, [words]);
-
-      if (!order.length) return null;
-      const current = order[index];
-      const correct = DICTIONARY[current.fr];
-
-      const check = () => {
-        const user = value.trim();
-        if (!user) return;
-
-        const normalizedUser = normalizeAnswer(user);
-        const normalizedCorrect = normalizeAnswer(correct);
-        const sameBase = normalizedUser === normalizedCorrect;
-
-        let type = "wrong";
-        let message = `Leider falsch. Richtig wäre: "${correct}".`;
-
-        if (sameBase) {
-          // unterscheiden: komplett gleich oder nur Artikel/Grossschreibung anders
-          if (user.toLowerCase() === correct.toLowerCase()) {
-            type = "correct";
-            message = "Super, alles richtig!";
-          } else {
-            type = "partial";
-            message =
-              'Grundwort stimmt, aber Artikel oder Gross-/Kleinschreibung nicht ganz. Richtig wäre: "' +
-              correct +
-              '".';
-          }
-        }
-
-        if (type === "correct") {
-          playSound("correct");
-          setStats((s) => ({ ...s, correct: s.correct + 1 }));
-        } else if (type === "partial") {
-          playSound("correct");
-          setStats((s) => ({ ...s, partial: s.partial + 1 }));
-        } else {
-          playSound("wrong");
-          setStats((s) => ({ ...s, wrong: s.wrong + 1 }));
-          setHearts((h) => {
-            const nh = h - 1;
-            return nh;
-          });
-        }
-
-        setResult({ type, message });
-
-        setTimeout(() => {
-          if (index + 1 === order.length || hearts - (type === "wrong" ? 1 : 0) <= 0) {
-            onFinish(
-              hearts - (type === "wrong" ? 1 : 0) > 0,
-              { ...stats, [type]: stats[type] + 1 }
-            );
-          } else {
-            setIndex((i) => i + 1);
-            setValue("");
-            setResult(null);
-          }
-        }, 900);
-      };
-
-      return (
-        <div className="w-full max-w-md mx-auto text-center pop-in">
-          <div className="flex justify-between items-center mb-4 text-xs text-slate-300">
-            <span>
-              Wort {index + 1} / {order.length}
-            </span>
-            <span>
-              {Array.from({ length: 3 }).map((_, i) => (
-                <span key={i} className="heart">
-                  {i < hearts ? "❤️" : "🖤"}
-                </span>
-              ))}
-            </span>
-          </div>
-          <div className="glass-panel p-8 mb-4">
-            <h2 className="text-3xl font-black text-rose-300 mb-2">
-              {current.fr}
-            </h2>
-            <button
-              onClick={() => speak(current.fr)}
-              className="text-xs bg-rose-500 text-black px-3 py-1 rounded-full font-bold"
-            >
-              🔊 Anhören
-            </button>
-          </div>
-          <input
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && check()}
-            className="w-full p-4 rounded-xl text-center text-xl bg-slate-800 text-white border-2 border-slate-600 mb-3 focus:border-rose-400 outline-none"
-            placeholder="Deutsches Wort (z.B. Die Schule)"
-            autoFocus
-          />
-          <button onClick={check} className="btn-action btn-red w-full py-3">
-            Prüfen
-          </button>
-          {result && (
-            <div
-              className={`mt-3 text-sm ${
-                result.type === "correct"
-                  ? "text-green-400"
-                  : result.type === "partial"
-                  ? "text-yellow-300"
-                  : "text-red-400"
-              }`}
-            >
-              {result.message}
-            </div>
-          )}
-        </div>
-      );
-    };
-
-    // --- SHOP ---
-    const Shop = ({ user, onBuy, onEquip, onClose }) => {
-      return (
-        <div className="max-w-md mx-auto p-4 min-h-screen pb-20">
-          <div className="flex justify-between items-center mb-4">
-            <button
-              onClick={onClose}
-              className="glass-panel px-3 py-1 text-xs text-slate-300"
-            >
-              ◀ Zurück
-            </button>
-            <div className="flex items-center gap-3 text-sm">
-              <span className="glass-panel px-3 py-1">Lvl {user.level}</span>
-              <span className="glass-panel px-3 py-1">
-                {user.coins} Münzen 💰
-              </span>
-            </div>
-          </div>
-
-          <h1 className="text-3xl font-black text-white mb-6 text-center">
-            Avatar & Lern-Shop
-          </h1>
-
-          <div className="grid grid-cols-3 gap-4 mb-8">
-            {SHOP_ITEMS.map((a) => {
-              const owned = user.unlocked.includes(a.id);
-              return (
-                <div
-                  key={a.id}
-                  onClick={() => {
-                    if (owned) {
-                      onEquip(a.id);
-                      playSound("correct");
-                    } else if (user.coins >= a.cost) {
-                      onBuy(a.cost, a.id);
-                      playSound("cash");
-                      safeConfetti();
-                    } else {
-                      alert("Zu wenig Münzen!");
+    const handleClick = (id)=>{
+        if(roundFinished) return;
+        if(open.includes(id) || matched.includes(id)) return;
+        if(open.length===2) return;
+        const newOpen=[...open,id];
+        setOpen(newOpen);
+        if(newOpen.length===2){
+            const c1 = cards.find(c=>c.id===newOpen[0]);
+            const c2 = cards.find(c=>c.id===newOpen[1]);
+            if(c1.pair===c2.pair){
+                setTimeout(()=>{
+                    setMatched(m=>[...m,c1.id,c2.id]);
+                    setOpen([]);
+                    if(matched.length+2===cards.length){
+                        setRoundFinished(true);
+                        fireConfetti();
+                        onReward({xp:40,coins:15});
                     }
-                  }}
-                  className={`shop-card glass-panel p-3 flex flex-col items-center ${
-                    user.avatar === a.id
-                      ? "border-green-500 bg-green-900/30"
-                      : "rarity-" + a.rarity
-                  } ${!owned && user.coins < a.cost ? "opacity-40" : ""}`}
-                >
-                  <div className="text-4xl mb-1">{a.icon}</div>
-                  <div className="font-bold text-xs text-center">{a.name}</div>
-                  {!owned && (
-                    <div className="bg-yellow-400 text-black px-2 py-0.5 rounded text-[0.65rem] font-bold mt-1">
-                      {a.cost} 💰
-                    </div>
-                  )}
-                  {owned && (
-                    <div className="text-green-300 text-[0.65rem] font-bold mt-1">
-                      {user.avatar === a.id ? "AKTIV" : "GEKAUFT"}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          <a
-            href="index.html"
-            className="glass-panel block text-center text-slate-300 text-xs py-3 font-bold"
-          >
-            🏠 Zur Startseite
-          </a>
-        </div>
-      );
-    };
-
-    // --- MODAL ---
-    const Modal = ({ title, children, onClose, type = "info" }) => (
-      <div className="modal-overlay" onClick={onClose}>
-        <div
-          className={`bg-slate-800 p-6 rounded-3xl border-4 w-full max-w-sm text-center relative shadow-2xl ${
-            type === "win"
-              ? "border-yellow-400"
-              : type === "error"
-              ? "border-red-500"
-              : "border-blue-500"
-          }`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <h2
-            className={`text-2xl font-black mb-4 font-game ${
-              type === "win"
-                ? "text-yellow-400"
-                : type === "error"
-                ? "text-red-400"
-                : "text-white"
-            }`}
-          >
-            {title}
-          </h2>
-          <div className="text-slate-300 mb-6 text-sm">{children}</div>
-          <button
-            onClick={onClose}
-            className={`btn-action w-full py-3 ${
-              type === "win"
-                ? "btn-yellow"
-                : type === "error"
-                ? "btn-red"
-                : "btn-blue"
-            }`}
-          >
-            OK
-          </button>
-        </div>
-      </div>
-    );
-
-    // --- APP ---
-    const initialUser = () => ({
-      name: "Agent",
-      coins: 100,
-      xp: 0,
-      level: 1,
-      avatar: "bear",
-      unlocked: ["bear"],
-      unlockedWorlds: [1]
-    });
-
-    const App = () => {
-      const [user, setUser] = useState(initialUser);
-      const [view, setView] = useState("map"); // map | game | shop
-      const [activeWorld, setActiveWorld] = useState(null);
-      const [gameMode, setGameMode] = useState(null);
-      const [modal, setModal] = useState(null);
-
-      useEffect(() => {
-        const stored = localStorage.getItem("franz_galaxy_v2");
-        if (stored) {
-          try {
-            setUser(JSON.parse(stored));
-          } catch (e) {}
-        }
-      }, []);
-
-      const save = (u) => {
-        setUser(u);
-        localStorage.setItem("franz_galaxy_v2", JSON.stringify(u));
-      };
-
-      const resetAll = () => {
-        if (!confirm("Willst du wirklich alles zurücksetzen?")) return;
-        const fresh = initialUser();
-        save(fresh);
-        setView("map");
-        setActiveWorld(null);
-        setGameMode(null);
-      };
-
-      const addProgress = (xpGain, coinGain) => {
-        let u = { ...user };
-        if (u.level >= MAX_LEVEL) {
-          // Level voll, nur Münzen
-          u.coins += coinGain;
-          save(u);
-          setModal({
-            title: "Max Level!",
-            type: "win",
-            msg: `Du hast das Max-Level erreicht. Du kannst weiter Münzen sammeln.`
-          });
-          return;
-        }
-
-        u.xp += xpGain;
-        u.coins += coinGain;
-
-        let leveledUp = false;
-        while (u.level < MAX_LEVEL && u.xp >= getXPForLevel(u.level + 1)) {
-          u.level++;
-          leveledUp = true;
-        }
-
-        if (leveledUp) {
-          playSound("win");
-          safeConfetti();
-          setModal({
-            title: "LEVEL UP!",
-            type: "win",
-            msg: `Du bist jetzt ${getRankTitle(u.level)} (Level ${u.level}).`
-          });
-        } else {
-          setModal({
-            title: "Mission geschafft!",
-            type: "win",
-            msg: `+${xpGain} XP und +${coinGain} Münzen.`
-          });
-        }
-
-        save(u);
-      };
-
-      // ---- VIEW: MAP / MENÜ ----
-      if (view === "map") {
-        const nextXP = getXPForLevel(
-          Math.min(user.level + 1, MAX_LEVEL)
-        );
-        const progress = Math.min(100, (user.xp / nextXP) * 100);
-
-        return (
-          <div className="max-w-md mx-auto p-4 min-h-screen flex flex-col">
-            <div className="flex justify-between items-center mb-4">
-              <a
-                href="index.html"
-                className="glass-panel px-3 py-1 text-xs text-slate-300"
-              >
-                🏠 Zur Startseite
-              </a>
-              <button
-                onClick={resetAll}
-                className="glass-panel px-3 py-1 text-xs text-red-300"
-              >
-                🔁 Alles zurücksetzen
-              </button>
-            </div>
-
-            <div className="glass-panel p-4 mb-6 flex justify-between items-center">
-              <div className="flex items-center gap-3">
-                <div className="text-4xl bg-white/10 p-2 rounded-xl">
-                  {SHOP_ITEMS.find((a) => a.id === user.avatar)?.icon || "🐻"}
-                </div>
-                <div>
-                  <div className="font-bold text-white">{user.name}</div>
-                  <div className="text-xs text-blue-400 font-bold uppercase">
-                    {getRankTitle(user.level)} • Lvl {user.level}/{MAX_LEVEL}
-                  </div>
-                </div>
-              </div>
-              <button
-                onClick={() => setView("shop")}
-                className="font-bold text-yellow-400 text-sm hover:scale-110 transition"
-              >
-                {user.coins} 💰 Shop
-              </button>
-            </div>
-
-            <div className="xp-track mb-4">
-              <div className="xp-fill" style={{ width: `${progress}%` }}></div>
-            </div>
-
-            <div className="space-y-6 pb-10">
-              {WORLDS.map((w) => {
-                const locked = user.level < w.reqLvl;
-                const isActive = activeWorld?.id === w.id;
-                return (
-                  <div key={w.id} className="relative">
-                    <div
-                      onClick={() => !locked && setActiveWorld(isActive ? null : w)}
-                      className={`glass-panel p-4 flex items-center gap-4 transition cursor-pointer border-l-4 ${
-                        locked ? "border-slate-500 opacity-40" : "border-blue-500 hover:bg-white/10"
-                      }`}
-                    >
-                      <div className="text-3xl">
-                        {locked ? "🔒" : w.icon}
-                      </div>
-                      <div className="flex-1">
-                        <div className="font-bold text-lg text-white">
-                          {w.name}
-                        </div>
-                        <div className="text-xs text-slate-400">
-                          {locked
-                            ? `Ab Level ${w.reqLvl}`
-                            : `${w.words.length} Wörter`}
-                        </div>
-                      </div>
-                      <div className="text-white text-sm">
-                        {isActive ? "▼" : "▶"}
-                      </div>
-                    </div>
-
-                    {isActive && !locked && (
-                      <div className="mt-3 grid grid-cols-2 gap-3 pop-in pl-4 border-l-2 border-blue-500">
-                        <button
-                          onClick={() => {
-                            setGameMode("match");
-                            setView("game");
-                          }}
-                          className="btn-action btn-blue py-2 text-xs"
-                        >
-                          🔗 Verbinden
-                        </button>
-                        <button
-                          onClick={() => {
-                            setGameMode("memory");
-                            setView("game");
-                          }}
-                          className="btn-action btn-green py-2 text-xs"
-                        >
-                          🃏 Memory
-                        </button>
-                        <button
-                          onClick={() => {
-                            setGameMode("quiz");
-                            setView("game");
-                          }}
-                          className="btn-action btn-purple py-2 text-xs"
-                        >
-                          ❓ Quiz
-                        </button>
-                        <button
-                          onClick={() => {
-                            setGameMode("listen");
-                            setView("game");
-                          }}
-                          className="btn-action btn-yellow py-2 text-xs text-black"
-                        >
-                          👂 Hören
-                        </button>
-                        <button
-                          onClick={() => {
-                            setGameMode("write");
-                            setView("game");
-                          }}
-                          className="btn-action btn-red py-2 text-xs col-span-2"
-                        >
-                          ✍️ Schreiben
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            {modal && (
-              <Modal
-                title={modal.title}
-                type={modal.type}
-                onClose={() => setModal(null)}
-              >
-                {modal.msg}
-              </Modal>
-            )}
-          </div>
-        );
-      }
-
-      // ---- VIEW: GAME ----
-      if (view === "game") {
-        const world = activeWorld;
-        if (!world) {
-          setView("map");
-          return null;
-        }
-
-        const handleFinish = (success) => {
-          if (success) {
-            // je nach Modus etwas andere Belohnung
-            if (gameMode === "memory" || gameMode === "match") {
-              addProgress(60, 25);
-            } else if (gameMode === "quiz" || gameMode === "listen") {
-              addProgress(40, 15);
-            } else if (gameMode === "write") {
-              addProgress(80, 30);
+                },600);
+            }else{
+                setTimeout(()=>setOpen([]),800);
             }
-          } else {
-            setModal({
-              title: "Versuch es noch einmal",
-              type: "error",
-              msg: "Zu viele Fehler. Übe die Wörter und starte die Mission neu."
-            });
-          }
-          setView("map");
-        };
-
-        return (
-          <div className="min-h-screen p-4 flex flex-col relative">
-            <div className="flex justify-between items-center mb-4 z-20">
-              <button
-                onClick={() => setView("map")}
-                className="glass-panel w-10 h-10 flex items-center justify-center text-white font-bold text-xl"
-              >
-                ✕
-              </button>
-              <div className="glass-panel px-3 py-1 text-xs text-blue-300 font-bold uppercase">
-                {world.name} • {gameMode}
-              </div>
-              <a
-                href="index.html"
-                className="glass-panel px-3 py-1 text-xs text-slate-300"
-              >
-                🏠 Start
-              </a>
-            </div>
-
-            <div className="flex-1 flex flex-col justify-center items-center w-full max-w-2xl mx-auto">
-              {gameMode === "memory" && (
-                <MemoryGame words={world.words} onFinish={handleFinish} />
-              )}
-              {gameMode === "match" && (
-                <MatchGame words={world.words} onFinish={handleFinish} />
-              )}
-              {gameMode === "quiz" && (
-                <QuizGame words={world.words} onFinish={handleFinish} />
-              )}
-              {gameMode === "listen" && (
-                <ListenGame words={world.words} onFinish={handleFinish} />
-              )}
-              {gameMode === "write" && (
-                <WriteGame words={world.words} onFinish={handleFinish} />
-              )}
-            </div>
-
-            {modal && (
-              <Modal
-                title={modal.title}
-                type={modal.type}
-                onClose={() => setModal(null)}
-              >
-                {modal.msg}
-              </Modal>
-            )}
-          </div>
-        );
-      }
-
-      // ---- VIEW: SHOP ----
-      if (view === "shop") {
-        return (
-          <Shop
-            user={user}
-            onClose={() => setView("map")}
-            onBuy={(cost, id) => {
-              const u = { ...user };
-              u.coins -= cost;
-              if (!u.unlocked.includes(id)) u.unlocked.push(id);
-              save(u);
-            }}
-            onEquip={(id) => {
-              const u = { ...user, avatar: id };
-              if (!u.unlocked.includes(id)) u.unlocked.push(id);
-              save(u);
-            }}
-          />
-        );
-      }
-
-      return null;
+        }
     };
 
-    const root = ReactDOM.createRoot(document.getElementById("root"));
-    root.render(<App />);
-  </script>
+    return (
+        <section className="max-w-5xl mx-auto px-4 mt-6">
+            <h2 className="font-fun text-xl text-white mb-2 flex items-center gap-2">
+                <i className="fa-solid fa-table-cells-large text-indigo-400"></i>
+                Memory – FR & DE
+            </h2>
+            <p className="text-slate-400 text-sm mb-4">
+                Decke immer zwei Karten auf. Ein Paar sind das französische Wort und die deutsche Übersetzung.
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {cards.map(card=>{
+                    const isOpen = open.includes(card.id) || matched.includes(card.id);
+                    return (
+                        <div key={card.id} className="memory-scene" onClick={()=>handleClick(card.id)}>
+                            <div className={`memory-card ${isOpen?"flipped":""}`}>
+                                <div className="memory-face memory-front">?</div>
+                                <div className={`memory-face memory-back ${card.lang==="fr"?"memory-back-fr":"memory-back-de"}`}>
+                                    <span className="px-1 leading-tight">
+                                        {card.txt}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+            {roundFinished && (
+                <div className="mt-4 text-sm text-emerald-300">
+                    Runde geschafft! Du hast XP und Münzen bekommen. Klicke oben auf einen anderen Modus oder lade die Seite neu für ein neues Memory.
+                </div>
+            )}
+        </section>
+    );
+}
+
+/* ----- Hör zu (Multiple Choice, Anti-Cheat) ----- */
+
+function ListenGame({words,onResult}) {
+    const [current,setCurrent]=useState(null);
+    const [options,setOptions]=useState([]);
+    const [state,setState]=useState("ready"); // ready | answered
+    const [wasCorrect,setWasCorrect]=useState(null);
+    const [hearts,setHearts]=useState(3);
+
+    const pickNew = ()=>{
+        const pool=[...words].sort(()=>Math.random()-0.5);
+        const correct=pool[0];
+        const distractors = pool.slice(1,5).map(w=>w.de);
+        const opt = [correct.de,...distractors].sort(()=>Math.random()-0.5);
+        setCurrent(correct);
+        setOptions(opt);
+        setState("ready");
+        setWasCorrect(null);
+    };
+
+    useEffect(()=>{pickNew()},[words]);
+
+    const handleAnswer=(de)=>{
+        if(state!=="ready") return;
+        const correct = normalize(de)===normalize(current.de);
+        setState("answered");
+        setWasCorrect(correct);
+        if(correct){
+            speakFR(current.fr);
+            fireConfetti();
+            onResult({xp:20,coins:8});
+        }else{
+            onResult({xp:0,coins:-3});
+            setHearts(h=>Math.max(0,h-1));
+        }
+    };
+
+    const handleNext=()=>{
+        if(hearts===0){
+            setHearts(3);
+        }
+        pickNew();
+    };
+
+    if(!current) return null;
+
+    return (
+        <section className="max-w-5xl mx-auto px-4 mt-6">
+            <div className="flex items-center justify-between mb-3">
+                <h2 className="font-fun text-xl text-white flex items-center gap-2">
+                    <i className="fa-solid fa-headphones text-sky-400"></i>
+                    Hör zu & wähle
+                </h2>
+                <div className="flex items-center gap-1 text-red-300 text-sm">
+                    {Array.from({length:3}).map((_,i)=>(
+                        <span key={i}>{i<hearts?"❤️":"🖤"}</span>
+                    ))}
+                </div>
+            </div>
+            <p className="text-slate-400 text-sm mb-4">
+                Drücke auf den Lautsprecher. Höre das französische Wort und wähle **genau eine** deutsche Bedeutung.
+                Du hast nur einen Versuch pro Wort.
+            </p>
+
+            <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-4 flex flex-col gap-4">
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={()=>speakFR(current.fr)}
+                        className="btn-main bg-sky-500 text-white text-sm">
+                        <i className="fa-solid fa-volume-high"></i> Abspielen
+                    </button>
+                    <span className="text-slate-300 text-sm">
+                        Französisches Wort: <span className="font-bold text-sky-300">{current.fr}</span>
+                    </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {options.map(opt=>{
+                        const isCorrect = normalize(opt)===normalize(current.de);
+                        let color="bg-slate-800 hover:bg-slate-700 text-slate-100";
+                        if(state==="answered"){
+                            if(isCorrect) color="bg-emerald-600 text-white";
+                            else if(wasCorrect===false && normalize(opt)===normalize(current.answer)) {
+                                // nix
+                            }
+                        }
+                        return (
+                            <button
+                                key={opt}
+                                disabled={state!=="ready"}
+                                onClick={()=>handleAnswer(opt)}
+                                className={`w-full px-3 py-3 rounded-xl text-sm font-bold border border-slate-700 ${color}
+                                           disabled:opacity-80 disabled:cursor-default`}>
+                                {opt}
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {state==="answered" && (
+                    <div className={`text-sm ${wasCorrect?"text-emerald-300":"text-red-300"}`}>
+                        {wasCorrect
+                            ? "Richtig! Du hast XP und Münzen bekommen."
+                            : `Leider falsch. Richtig wäre: "${current.de}".`}
+                    </div>
+                )}
+
+                <div className="flex justify-end">
+                    <button
+                        onClick={handleNext}
+                        className="btn-main bg-indigo-500 text-white text-xs">
+                        Nächstes Wort <i className="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+    );
+}
+
+/* ----- Schreiben (mit „fast richtig“ bei Artikeln) ----- */
+
+function WriteGame({words,onResult}) {
+    const [current,setCurrent]=useState(null);
+    const [direction,setDirection]=useState("fr2de");
+    const [input,setInput]=useState("");
+    const [feedback,setFeedback]=useState(null);
+
+    const pickNew = ()=>{
+        const w = words[Math.floor(Math.random()*words.length)];
+        setCurrent(w);
+        setDirection(Math.random()<0.5?"fr2de":"de2fr");
+        setInput("");
+        setFeedback(null);
+    };
+
+    useEffect(()=>{pickNew()},[words]);
+
+    if(!current) return null;
+
+    const correctAnswer = direction==="fr2de" ? current.de : current.fr;
+
+    const check = ()=>{
+        const user = input.trim();
+        if(!user) return;
+        const normUser = normalize(user);
+        const normCorrect = normalize(correctAnswer);
+
+        if(normUser===normCorrect){
+            fireConfetti();
+            onResult({xp:25,coins:10});
+            setFeedback({type:"full",msg:"Vollständig richtig! Super."});
+            return;
+        }
+
+        const basicUser = direction==="fr2de" ? stripDeArticle(user) : stripFrArticle(user);
+        const basicCorrect = direction==="fr2de" ? stripDeArticle(correctAnswer) : stripFrArticle(correctAnswer);
+
+        if(basicUser===basicCorrect){
+            onResult({xp:15,coins:5});
+            setFeedback({
+                type:"partial",
+                msg:`Das Wort stimmt, aber der Artikel war anders. Richtig wäre z.B.: "${correctAnswer}".`
+            });
+        }else{
+            onResult({xp:0,coins:-2});
+            setFeedback({
+                type:"wrong",
+                msg:`Leider falsch. Richtig wäre: "${correctAnswer}".`
+            });
+        }
+    };
+
+    return (
+        <section className="max-w-5xl mx-auto px-4 mt-6">
+            <h2 className="font-fun text-xl text-white mb-2 flex items-center gap-2">
+                <i className="fa-solid fa-pen text-emerald-400"></i>
+                Schreiben & Übersetzen
+            </h2>
+            <p className="text-slate-400 text-sm mb-4">
+                Schreibe die Übersetzung. Gross/klein ist egal. Bei falschem Artikel bekommst du noch halbe Punkte.
+            </p>
+            <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-4 flex flex-col gap-4">
+                <div className="text-sm text-slate-300">
+                    {direction==="fr2de" ? (
+                        <>Übersetze ins Deutsche: <span className="font-bold text-sky-300">{current.fr}</span></>
+                    ) : (
+                        <>Übersetze ins Französische: <span className="font-bold text-amber-300">{current.de}</span></>
+                    )}
+                </div>
+                <input
+                    className="w-full px-3 py-3 rounded-xl bg-slate-950 border border-slate-700 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                    value={input}
+                    onChange={e=>setInput(e.target.value)}
+                    onKeyDown={e=>{if(e.key==="Enter") check();}}
+                    placeholder="Antwort hier eingeben..."
+                />
+                {feedback && (
+                    <div className={`text-sm ${
+                        feedback.type==="full" ? "text-emerald-300" :
+                        feedback.type==="partial" ? "text-yellow-300" : "text-red-300"
+                    }`}>
+                        {feedback.msg}
+                    </div>
+                )}
+                <div className="flex justify-between">
+                    <button
+                        onClick={pickNew}
+                        className="btn-main bg-slate-800 text-slate-100 text-xs">
+                        Überspringen
+                    </button>
+                    <button
+                        onClick={check}
+                        className="btn-main bg-emerald-500 text-white text-xs">
+                        Prüfen <i className="fa-solid fa-check"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+    );
+}
+
+/* ----- Shop ----- */
+
+function Shop({profile,setProfile}) {
+    const buy = (item)=>{
+        if(profile.bought.includes(item.id)) return;
+        if(profile.coins < item.price) return;
+        const newProfile = {
+            ...profile,
+            coins: profile.coins - item.price,
+            bought: [...profile.bought,item.id]
+        };
+        saveProfile(newProfile);
+        setProfile(newProfile);
+    };
+
+    const equipAvatar = (item)=>{
+        if(!profile.bought.includes(item.id) && item.price>0) return;
+        const newProfile = {...profile,avatar:item.emoji};
+        saveProfile(newProfile);
+        setProfile(newProfile);
+    };
+
+    const cardClass = rarity=>{
+        if(rarity==="legendary") return "shop-card shop-legendary";
+        if(rarity==="epic") return "shop-card shop-epic";
+        if(rarity==="rare") return "shop-card shop-rare";
+        return "shop-card shop-common";
+    };
+
+    return (
+        <section className="max-w-5xl mx-auto px-4 mt-6 mb-10">
+            <h2 className="font-fun text-xl text-white mb-2 flex items-center gap-2">
+                <i className="fa-solid fa-store text-amber-400"></i>
+                Shop – Tiere & Lern-Helfer
+            </h2>
+            <p className="text-slate-400 text-sm mb-4">
+                Kaufe neue Tier-Avatare oder kleine Hilfen fürs Lernen.
+                Einige Dinge (z.B. Doppel-XP) gelten nur für die nächste Runde.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {shopItems.map(item=>{
+                    const owned = profile.bought.includes(item.id) || item.price===0;
+                    return (
+                        <div key={item.id} className={cardClass(item.rarity)}>
+                            <div className="flex items-center justify-between">
+                                <div className="text-3xl">{item.emoji}</div>
+                                <span className="text-[10px] uppercase tracking-wide text-slate-300">
+                                    {item.type==="avatar"?"Avatar":item.type==="boost"?"Boost":"Thema"}
+                                </span>
+                            </div>
+                            <div className="mt-1">
+                                <div className="font-bold text-sm text-white">{item.name}</div>
+                                <div className="text-[11px] text-slate-300">{item.desc}</div>
+                            </div>
+                            <div className="mt-2 flex items-center justify-between text-xs">
+                                <span className="flex items-center gap-1 text-amber-300">
+                                    <i className="fa-solid fa-coins text-amber-400"></i>
+                                    {item.price}
+                                </span>
+                                {item.type==="avatar" ? (
+                                    <div className="flex gap-1">
+                                        <button
+                                            onClick={()=>buy(item)}
+                                            className="px-2 py-1 rounded-full bg-slate-800 text-slate-100 disabled:opacity-40"
+                                            disabled={owned || profile.coins<item.price}>
+                                            {owned?"Gekauft":"Kaufen"}
+                                        </button>
+                                        <button
+                                            onClick={()=>equipAvatar(item)}
+                                            className="px-2 py-1 rounded-full bg-indigo-500 text-white">
+                                            Tragen
+                                        </button>
+                                    </div>
+                                ):(
+                                    <button
+                                        onClick={()=>buy(item)}
+                                        className="px-2 py-1 rounded-full bg-slate-800 text-slate-100 disabled:opacity-40"
+                                        disabled={owned || profile.coins<item.price}>
+                                        {owned?"Im Inventar":"Kaufen"}
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </section>
+    );
+}
+
+/* ----- HAUPT-APP ----- */
+
+function App(){
+    const [words,setWords]=useState(fallbackWords);
+    const [profile,setProfile]=useState(loadProfile());
+    const [mode,setMode]=useState("memory");
+
+    // JSON laden (falls vorhanden)
+    useEffect(()=>{
+        async function loadJson(){
+            try{
+                const res = await fetch("data/franz_words.json");
+                if(!res.ok) return;
+                const json = await res.json();
+                if(Array.isArray(json.words)){
+                    setWords(json.words);
+                }else if(Array.isArray(json)){
+                    setWords(json);
+                }
+            }catch(e){
+                // Fallback bleibt
+            }
+        }
+        loadJson();
+    },[]);
+
+    const addReward = ({xp,coins})=>{
+        const newP = {...profile};
+        if(xp) newP.xp = Math.max(0,newP.xp + xp);
+        if(coins){
+            newP.coins = Math.max(0,newP.coins + coins);
+        }
+        saveProfile(newP);
+        setProfile(newP);
+    };
+
+    const resetAll = ()=>{
+        if(!confirm("Wirklich alles löschen? Level, Münzen & Shop werden zurückgesetzt.")) return;
+        localStorage.removeItem("franz_profile_v1");
+        setProfile(defaultProfile);
+    };
+
+    return (
+        <div className="pb-10">
+            <Header profile={profile} onReset={resetAll}/>
+            <ModeTabs mode={mode} setMode={setMode}/>
+            {mode==="memory" && <MemoryGame words={words} onReward={addReward}/>}
+            {mode==="listen" && <ListenGame words={words} onResult={addReward}/>}
+            {mode==="write" && <WriteGame words={words} onResult={addReward}/>}
+            {mode==="shop" && <Shop profile={profile} setProfile={setProfile}/>}
+        </div>
+    );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
 </body>
 </html>
