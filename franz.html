@@ -3,125 +3,319 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Französisch Abenteuer – 4. Klasse</title>
+    <title>Französisch Galaxy – 4. Klasse</title>
 
-    <!-- Tailwind & React -->
+    <!-- ENGINE -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-    <!-- Extras -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
 
     <style>
-        body{
-            font-family:'Nunito',sans-serif;
-            background:linear-gradient(180deg,#0f172a 0%,#020617 60%,#0b1120 100%);
-            color:#e5e7eb;
+        :root {
+            --primary: #6366f1;
+            --secondary: #a855f7;
+            --bg-dark: #020617;
         }
-        .font-fun{font-family:'Fredoka',sans-serif;}
 
-        /* Karten für Memory */
-        .memory-scene{perspective:1000px;height:110px;cursor:pointer;}
-        .memory-card{
-            width:100%;height:100%;position:relative;
-            transform-style:preserve-3d;
-            transition:transform .45s;
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-dark);
+            color: #e5e7eb;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
         }
-        .memory-card.flipped{transform:rotateY(180deg);}
-        .memory-face{
-            position:absolute;inset:0;
-            backface-visibility:hidden;
-            border-radius:18px;
-            display:flex;align-items:center;justify-content:center;
-            box-shadow:0 4px 10px rgba(0,0,0,.4);
-            border:3px solid rgba(148,163,184,.6);
+
+        .font-game { font-family: 'Baloo 2', cursive; }
+
+        /* Hintergrund Sterne */
+        .stars {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background: radial-gradient(circle at bottom, #1e293b 0%, #020617 60%, #000 100%);
+            overflow: hidden;
         }
-        .memory-front{
-            background:linear-gradient(135deg,#4f46e5,#ec4899);
-            color:white;font-size:2.4rem;
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 999px;
+            opacity: 0.5;
+            animation: twinkle 4s infinite;
         }
-        .memory-back{
-            transform:rotateY(180deg);
+
+        @keyframes twinkle {
+            0%,100% { opacity: 0.2; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: 24px;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            box-shadow: 0 12px 40px rgba(15, 23, 42, 0.8);
+        }
+
+        .btn-main {
+            border-radius: 16px;
+            padding: 0.75rem 1.4rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            border-bottom-width: 6px;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.35);
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        .btn-main:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.35);
+            border-bottom-width: 2px;
+        }
+
+        .btn-blue   { background: #3b82f6; border-color:#1d4ed8; color:white; }
+        .btn-green  { background: #22c55e; border-color:#15803d; color:white; }
+        .btn-purple { background: #8b5cf6; border-color:#6d28d9; color:white; }
+        .btn-red    { background: #ef4444; border-color:#b91c1c; color:white; }
+        .btn-yellow { background: #facc15; border-color:#ca8a04; color:#1f2937; }
+
+        .mode-card {
+            border-radius: 24px;
+            padding: 1.6rem;
+            cursor: pointer;
+            transition: transform 0.18s, box-shadow 0.18s;
+            box-shadow: 0 10px 25px rgba(15,23,42,0.9);
+            border: 1px solid rgba(148,163,184,0.4);
+            background: radial-gradient(circle at top, rgba(148,163,184,0.25), rgba(15,23,42,0.95));
+        }
+
+        .mode-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 16px 35px rgba(15,23,42,1);
+        }
+
+        .xp-track {
+            height: 14px;
+            border-radius: 999px;
+            background: rgba(15,23,42,0.9);
+            overflow: hidden;
+            border: 1px solid rgba(148,163,184,0.5);
+        }
+
+        .xp-fill {
+            height: 100%;
+            background: linear-gradient(90deg,#22c55e,#4ade80,#22c55e);
+            transition: width 0.6s ease-out;
+        }
+
+        /* Memory Karten */
+        .scene {
+            perspective: 1000px;
+            height: 130px;
+        }
+
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
+            cursor: pointer;
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card.matched {
+            animation: popOut 0.4s forwards;
+        }
+
+        .face {
+            position: absolute;
+            inset: 0;
+            border-radius: 18px;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+            text-align: center;
+            box-shadow: 0 6px 16px rgba(15,23,42,0.8);
+            border: 2px solid rgba(148,163,184,0.4);
+        }
+
+        .front {
+            background: linear-gradient(135deg,#6366f1,#a855f7);
+            color: white;
+            font-size: 2.5rem;
+        }
+
+        .back {
+            background: #020617;
+            transform: rotateY(180deg);
+            font-weight: 800;
+            font-size: 1.2rem;
+        }
+
+        .type-fr .back { color:#60a5fa; border-color:#3b82f6; }
+        .type-de .back { color:#fb923c; border-color:#f97316; }
+
+        @keyframes popOut {
+            0% { transform: scale(1); opacity:1; }
+            50% { transform: scale(1.2); opacity:1; }
+            100% { transform: scale(0); opacity:0; }
+        }
+
+        /* Antwort-Karten */
+        .answer-btn {
+            border-radius: 16px;
+            padding: 0.75rem 1rem;
+            font-weight: 800;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid #334155;
+            background: #020617;
+            box-shadow: 0 4px 0 #020617;
+            transition: transform 0.08s, box-shadow 0.08s, border-color 0.08s, background 0.08s;
+        }
+
+        .answer-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #020617;
+        }
+
+        .answer-selected {
+            border-color:#38bdf8;
             background:#0f172a;
-            font-size:1.2rem;
-            font-weight:800;
-            text-align:center;
-            padding:6px;
         }
 
-        .memory-back-fr{border-color:#60a5fa;color:#bfdbfe;}
-        .memory-back-de{border-color:#f97316;color:#fed7aa;}
+        .answer-correct   { border-color:#22c55e; }
+        .answer-wrong     { border-color:#ef4444; }
 
-        /* Buttons */
-        .btn-main{
-            border-radius:999px;
-            font-weight:800;
-            text-transform:uppercase;
-            letter-spacing:.05em;
-            padding:.7rem 1.4rem;
-            display:inline-flex;
-            align-items:center;
-            gap:.5rem;
-            box-shadow:0 6px 0 rgba(15,23,42,.9);
-            transition:transform .1s, box-shadow .1s;
-        }
-        .btn-main:active{
-            transform:translateY(4px);
-            box-shadow:0 0 0 rgba(15,23,42,.9);
+        /* Shop Karten */
+        .shop-card {
+            border-radius: 18px;
+            padding: 0.9rem;
+            cursor: pointer;
+            border-width: 2px;
+            border-style: solid;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 6px 18px rgba(15,23,42,0.9);
+            transition: transform 0.13s, box-shadow 0.13s;
+            background: #020617;
         }
 
-        /* Shop-Karten */
-        .shop-card{
-            border-radius:18px;
-            padding:12px;
-            border-width:3px;
-            border-style:solid;
+        .shop-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 10px 26px rgba(15,23,42,1);
+        }
+
+        .rarity-common     { border-color:#94a3b8; }
+        .rarity-rare       { border-color:#3b82f6; box-shadow:0 0 12px rgba(59,130,246,0.55); }
+        .rarity-epic       { border-color:#a855f7; box-shadow:0 0 16px rgba(168,85,247,0.7); }
+        .rarity-legendary  { border-color:#facc15; box-shadow:0 0 22px rgba(250,204,21,0.8); }
+
+        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake {
+            10%,90%{transform:translate3d(-1px,0,0);}
+            20%,80%{transform:translate3d(2px,0,0);}
+            30%,50%,70%{transform:translate3d(-4px,0,0);}
+            40%,60%{transform:translate3d(4px,0,0);}
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15,23,42,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 40;
+            backdrop-filter: blur(6px);
+        }
+
+        /* Input */
+        .input-de {
+            width: 100%;
+            border-radius: 16px;
+            padding: 0.9rem 1rem;
+            font-size: 1.1rem;
             background:#020617;
-            display:flex;
-            flex-direction:column;
-            gap:6px;
-            cursor:pointer;
-            transition:transform .15s, box-shadow .15s, border-color .15s;
-        }
-        .shop-card:hover{
-            transform:translateY(-3px);
-            box-shadow:0 12px 25px rgba(0,0,0,.7);
-        }
-        .shop-common{border-color:#9ca3af;}
-        .shop-rare{border-color:#3b82f6;box-shadow:0 0 12px rgba(59,130,246,.5);}
-        .shop-epic{border-color:#a855f7;box-shadow:0 0 16px rgba(168,85,247,.6);}
-        .shop-legendary{
-            border-color:#eab308;
-            box-shadow:0 0 22px rgba(234,179,8,.7);
-            background:linear-gradient(135deg,#111827,#422006);
+            border:2px solid #334155;
+            outline:none;
         }
 
-        /* Overlay */
-        .modal-overlay{
-            position:fixed;inset:0;
-            background:rgba(15,23,42,.85);
-            display:flex;align-items:center;justify-content:center;
-            z-index:50;
-            backdrop-filter:blur(6px);
+        .input-de:focus {
+            border-color:#6366f1;
+            box-shadow:0 0 0 3px rgba(99,102,241,0.4);
         }
     </style>
 </head>
-<body class="min-h-screen">
-
+<body class="min-h-screen pb-10">
+<div class="stars" id="stars"></div>
 <div id="root"></div>
 
 <script type="text/babel">
-const {useState,useEffect,useRef} = React;
+const { useState, useEffect } = React;
 
-/* ---------- HILFSFUNKTIONEN ---------- */
+/* Sterne im Hintergrund */
+const starRoot = document.getElementById('stars');
+for (let i = 0; i < 60; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2 + 1;
+    s.style.width = size + 'px';
+    s.style.height = size + 'px';
+    s.style.top = Math.random() * 100 + '%';
+    s.style.left = Math.random() * 100 + '%';
+    s.style.animationDelay = (Math.random() * 4) + 's';
+    starRoot.appendChild(s);
+}
 
-const speakFR = (text)=>{
-    if(!('speechSynthesis' in window)) return;
+/* Hilfsfunktionen */
+const XP_LEVELS = [0, 200, 500, 900, 1500, 2300, 3300, 4500, 6000, 8000, 11000];
+
+const WORDS = [
+    // Pronomen / Basis
+    { fr:"Je", de:"Ich" }, { fr:"Tu", de:"Du" }, { fr:"Il", de:"Er" }, { fr:"Elle", de:"Sie" },
+    { fr:"Nous", de:"Wir" }, { fr:"Vous", de:"Ihr / Sie" }, { fr:"Ils", de:"Sie (m)" }, { fr:"Elles", de:"Sie (w)" },
+    // Aller & Transport
+    { fr:"Aller", de:"Gehen" }, { fr:"Je vais", de:"Ich gehe" }, { fr:"Tu vas", de:"Du gehst" },
+    { fr:"Il va", de:"Er geht" }, { fr:"Nous allons", de:"Wir gehen" }, { fr:"Vous allez", de:"Ihr geht" },
+    { fr:"Ils vont", de:"Sie gehen" }, { fr:"À pied", de:"Zu Fuss" },
+    { fr:"Le train", de:"Der Zug" }, { fr:"La voiture", de:"Das Auto" },
+    { fr:"Le parcours", de:"Die Strecke / Der Rundweg" },
+    // Geld / Zahlen – nur ein Teil, reicht fürs Spiel
+    { fr:"Dix-huit", de:"Achtzehn" }, { fr:"Onze", de:"Elf" }, { fr:"Vingt", de:"Zwanzig" },
+    { fr:"Dix-sept", de:"Siebzehn" }, { fr:"Treize", de:"Dreizehn" }, { fr:"Cinq", de:"Fünf" },
+    { fr:"Seize", de:"Sechzehn" },
+    // Tiere + Story-Wörter
+    { fr:"La souris", de:"Die Maus" }, { fr:"Le lapin", de:"Der Hase" }, { fr:"La tortue", de:"Die Schildkröte" },
+    { fr:"L'écureuil", de:"Das Eichhörnchen" }, { fr:"Le secret", de:"Das Geheimnis" },
+    { fr:"La pomme", de:"Der Apfel" },
+    { fr:"Organiser", de:"Organisieren" }, { fr:"Raconter", de:"Erzählen" },
+    { fr:"Inviter", de:"Einladen" }, { fr:"Pour", de:"Für" },
+    // Strukturwörter
+    { fr:"D'abord", de:"Zuerst" }, { fr:"Puis", de:"Dann" },
+    { fr:"Après", de:"Danach" }, { fr:"Finalement", de:"Schliesslich" },
+];
+
+const speakFR = (text) => {
+    if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'fr-FR';
@@ -129,651 +323,840 @@ const speakFR = (text)=>{
     window.speechSynthesis.speak(u);
 };
 
-const fireConfetti = ()=>{
-    if(window.confetti){
-        window.confetti({particleCount:80,spread:70,origin:{y:0.6}});
+const safeConfetti = () => {
+    if (window.confetti) {
+        window.confetti({ particleCount: 120, spread: 70, origin: { y: 0.7 } });
     }
 };
 
-const normalize = s => s.toLowerCase().trim();
-const stripFrArticle = s=>{
-    s = normalize(s);
-    if(s.startsWith("l'")) return s.slice(2);
-    const arts = ["le ","la ","les "];
-    for(const a of arts) if(s.startsWith(a)) return s.slice(a.length);
-    return s;
-};
-const stripDeArticle = s=>{
-    s = normalize(s);
-    const arts = ["der ","die ","das "];
-    for(const a of arts) if(s.startsWith(a)) return s.slice(a.length);
-    return s;
+const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+const shuffle = (arr) => {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
 };
 
-/* ---------- STANDARD-WÖRTER (Fallback, falls JSON fehlt) ---------- */
+/* Normalisierung für deutsche Antworten */
+const articleSet = new Set([
+    "der","die","das","ein","eine","einen","dem","den","le","la","les","un","une","des","l'"
+]);
 
-const fallbackWords = [
-    // Pronomen
-    {fr:"je",de:"ich",topic:"pronomen"},
-    {fr:"tu",de:"du",topic:"pronomen"},
-    {fr:"il",de:"er",topic:"pronomen"},
-    {fr:"elle",de:"sie",topic:"pronomen"},
-    {fr:"nous",de:"wir",topic:"pronomen"},
-    {fr:"vous",de:"ihr",topic:"pronomen"},
-    {fr:"ils",de:"sie (m)",topic:"pronomen"},
-    {fr:"elles",de:"sie (w)",topic:"pronomen"},
-    // slowUp / Transport
-    {fr:"le train",de:"der Zug",topic:"slowup"},
-    {fr:"la voiture",de:"das Auto",topic:"slowup"},
-    {fr:"le parcours",de:"die Strecke",topic:"slowup"},
-    {fr:"à pied",de:"zu Fuss",topic:"slowup"},
-    {fr:"jusqu'à",de:"bis",topic:"slowup"},
-    // Tiere
-    {fr:"la souris",de:"die Maus",topic:"tiere"},
-    {fr:"le lapin",de:"der Hase",topic:"tiere"},
-    {fr:"la tortue",de:"die Schildkröte",topic:"tiere"},
-    {fr:"le chien",de:"der Hund",topic:"tiere"},
-    {fr:"le chat",de:"die Katze",topic:"tiere"},
-    {fr:"l'écureuil",de:"das Eichhörnchen",topic:"tiere"},
-    // Schule / Alltag
-    {fr:"la bibliothèque",de:"die Bibliothek",topic:"schule"},
-    {fr:"l'école",de:"die Schule",topic:"schule"},
-    {fr:"le secret",de:"das Geheimnis",topic:"schule"},
-    {fr:"la pomme",de:"der Apfel",topic:"schule"},
-    {fr:"la bande dessinée",de:"der Comic",topic:"schule"},
-    // Verben
-    {fr:"organiser",de:"organisieren",topic:"verben"},
-    {fr:"raconter",de:"erzählen",topic:"verben"},
-    {fr:"inviter",de:"einladen",topic:"verben"},
-    {fr:"cacher",de:"verstecken",topic:"verben"},
-    {fr:"garder",de:"(für sich) behalten",topic:"verben"},
-    // Zahlen rund ums Geld
-    {fr:"onze",de:"elf",topic:"zahlen"},
-    {fr:"douze",de:"zwölf",topic:"zahlen"},
-    {fr:"treize",de:"dreizehn",topic:"zahlen"},
-    {fr:"seize",de:"sechzehn",topic:"zahlen"},
-    {fr:"dix-huit",de:"achtzehn",topic:"zahlen"},
-    {fr:"vingt",de:"zwanzig",topic:"zahlen"},
-    {fr:"dix-sept",de:"siebzehn",topic:"zahlen"}
+const normalize = (str) =>
+    str.toLowerCase().trim()
+        .replace(/\s+/g," ")
+        .replace(/[.!?;,]/g,"");
+
+const stripArticle = (str) => {
+    const parts = str.split(" ");
+    if (parts.length === 0) return "";
+    if (articleSet.has(parts[0])) {
+        parts.shift();
+    }
+    return parts.join(" ");
+};
+
+const compareGerman = (correctRaw, userRaw) => {
+    const cNorm = normalize(correctRaw);
+    const uNorm = normalize(userRaw);
+
+    if (!uNorm) return {status:"empty"};
+
+    if (uNorm === cNorm) {
+        return {status:"full", note:null};
+    }
+
+    const cNoArt = stripArticle(cNorm);
+    const uNoArt = stripArticle(uNorm);
+
+    if (uNoArt && uNoArt === cNoArt) {
+        return {
+            status:"partial",
+            note:"Die Bedeutung stimmt, aber der Artikel war nicht korrekt."
+        };
+    }
+
+    return {status:"wrong"};
+};
+
+/* Shop Items */
+const SHOP_ITEMS = [
+    // Common
+    { id:"cat",   name:"Katze",  emoji:"🐱", price:80,  rarity:"common",    type:"avatar", desc:"Schnurrende Lern-Partnerin." },
+    { id:"dog",   name:"Hund",   emoji:"🐶", price:80,  rarity:"common",    type:"avatar", desc:"Treuer Lern-Buddy." },
+    { id:"owl",   name:"Eule",   emoji:"🦉", price:110, rarity:"rare",      type:"avatar", desc:"Bringt Nachhilfe in der Nacht." },
+    { id:"panda", name:"Panda",  emoji:"🐼", price:130, rarity:"rare",      type:"avatar", desc:"Entspannt, aber schlau." },
+    { id:"lion",  name:"Löwe",   emoji:"🦁", price:160, rarity:"rare",      type:"avatar", desc:"Brüllt, wenn du Fehler machst." },
+    { id:"unicorn", name:"Einhorn", emoji:"🦄", price:260, rarity:"epic",  type:"avatar", desc:"Magische XP-Funken." },
+    { id:"dragon", name:"Drache", emoji:"🐲", price:320, rarity:"epic",    type:"avatar", desc:"Bewacht deine Highscores." },
+
+    // Lern-Booster
+    { id:"double_xp_5", name:"Doppel-XP (5 Runden)", emoji:"⚡", price:200, rarity:"rare", type:"boost", desc:"5 Aufgaben lang doppelte XP." },
+    { id:"extra_hint",  name:"Tipp-Helfer", emoji:"💡", price:150, rarity:"rare", type:"boost", desc:"Schaltet einen Hinweis-Button frei." },
+
+    // ganz hinten: Bär & Fuchs – teuer / legendär
+    { id:"fox",   name:"Fuchs",  emoji:"🦊", price:600, rarity:"legendary", type:"avatar", desc:"Super-seltener Fuchs. Nur für Profis." },
+    { id:"bear",  name:"Bär",    emoji:"🐻", price:650, rarity:"legendary", type:"avatar", desc:"Galaktischer Bär, der über alles wacht." },
 ];
 
-/* ---------- LEVEL & PROFIL ---------- */
-
-const MAX_LEVEL = 20;
-const xpForLevel = lvl => 150 + (lvl-1)*80;
-const calcLevel = (xp)=>{
-    let lvl=1, rest=xp;
-    while(lvl<MAX_LEVEL && rest>=xpForLevel(lvl)){
-        rest-=xpForLevel(lvl);
-        lvl++;
-    }
-    const next = lvl<MAX_LEVEL ? xpForLevel(lvl) : 0;
-    return {level:lvl,progress: lvl===MAX_LEVEL?1:rest/next};
-};
-
-const defaultProfile = {
-    xp:0,
-    coins:0,
-    avatar:"🐻",
-    bought:[],
-};
-
-const loadProfile = ()=>{
-    try{
-        const raw = localStorage.getItem("franz_profile_v1");
-        if(!raw) return defaultProfile;
-        return {...defaultProfile,...JSON.parse(raw)};
-    }catch(e){
-        return defaultProfile;
-    }
-};
-
-const saveProfile = (p)=>{
-    try{
-        localStorage.setItem("franz_profile_v1",JSON.stringify(p));
-    }catch(e){}
-};
-
-/* ---------- SHOP-DATEN ---------- */
-
-const shopItems = [
-    // Avatare
-    {id:"bear",type:"avatar",emoji:"🐻",name:"Bär Bruno",desc:"Der gemütliche Beschützer.",price:0,rarity:"common"},
-    {id:"fox",type:"avatar",emoji:"🦊",name:"Fuchs Foxy",desc:"Superschnell beim Denken.",price:80,rarity:"rare"},
-    {id:"owl",type:"avatar",emoji:"🦉",name:"Eule Luna",desc:"Hilft beim Konzentrieren.",price:120,rarity:"rare"},
-    {id:"turtle",type:"avatar",emoji:"🐢",name:"Schildkröte Turbo",desc:"Langsam, aber fehlerfrei.",price:180,rarity:"epic"},
-    {id:"dragon",type:"avatar",emoji:"🐲",name:"Drache Draco",desc:"Legendärer Lernmeister.",price:350,rarity:"legendary"},
-    // Lern-Hilfen
-    {id:"hint",type:"boost",emoji:"💡",name:"Hinweis-Ticket",desc:"+1 Hinweis im Schreib-Modus.",price:40,rarity:"common"},
-    {id:"doublexp",type:"boost",emoji:"⚡",name:"Doppel-XP (1 Runde)",desc:"Nächste Runde +100% XP.",price:120,rarity:"epic"},
-    {id:"heart",type:"boost",emoji:"❤️",name:"Extra Herz",desc:"Ein Fehler mehr erlaubt in Hör zu.",price:70,rarity:"rare"},
-    // Kosmetik
-    {id:"theme-forest",type:"theme",emoji:"🌲",name:"Wald-Thema",desc:"Grüner Hintergrund.",price:90,rarity:"rare"},
-    {id:"theme-space",type:"theme",emoji:"✨",name:"Galaxy-Thema",desc:"Leuchtende Sterne.",price:90,rarity:"rare"}
+/* Glücksrad */
+const SPIN_REWARDS = [
+    { type:"coins", amount:50,  label:"+50 Münzen",  weight:30 },
+    { type:"coins", amount:120, label:"+120 Münzen", weight:20 },
+    { type:"xp",    amount:200, label:"+200 XP",      weight:20 },
+    { type:"xp",    amount:400, label:"+400 XP",      weight:10 },
+    { type:"item",  rarity:"rare",      label:"Zufälliger seltener Avatar",  weight:10 },
+    { type:"item",  rarity:"legendary", label:"Ultra seltener Avatar!",      weight:5 },
+    { type:"nothing", label:"Leider nix…",           weight:5 }
 ];
 
-/* ---------- COMPONENTS ---------- */
+const chooseWeighted = (arr) => {
+    const total = arr.reduce((s, r) => s + r.weight, 0);
+    let r = Math.random() * total;
+    for (const item of arr) {
+        if (r < item.weight) return item;
+        r -= item.weight;
+    }
+    return arr[arr.length - 1];
+};
 
-function Header({profile,onReset}) {
-    const {level,progress} = calcLevel(profile.xp);
-    return (
-        <header className="px-4 pt-4 pb-3 border-b border-slate-800 bg-slate-950/60 backdrop-blur">
-            <div className="max-w-5xl mx-auto flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div className="flex items-center gap-3">
-                    <a href="index.html" className="btn-main bg-white text-slate-800 text-xs md:text-sm">
-                        <i className="fa-solid fa-house"></i>
-                        Startseite
-                    </a>
-                    <div>
-                        <h1 className="font-fun text-2xl md:text-3xl text-white flex items-center gap-2">
-                            <span className="text-3xl">{profile.avatar}</span>
-                            <span>Französisch-Abenteuer</span>
-                        </h1>
-                        <p className="text-slate-400 text-xs md:text-sm">
-                            4. Klasse • Wörter, Hören, Schreiben & Shop
-                        </p>
-                    </div>
-                </div>
-                <div className="flex flex-col md:items-end gap-1 text-xs md:text-sm">
-                    <div className="flex items-center gap-4">
-                        <div>
-                            <div className="flex justify-between text-slate-400 text-[11px] mb-1">
-                                <span>Level {level}</span>
-                                <span>{Math.round(progress*100)}%</span>
-                            </div>
-                            <div className="w-40 h-2 bg-slate-800 rounded-full overflow-hidden">
-                                <div className="h-full bg-gradient-to-r from-emerald-400 to-lime-400"
-                                     style={{width:`${progress*100}%`}}></div>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <span className="flex items-center gap-1 text-amber-300">
-                                <i className="fa-solid fa-coins text-amber-400"></i>
-                                {profile.coins}
-                            </span>
-                            <button
-                                onClick={onReset}
-                                className="text-xs text-red-300 hover:text-red-400 underline decoration-dotted">
-                                Alles zurücksetzen
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </header>
-    );
-}
+/* Haupt-App */
+const App = () => {
+    const [mode, setMode] = useState("menu"); // menu | memory | listen | write | shop
 
-function ModeTabs({mode,setMode}) {
-    const tab = (id,label,icon) => (
-        <button
-            key={id}
-            onClick={()=>setMode(id)}
-            className={`flex-1 px-3 py-2 rounded-full text-xs md:text-sm font-bold flex items-center justify-center gap-2
-                        transition ${mode===id
-                        ? "bg-indigo-500 text-white shadow-lg"
-                        : "bg-slate-800/60 text-slate-300 hover:bg-slate-700"}`}>
-            <i className={`fa-solid ${icon}`}></i>{label}
-        </button>
-    );
-    return (
-        <div className="max-w-5xl mx-auto px-4 mt-4">
-            <div className="bg-slate-900/70 border border-slate-800 rounded-full p-1 flex gap-1">
-                {tab("memory","Memory","fa-table-cells")}
-                {tab("listen","Hör zu","fa-headphones")}
-                {tab("write","Schreiben","fa-pen")}
-                {tab("shop","Shop","fa-store")}
-            </div>
-        </div>
-    );
-}
+    const [xp, setXp] = useState(() => parseInt(localStorage.getItem("fr_xp") || "0", 10));
+    const [coins, setCoins] = useState(() => parseInt(localStorage.getItem("fr_coins") || "0", 10));
 
-/* ----- Memory ----- */
+    const [owned, setOwned] = useState(() => {
+        const raw = localStorage.getItem("fr_owned");
+        if (!raw) return ["starter"];
+        try { return JSON.parse(raw); } catch { return ["starter"]; }
+    });
 
-function MemoryGame({words,onReward}) {
-    const [cards,setCards] = useState([]);
-    const [open,setOpen] = useState([]);
-    const [matched,setMatched] = useState([]);
-    const [roundFinished,setRoundFinished] = useState(false);
+    const [avatar, setAvatar] = useState(() => localStorage.getItem("fr_avatar") || "starter");
+    const [doubleXpRounds, setDoubleXpRounds] = useState(0);
 
-    useEffect(()=>{
-        const base = [...words].sort(()=>Math.random()-0.5).slice(0,8);
-        const deck = base.flatMap((w,idx)=>[
-            {id:`${idx}-fr`,pair:idx,txt:w.fr,lang:"fr"},
-            {id:`${idx}-de`,pair:idx,txt:w.de,lang:"de"}
-        ]).sort(()=>Math.random()-0.5);
-        setCards(deck);
-        setOpen([]);
-        setMatched([]);
-        setRoundFinished(false);
-    },[words]);
+    const [spinState, setSpinState] = useState(() => {
+        const raw = localStorage.getItem("fr_spin");
+        if (!raw) return { lastDate:null };
+        try { return JSON.parse(raw); } catch { return { lastDate:null }; }
+    });
 
-    const handleClick = (id)=>{
-        if(roundFinished) return;
-        if(open.includes(id) || matched.includes(id)) return;
-        if(open.length===2) return;
-        const newOpen=[...open,id];
-        setOpen(newOpen);
-        if(newOpen.length===2){
-            const c1 = cards.find(c=>c.id===newOpen[0]);
-            const c2 = cards.find(c=>c.id===newOpen[1]);
-            if(c1.pair===c2.pair){
-                setTimeout(()=>{
-                    setMatched(m=>[...m,c1.id,c2.id]);
-                    setOpen([]);
-                    if(matched.length+2===cards.length){
-                        setRoundFinished(true);
-                        fireConfetti();
-                        onReward({xp:40,coins:15});
+    // Memory state
+    const [memCards, setMemCards] = useState([]);
+    const [memFlipped, setMemFlipped] = useState([]);
+    const [memMatched, setMemMatched] = useState([]);
+    const [memLocked, setMemLocked] = useState(false);
+
+    // Listen
+    const [listenList, setListenList] = useState([]);
+    const [listenIndex, setListenIndex] = useState(0);
+    const [listenAnswered, setListenAnswered] = useState(false);
+    const [listenCorrect, setListenCorrect] = useState(null);
+
+    // Write
+    const [writeList, setWriteList] = useState([]);
+    const [writeIndex, setWriteIndex] = useState(0);
+    const [writeInput, setWriteInput] = useState("");
+    const [writeFeedback, setWriteFeedback] = useState(null); // {status, note}
+    const [writeLocked, setWriteLocked] = useState(false);
+
+    // Shop
+    const [shopMessage, setShopMessage] = useState(null);
+    const [spinResult, setSpinResult] = useState(null);
+    const [spinBusy, setSpinBusy] = useState(false);
+
+    /* Globale Speicherung */
+    useEffect(() => localStorage.setItem("fr_xp", xp.toString()), [xp]);
+    useEffect(() => localStorage.setItem("fr_coins", coins.toString()), [coins]);
+    useEffect(() => localStorage.setItem("fr_owned", JSON.stringify(owned)), [owned]);
+    useEffect(() => localStorage.setItem("fr_avatar", avatar), [avatar]);
+    useEffect(() => localStorage.setItem("fr_spin", JSON.stringify(spinState)), [spinState]);
+
+    const calcLevel = () => {
+        let lvl = 1;
+        for (let i = 0; i < XP_LEVELS.length; i++) {
+            if (xp >= XP_LEVELS[i]) lvl = i + 1;
+        }
+        return Math.min(lvl, XP_LEVELS.length);
+    };
+
+    const level = calcLevel();
+    const maxLevel = XP_LEVELS.length;
+    const nextLevelXp = level >= maxLevel ? XP_LEVELS[maxLevel-1] : XP_LEVELS[level];
+    const prevLevelXp = level > 1 ? XP_LEVELS[level-1] : 0;
+    const levelProgress = level >= maxLevel ? 1 : (xp - prevLevelXp) / (nextLevelXp - prevLevelXp);
+
+    const addReward = (baseXp, baseCoins) => {
+        let bonusXp = baseXp;
+        if (doubleXpRounds > 0) {
+            bonusXp *= 2;
+            setDoubleXpRounds(r => r - 1);
+        }
+        if (bonusXp > 0) setXp(x => x + bonusXp);
+        if (baseCoins > 0) setCoins(c => c + baseCoins);
+    };
+
+    const resetAll = () => {
+        if (!confirm("Wirklich alles zurücksetzen? Level, Münzen, gekaufte Dinge – alles weg.")) return;
+        setXp(0);
+        setCoins(0);
+        setOwned(["starter"]);
+        setAvatar("starter");
+        setDoubleXpRounds(0);
+        setSpinState({ lastDate:null });
+        setSpinResult(null);
+        setShopMessage(null);
+        setMode("menu");
+    };
+
+    /* Mode-Wechsel initialisiert jeweils das Spiel */
+    useEffect(() => {
+        if (mode === "memory") {
+            const base = shuffle(WORDS).slice(0, 8); // 8 Paare
+            const deck = shuffle(base.flatMap(w => ([
+                { id: w.fr + "-fr", txt: w.fr, type:"fr", key:w.fr },
+                { id: w.fr + "-de", txt: w.de, type:"de", key:w.fr }
+            ])));
+            setMemCards(deck);
+            setMemFlipped([]);
+            setMemMatched([]);
+            setMemLocked(false);
+        } else if (mode === "listen") {
+            const list = shuffle(WORDS).slice(0, 15);
+            setListenList(list);
+            setListenIndex(0);
+            setListenAnswered(false);
+            setListenCorrect(null);
+            if (list.length > 0) speakFR(list[0].fr);
+        } else if (mode === "write") {
+            const list = shuffle(WORDS).slice(0, 15);
+            setWriteList(list);
+            setWriteIndex(0);
+            setWriteInput("");
+            setWriteFeedback(null);
+            setWriteLocked(false);
+        } else if (mode === "menu") {
+            // nichts
+        }
+    }, [mode]);
+
+    /* MEMORY HANDLER */
+    const handleFlip = (card) => {
+        if (memLocked) return;
+        if (memFlipped.includes(card.id) || memMatched.includes(card.id)) return;
+
+        const newFlipped = [...memFlipped, card.id];
+        setMemFlipped(newFlipped);
+
+        if (newFlipped.length === 2) {
+            setMemLocked(true);
+            const [id1, id2] = newFlipped;
+            const c1 = memCards.find(c => c.id === id1);
+            const c2 = memCards.find(c => c.id === id2);
+            if (c1 && c2 && c1.key === c2.key && c1.type !== c2.type) {
+                // Treffer
+                setTimeout(() => {
+                    setMemMatched(m => [...m, id1, id2]);
+                    setMemFlipped([]);
+                    setMemLocked(false);
+                    addReward(30, 10);
+                    if (memMatched.length + 2 === memCards.length) {
+                        safeConfetti();
                     }
-                },600);
-            }else{
-                setTimeout(()=>setOpen([]),800);
+                }, 550);
+            } else {
+                setTimeout(() => {
+                    setMemFlipped([]);
+                    setMemLocked(false);
+                }, 750);
             }
         }
     };
 
-    return (
-        <section className="max-w-5xl mx-auto px-4 mt-6">
-            <h2 className="font-fun text-xl text-white mb-2 flex items-center gap-2">
-                <i className="fa-solid fa-table-cells-large text-indigo-400"></i>
-                Memory – FR & DE
-            </h2>
-            <p className="text-slate-400 text-sm mb-4">
-                Decke immer zwei Karten auf. Ein Paar sind das französische Wort und die deutsche Übersetzung.
+    /* LISTEN HANDLER */
+    const buildChoices = (current) => {
+        const others = shuffle(WORDS.filter(w => w.de !== current.de)).slice(0,3);
+        const opts = shuffle([current.de, ...others.map(o => o.de)]);
+        return opts;
+    };
+
+    const [listenChoices, setListenChoices] = useState([]);
+    useEffect(() => {
+        if (mode !== "listen" || listenList.length === 0) return;
+        const cur = listenList[listenIndex];
+        if (!cur) return;
+        setListenChoices(buildChoices(cur));
+    }, [listenList, listenIndex, mode]);
+
+    const handleListenAnswer = (option) => {
+        if (listenAnswered) return;
+        const cur = listenList[listenIndex];
+        const correct = option === cur.de;
+        setListenAnswered(true);
+        setListenCorrect(correct);
+        if (correct) {
+            addReward(40, 15);
+        }
+    };
+
+    const nextListen = () => {
+        const nextIndex = listenIndex + 1;
+        if (nextIndex >= listenList.length) {
+            setMode("menu");
+            return;
+        }
+        setListenIndex(nextIndex);
+        setListenAnswered(false);
+        setListenCorrect(null);
+        const cur = listenList[nextIndex];
+        speakFR(cur.fr);
+    };
+
+    /* WRITE HANDLER */
+    const submitWrite = () => {
+        if (writeLocked) return;
+        const cur = writeList[writeIndex];
+        const result = compareGerman(cur.de, writeInput);
+        if (result.status === "empty") {
+            setWriteFeedback({status:"empty", note:"Bitte etwas eingeben."});
+            return;
+        }
+        setWriteLocked(true);
+        setWriteFeedback(result);
+
+        if (result.status === "full") {
+            addReward(45, 15);
+        } else if (result.status === "partial") {
+            addReward(25, 8);
+        }
+    };
+
+    const nextWrite = () => {
+        const next = writeIndex + 1;
+        if (next >= writeList.length) {
+            setMode("menu");
+            return;
+        }
+        setWriteIndex(next);
+        setWriteInput("");
+        setWriteFeedback(null);
+        setWriteLocked(false);
+    };
+
+    /* SHOP / SPIN HANDLER */
+    const buyItem = (item) => {
+        if (owned.includes(item.id)) {
+            setShopMessage("Das hast du schon.");
+            return;
+        }
+        if (coins < item.price) {
+            setShopMessage("Zu wenig Münzen.");
+            return;
+        }
+        setCoins(c => c - item.price);
+        setOwned(o => [...o, item.id]);
+        setShopMessage(`Gekauft: ${item.name}!`);
+        if (item.type === "avatar") {
+            setAvatar(item.id);
+        }
+        if (item.id === "double_xp_5") {
+            setDoubleXpRounds(r => r + 5);
+        }
+    };
+
+    const selectAvatar = (item) => {
+        if (!owned.includes(item.id)) return;
+        setAvatar(item.id);
+    };
+
+    const canSpinToday = () => {
+        if (!spinState.lastDate) return true;
+        const today = new Date().toISOString().slice(0,10);
+        return spinState.lastDate !== today;
+    };
+
+    const doSpin = () => {
+        if (!canSpinToday() || spinBusy) return;
+        setSpinBusy(true);
+        const today = new Date().toISOString().slice(0,10);
+        const reward = chooseWeighted(SPIN_REWARDS);
+        setTimeout(() => {
+            setSpinBusy(false);
+            setSpinState({ lastDate: today });
+            let msg = reward.label;
+            if (reward.type === "coins") {
+                setCoins(c => c + reward.amount);
+            } else if (reward.type === "xp") {
+                setXp(x => x + reward.amount);
+            } else if (reward.type === "item") {
+                const candidates = SHOP_ITEMS.filter(i => i.type === "avatar" && i.rarity === reward.rarity);
+                if (candidates.length > 0) {
+                    const item = candidates[randInt(0, candidates.length-1)];
+                    if (!owned.includes(item.id)) {
+                        setOwned(o => [...o, item.id]);
+                        setAvatar(item.id);
+                        msg = `Gewonnen: ${item.name} (${reward.label})`;
+                    } else {
+                        setCoins(c => c + 150);
+                        msg = `Du hattest den Avatar schon. Dafür +150 Münzen.`;
+                    }
+                }
+            } else if (reward.type === "nothing") {
+                // nichts
+            }
+            setSpinResult(msg);
+            safeConfetti();
+        }, 800);
+    };
+
+    /* RENDER-FUNKTIONEN */
+
+    const renderHeader = () => (
+        <header className="mb-5 flex flex-col gap-3">
+            <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center text-2xl shadow-lg border border-slate-600">
+                        {avatar === "starter" && "🚀"}
+                        {avatar !== "starter" && (SHOP_ITEMS.find(i => i.id === avatar)?.emoji || "⭐")}
+                    </div>
+                    <div>
+                        <div className="text-slate-300 text-xs uppercase tracking-[0.2em]">Französisch Galaxy</div>
+                        <div className="font-game text-xl text-slate-50">Level {level} / {maxLevel}</div>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-3 text-sm font-bold">
+                    <a href="index.html" className="px-3 py-2 rounded-xl bg-slate-900 border border-slate-600 text-slate-200 hover:bg-slate-800">
+                        ⬅ Zur Startseite
+                    </a>
+                    <button onClick={resetAll} className="px-3 py-2 rounded-xl bg-red-600 text-white text-xs font-bold border-b-4 border-red-900">
+                        Reset alles
+                    </button>
+                </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+                <div className="flex-1">
+                    <div className="flex justify-between text-xs text-slate-300 mb-1">
+                        <span>XP: {xp}</span>
+                        <span>{level >= maxLevel ? "Max Level" : `Nächstes Level bei ${nextLevelXp} XP`}</span>
+                    </div>
+                    <div className="xp-track">
+                        <div className="xp-fill" style={{ width: `${Math.min(100, Math.max(0, levelProgress * 100))}%` }}></div>
+                    </div>
+                </div>
+                <div className="flex flex-col items-end">
+                    <div className="text-sm font-bold text-amber-300">💰 {coins} Münzen</div>
+                    {doubleXpRounds > 0 && (
+                        <div className="text-[0.7rem] text-emerald-300 font-bold">
+                            ⚡ Doppel-XP aktiv ({doubleXpRounds} Aufgaben)
+                        </div>
+                    )}
+                </div>
+            </div>
+        </header>
+    );
+
+    const renderMenu = () => (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-2">
+            <div className="mode-card" onClick={() => setMode("memory")}>
+                <div className="flex items-center justify-between mb-3">
+                    <div>
+                        <div className="text-xs text-sky-300 uppercase tracking-[0.2em]">Modus</div>
+                        <div className="font-game text-2xl text-sky-100">Memory</div>
+                    </div>
+                    <div className="text-4xl">🧠</div>
+                </div>
+                <p className="text-sm text-slate-300">
+                    Finde passende Paare (FR/DE). Jede richtige Kombination bringt XP & Münzen.
+                </p>
+            </div>
+
+            <div className="mode-card" onClick={() => setMode("listen")}>
+                <div className="flex items-center justify-between mb-3">
+                    <div>
+                        <div className="text-xs text-indigo-300 uppercase tracking-[0.2em]">Modus</div>
+                        <div className="font-game text-2xl text-indigo-100">Hör zu</div>
+                    </div>
+                    <div className="text-4xl">🎧</div>
+                </div>
+                <p className="text-sm text-slate-300">
+                    Höre das französische Wort und wähle die richtige deutsche Bedeutung aus 4 Möglichkeiten.
+                </p>
+            </div>
+
+            <div className="mode-card" onClick={() => setMode("write")}>
+                <div className="flex items-center justify-between mb-3">
+                    <div>
+                        <div className="text-xs text-violet-300 uppercase tracking-[0.2em]">Modus</div>
+                        <div className="font-game text-2xl text-violet-100">Schreiben</div>
+                    </div>
+                    <div className="text-4xl">✍️</div>
+                </div>
+                <p className="text-sm text-slate-300">
+                    Du siehst nur das französische Wort und musst die deutsche Bedeutung schreiben.
+                    Artikel-Fehler geben halbe Punkte.
+                </p>
+            </div>
+
+            <div className="mode-card" onClick={() => setMode("shop")}>
+                <div className="flex items-center justify-between mb-3">
+                    <div>
+                        <div className="text-xs text-emerald-300 uppercase tracking-[0.2em]">Modus</div>
+                        <div className="font-game text-2xl text-emerald-100">Shop & Glücksrad</div>
+                    </div>
+                    <div className="text-4xl">🛒</div>
+                </div>
+                <p className="text-sm text-slate-300">
+                    Kaufe Tiere, Avatare & Booster. Drehe einmal pro Tag am Glücksrad für Extra-Belohnungen.
+                </p>
+            </div>
+        </div>
+    );
+
+    const renderMemory = () => (
+        <div className="mt-2">
+            <div className="flex items-center justify-between mb-3">
+                <h2 className="font-game text-xl text-sky-100 flex items-center gap-2">
+                    🧠 Memory – FR / DE
+                </h2>
+                <button
+                    className="text-xs px-3 py-1 rounded-xl bg-slate-800 border border-slate-600"
+                    onClick={() => setMode("menu")}
+                >
+                    ⬅ Zurück zum Modus-Menü
+                </button>
+            </div>
+            <p className="text-xs text-slate-400 mb-3">
+                Tipp: Laut mitsprechen. Jede gefundene Karte gibt XP & Münzen.
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                {cards.map(card=>{
-                    const isOpen = open.includes(card.id) || matched.includes(card.id);
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {memCards.map(card => {
+                    const flipped = memFlipped.includes(card.id) || memMatched.includes(card.id);
+                    const matched = memMatched.includes(card.id);
                     return (
-                        <div key={card.id} className="memory-scene" onClick={()=>handleClick(card.id)}>
-                            <div className={`memory-card ${isOpen?"flipped":""}`}>
-                                <div className="memory-face memory-front">?</div>
-                                <div className={`memory-face memory-back ${card.lang==="fr"?"memory-back-fr":"memory-back-de"}`}>
-                                    <span className="px-1 leading-tight">
-                                        {card.txt}
-                                    </span>
+                        <div key={card.id} className="scene">
+                            <div
+                                className={`card ${flipped ? "flipped" : ""} ${matched ? "matched" : ""}`}
+                                onClick={() => handleFlip(card)}
+                            >
+                                <div className="face front">?</div>
+                                <div className={`face back type-${card.type}`}>
+                                    <span>{card.txt}</span>
                                 </div>
                             </div>
                         </div>
                     );
                 })}
             </div>
-            {roundFinished && (
-                <div className="mt-4 text-sm text-emerald-300">
-                    Runde geschafft! Du hast XP und Münzen bekommen. Klicke oben auf einen anderen Modus oder lade die Seite neu für ein neues Memory.
-                </div>
-            )}
-        </section>
-    );
-}
-
-/* ----- Hör zu (Multiple Choice, Anti-Cheat) ----- */
-
-function ListenGame({words,onResult}) {
-    const [current,setCurrent]=useState(null);
-    const [options,setOptions]=useState([]);
-    const [state,setState]=useState("ready"); // ready | answered
-    const [wasCorrect,setWasCorrect]=useState(null);
-    const [hearts,setHearts]=useState(3);
-
-    const pickNew = ()=>{
-        const pool=[...words].sort(()=>Math.random()-0.5);
-        const correct=pool[0];
-        const distractors = pool.slice(1,5).map(w=>w.de);
-        const opt = [correct.de,...distractors].sort(()=>Math.random()-0.5);
-        setCurrent(correct);
-        setOptions(opt);
-        setState("ready");
-        setWasCorrect(null);
-    };
-
-    useEffect(()=>{pickNew()},[words]);
-
-    const handleAnswer=(de)=>{
-        if(state!=="ready") return;
-        const correct = normalize(de)===normalize(current.de);
-        setState("answered");
-        setWasCorrect(correct);
-        if(correct){
-            speakFR(current.fr);
-            fireConfetti();
-            onResult({xp:20,coins:8});
-        }else{
-            onResult({xp:0,coins:-3});
-            setHearts(h=>Math.max(0,h-1));
-        }
-    };
-
-    const handleNext=()=>{
-        if(hearts===0){
-            setHearts(3);
-        }
-        pickNew();
-    };
-
-    if(!current) return null;
-
-    return (
-        <section className="max-w-5xl mx-auto px-4 mt-6">
-            <div className="flex items-center justify-between mb-3">
-                <h2 className="font-fun text-xl text-white flex items-center gap-2">
-                    <i className="fa-solid fa-headphones text-sky-400"></i>
-                    Hör zu & wähle
-                </h2>
-                <div className="flex items-center gap-1 text-red-300 text-sm">
-                    {Array.from({length:3}).map((_,i)=>(
-                        <span key={i}>{i<hearts?"❤️":"🖤"}</span>
-                    ))}
-                </div>
-            </div>
-            <p className="text-slate-400 text-sm mb-4">
-                Drücke auf den Lautsprecher. Höre das französische Wort und wähle **genau eine** deutsche Bedeutung.
-                Du hast nur einen Versuch pro Wort.
-            </p>
-
-            <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-4 flex flex-col gap-4">
-                <div className="flex items-center gap-3">
-                    <button
-                        onClick={()=>speakFR(current.fr)}
-                        className="btn-main bg-sky-500 text-white text-sm">
-                        <i className="fa-solid fa-volume-high"></i> Abspielen
-                    </button>
-                    <span className="text-slate-300 text-sm">
-                        Französisches Wort: <span className="font-bold text-sky-300">{current.fr}</span>
-                    </span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {options.map(opt=>{
-                        const isCorrect = normalize(opt)===normalize(current.de);
-                        let color="bg-slate-800 hover:bg-slate-700 text-slate-100";
-                        if(state==="answered"){
-                            if(isCorrect) color="bg-emerald-600 text-white";
-                            else if(wasCorrect===false && normalize(opt)===normalize(current.answer)) {
-                                // nix
-                            }
-                        }
-                        return (
-                            <button
-                                key={opt}
-                                disabled={state!=="ready"}
-                                onClick={()=>handleAnswer(opt)}
-                                className={`w-full px-3 py-3 rounded-xl text-sm font-bold border border-slate-700 ${color}
-                                           disabled:opacity-80 disabled:cursor-default`}>
-                                {opt}
-                            </button>
-                        );
-                    })}
-                </div>
-
-                {state==="answered" && (
-                    <div className={`text-sm ${wasCorrect?"text-emerald-300":"text-red-300"}`}>
-                        {wasCorrect
-                            ? "Richtig! Du hast XP und Münzen bekommen."
-                            : `Leider falsch. Richtig wäre: "${current.de}".`}
-                    </div>
-                )}
-
-                <div className="flex justify-end">
-                    <button
-                        onClick={handleNext}
-                        className="btn-main bg-indigo-500 text-white text-xs">
-                        Nächstes Wort <i className="fa-solid fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
-        </section>
-    );
-}
-
-/* ----- Schreiben (mit „fast richtig“ bei Artikeln) ----- */
-
-function WriteGame({words,onResult}) {
-    const [current,setCurrent]=useState(null);
-    const [direction,setDirection]=useState("fr2de");
-    const [input,setInput]=useState("");
-    const [feedback,setFeedback]=useState(null);
-
-    const pickNew = ()=>{
-        const w = words[Math.floor(Math.random()*words.length)];
-        setCurrent(w);
-        setDirection(Math.random()<0.5?"fr2de":"de2fr");
-        setInput("");
-        setFeedback(null);
-    };
-
-    useEffect(()=>{pickNew()},[words]);
-
-    if(!current) return null;
-
-    const correctAnswer = direction==="fr2de" ? current.de : current.fr;
-
-    const check = ()=>{
-        const user = input.trim();
-        if(!user) return;
-        const normUser = normalize(user);
-        const normCorrect = normalize(correctAnswer);
-
-        if(normUser===normCorrect){
-            fireConfetti();
-            onResult({xp:25,coins:10});
-            setFeedback({type:"full",msg:"Vollständig richtig! Super."});
-            return;
-        }
-
-        const basicUser = direction==="fr2de" ? stripDeArticle(user) : stripFrArticle(user);
-        const basicCorrect = direction==="fr2de" ? stripDeArticle(correctAnswer) : stripFrArticle(correctAnswer);
-
-        if(basicUser===basicCorrect){
-            onResult({xp:15,coins:5});
-            setFeedback({
-                type:"partial",
-                msg:`Das Wort stimmt, aber der Artikel war anders. Richtig wäre z.B.: "${correctAnswer}".`
-            });
-        }else{
-            onResult({xp:0,coins:-2});
-            setFeedback({
-                type:"wrong",
-                msg:`Leider falsch. Richtig wäre: "${correctAnswer}".`
-            });
-        }
-    };
-
-    return (
-        <section className="max-w-5xl mx-auto px-4 mt-6">
-            <h2 className="font-fun text-xl text-white mb-2 flex items-center gap-2">
-                <i className="fa-solid fa-pen text-emerald-400"></i>
-                Schreiben & Übersetzen
-            </h2>
-            <p className="text-slate-400 text-sm mb-4">
-                Schreibe die Übersetzung. Gross/klein ist egal. Bei falschem Artikel bekommst du noch halbe Punkte.
-            </p>
-            <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-4 flex flex-col gap-4">
-                <div className="text-sm text-slate-300">
-                    {direction==="fr2de" ? (
-                        <>Übersetze ins Deutsche: <span className="font-bold text-sky-300">{current.fr}</span></>
-                    ) : (
-                        <>Übersetze ins Französische: <span className="font-bold text-amber-300">{current.de}</span></>
-                    )}
-                </div>
-                <input
-                    className="w-full px-3 py-3 rounded-xl bg-slate-950 border border-slate-700 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
-                    value={input}
-                    onChange={e=>setInput(e.target.value)}
-                    onKeyDown={e=>{if(e.key==="Enter") check();}}
-                    placeholder="Antwort hier eingeben..."
-                />
-                {feedback && (
-                    <div className={`text-sm ${
-                        feedback.type==="full" ? "text-emerald-300" :
-                        feedback.type==="partial" ? "text-yellow-300" : "text-red-300"
-                    }`}>
-                        {feedback.msg}
-                    </div>
-                )}
-                <div className="flex justify-between">
-                    <button
-                        onClick={pickNew}
-                        className="btn-main bg-slate-800 text-slate-100 text-xs">
-                        Überspringen
-                    </button>
-                    <button
-                        onClick={check}
-                        className="btn-main bg-emerald-500 text-white text-xs">
-                        Prüfen <i className="fa-solid fa-check"></i>
-                    </button>
-                </div>
-            </div>
-        </section>
-    );
-}
-
-/* ----- Shop ----- */
-
-function Shop({profile,setProfile}) {
-    const buy = (item)=>{
-        if(profile.bought.includes(item.id)) return;
-        if(profile.coins < item.price) return;
-        const newProfile = {
-            ...profile,
-            coins: profile.coins - item.price,
-            bought: [...profile.bought,item.id]
-        };
-        saveProfile(newProfile);
-        setProfile(newProfile);
-    };
-
-    const equipAvatar = (item)=>{
-        if(!profile.bought.includes(item.id) && item.price>0) return;
-        const newProfile = {...profile,avatar:item.emoji};
-        saveProfile(newProfile);
-        setProfile(newProfile);
-    };
-
-    const cardClass = rarity=>{
-        if(rarity==="legendary") return "shop-card shop-legendary";
-        if(rarity==="epic") return "shop-card shop-epic";
-        if(rarity==="rare") return "shop-card shop-rare";
-        return "shop-card shop-common";
-    };
-
-    return (
-        <section className="max-w-5xl mx-auto px-4 mt-6 mb-10">
-            <h2 className="font-fun text-xl text-white mb-2 flex items-center gap-2">
-                <i className="fa-solid fa-store text-amber-400"></i>
-                Shop – Tiere & Lern-Helfer
-            </h2>
-            <p className="text-slate-400 text-sm mb-4">
-                Kaufe neue Tier-Avatare oder kleine Hilfen fürs Lernen.
-                Einige Dinge (z.B. Doppel-XP) gelten nur für die nächste Runde.
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {shopItems.map(item=>{
-                    const owned = profile.bought.includes(item.id) || item.price===0;
-                    return (
-                        <div key={item.id} className={cardClass(item.rarity)}>
-                            <div className="flex items-center justify-between">
-                                <div className="text-3xl">{item.emoji}</div>
-                                <span className="text-[10px] uppercase tracking-wide text-slate-300">
-                                    {item.type==="avatar"?"Avatar":item.type==="boost"?"Boost":"Thema"}
-                                </span>
-                            </div>
-                            <div className="mt-1">
-                                <div className="font-bold text-sm text-white">{item.name}</div>
-                                <div className="text-[11px] text-slate-300">{item.desc}</div>
-                            </div>
-                            <div className="mt-2 flex items-center justify-between text-xs">
-                                <span className="flex items-center gap-1 text-amber-300">
-                                    <i className="fa-solid fa-coins text-amber-400"></i>
-                                    {item.price}
-                                </span>
-                                {item.type==="avatar" ? (
-                                    <div className="flex gap-1">
-                                        <button
-                                            onClick={()=>buy(item)}
-                                            className="px-2 py-1 rounded-full bg-slate-800 text-slate-100 disabled:opacity-40"
-                                            disabled={owned || profile.coins<item.price}>
-                                            {owned?"Gekauft":"Kaufen"}
-                                        </button>
-                                        <button
-                                            onClick={()=>equipAvatar(item)}
-                                            className="px-2 py-1 rounded-full bg-indigo-500 text-white">
-                                            Tragen
-                                        </button>
-                                    </div>
-                                ):(
-                                    <button
-                                        onClick={()=>buy(item)}
-                                        className="px-2 py-1 rounded-full bg-slate-800 text-slate-100 disabled:opacity-40"
-                                        disabled={owned || profile.coins<item.price}>
-                                        {owned?"Im Inventar":"Kaufen"}
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-        </section>
-    );
-}
-
-/* ----- HAUPT-APP ----- */
-
-function App(){
-    const [words,setWords]=useState(fallbackWords);
-    const [profile,setProfile]=useState(loadProfile());
-    const [mode,setMode]=useState("memory");
-
-    // JSON laden (falls vorhanden)
-    useEffect(()=>{
-        async function loadJson(){
-            try{
-                const res = await fetch("data/franz_words.json");
-                if(!res.ok) return;
-                const json = await res.json();
-                if(Array.isArray(json.words)){
-                    setWords(json.words);
-                }else if(Array.isArray(json)){
-                    setWords(json);
-                }
-            }catch(e){
-                // Fallback bleibt
-            }
-        }
-        loadJson();
-    },[]);
-
-    const addReward = ({xp,coins})=>{
-        const newP = {...profile};
-        if(xp) newP.xp = Math.max(0,newP.xp + xp);
-        if(coins){
-            newP.coins = Math.max(0,newP.coins + coins);
-        }
-        saveProfile(newP);
-        setProfile(newP);
-    };
-
-    const resetAll = ()=>{
-        if(!confirm("Wirklich alles löschen? Level, Münzen & Shop werden zurückgesetzt.")) return;
-        localStorage.removeItem("franz_profile_v1");
-        setProfile(defaultProfile);
-    };
-
-    return (
-        <div className="pb-10">
-            <Header profile={profile} onReset={resetAll}/>
-            <ModeTabs mode={mode} setMode={setMode}/>
-            {mode==="memory" && <MemoryGame words={words} onReward={addReward}/>}
-            {mode==="listen" && <ListenGame words={words} onResult={addReward}/>}
-            {mode==="write" && <WriteGame words={words} onResult={addReward}/>}
-            {mode==="shop" && <Shop profile={profile} setProfile={setProfile}/>}
         </div>
     );
-}
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+    const renderListen = () => {
+        if (listenList.length === 0) return null;
+        const cur = listenList[listenIndex];
+
+        return (
+            <div className="mt-2">
+                <div className="flex items-center justify-between mb-3">
+                    <h2 className="font-game text-xl text-indigo-100 flex items-center gap-2">
+                        🎧 Hör zu – Multiple Choice
+                    </h2>
+                    <button
+                        className="text-xs px-3 py-1 rounded-xl bg-slate-800 border border-slate-600"
+                        onClick={() => setMode("menu")}
+                    >
+                        ⬅ Zurück zum Modus-Menü
+                    </button>
+                </div>
+
+                <div className="mb-2 text-xs text-slate-400">
+                    Aufgabe {listenIndex + 1} von {listenList.length}
+                </div>
+
+                <div className="glass-panel p-4 flex flex-col gap-4">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <div className="text-xs uppercase tracking-[0.2em] text-indigo-300 mb-1">Französisch anhören</div>
+                            <div className="font-game text-2xl text-slate-50">{cur.fr}</div>
+                        </div>
+                        <button
+                            className="btn-main btn-purple text-xs"
+                            onClick={() => speakFR(cur.fr)}
+                        >
+                            ▶ Nochmal hören
+                        </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
+                        {listenChoices.map(opt => {
+                            const selected = listenAnswered && opt === cur.de;
+                            const isCorrect = listenAnswered && opt === cur.de && listenCorrect;
+                            const isWrong = listenAnswered && opt !== cur.de && !listenCorrect;
+                            let extra = "";
+                            if (isCorrect) extra = "answer-correct";
+                            if (isWrong) extra = "answer-wrong";
+                            return (
+                                <button
+                                    key={opt}
+                                    className={`answer-btn ${listenAnswered ? "" : "hover:border-sky-400"} ${extra}`}
+                                    onClick={() => handleListenAnswer(opt)}
+                                    disabled={listenAnswered}
+                                >
+                                    {opt}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <div className="text-sm">
+                            {!listenAnswered && (
+                                <span className="text-slate-400">
+                                    Wähle die richtige deutsche Bedeutung.
+                                </span>
+                            )}
+                            {listenAnswered && listenCorrect && (
+                                <span className="text-emerald-300 font-semibold">
+                                    ✔ Richtig! Weiter zur nächsten Aufgabe.
+                                </span>
+                            )}
+                            {listenAnswered && listenCorrect === false && (
+                                <span className="text-red-300 font-semibold">
+                                    ✖ Leider falsch. Du bekommst hier keine Münzen.
+                                </span>
+                            )}
+                        </div>
+                        <button
+                            className="btn-main btn-blue text-xs"
+                            onClick={nextListen}
+                            disabled={!listenAnswered}
+                        >
+                            Nächste Aufgabe ▶
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const renderWrite = () => {
+        if (writeList.length === 0) return null;
+        const cur = writeList[writeIndex];
+
+        return (
+            <div className="mt-2">
+                <div className="flex items-center justify-between mb-3">
+                    <h2 className="font-game text-xl text-violet-100 flex items-center gap-2">
+                        ✍️ Schreiben – Deutsch eingeben
+                    </h2>
+                    <button
+                        className="text-xs px-3 py-1 rounded-xl bg-slate-800 border border-slate-600"
+                        onClick={() => setMode("menu")}
+                    >
+                        ⬅ Zurück zum Modus-Menü
+                    </button>
+                </div>
+
+                <div className="mb-2 text-xs text-slate-400">
+                    Aufgabe {writeIndex + 1} von {writeList.length}
+                </div>
+
+                <div className="glass-panel p-5 flex flex-col gap-4">
+                    <div className="flex items-center justify-between gap-4">
+                        <div>
+                            <div className="text-xs uppercase tracking-[0.2em] text-violet-300 mb-1">
+                                Französisches Wort
+                            </div>
+                            <div className="font-game text-3xl text-slate-50">{cur.fr}</div>
+                        </div>
+                        <button
+                            className="btn-main btn-purple text-xs"
+                            onClick={() => speakFR(cur.fr)}
+                        >
+                            ▶ Anhören
+                        </button>
+                    </div>
+
+                    <div>
+                        <label className="text-xs text-slate-300 mb-1 block">
+                            Schreibe die deutsche Bedeutung (Gross/Klein egal, Artikel nur halbe Punkte).
+                        </label>
+                        <input
+                            className="input-de"
+                            value={writeInput}
+                            onChange={e => setWriteInput(e.target.value)}
+                            placeholder="z.B. die Schildkröte"
+                        />
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-1">
+                        <div className="text-sm min-h-[1.5rem]">
+                            {writeFeedback && writeFeedback.status === "full" && (
+                                <span className="text-emerald-300 font-semibold">
+                                    ✔ Voll richtig! Du bekommst volle Punkte.
+                                </span>
+                            )}
+                            {writeFeedback && writeFeedback.status === "partial" && (
+                                <span className="text-amber-300 font-semibold">
+                                    ✓ Bedeutung stimmt, aber der Artikel war nicht korrekt. Halbe Punkte.
+                                </span>
+                            )}
+                            {writeFeedback && writeFeedback.status === "wrong" && (
+                                <span className="text-red-300 font-semibold">
+                                    ✖ Leider falsch. Richtig wäre: <span className="underline">{cur.de}</span>
+                                </span>
+                            )}
+                            {writeFeedback && writeFeedback.status === "empty" && (
+                                <span className="text-slate-300">
+                                    Bitte zuerst etwas eingeben.
+                                </span>
+                            )}
+                        </div>
+
+                        <div className="flex gap-2 justify-end">
+                            <button
+                                className="btn-main btn-blue text-xs"
+                                onClick={submitWrite}
+                                disabled={writeLocked}
+                            >
+                                Prüfen ✔
+                            </button>
+                            <button
+                                className="btn-main btn-green text-xs"
+                                onClick={nextWrite}
+                                disabled={!writeLocked}
+                            >
+                                Nächste ▶
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const renderShop = () => (
+        <div className="mt-2">
+            <div className="flex items-center justify-between mb-3">
+                <h2 className="font-game text-xl text-emerald-100 flex items-center gap-2">
+                    🛒 Tier-Shop & Glücksrad
+                </h2>
+                <button
+                    className="text-xs px-3 py-1 rounded-xl bg-slate-800 border border-slate-600"
+                    onClick={() => setMode("menu")}
+                >
+                    ⬅ Zurück zum Modus-Menü
+                </button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-[2fr,1fr] gap-4">
+                <div className="glass-panel p-4">
+                    <div className="flex items-center justify-between mb-3">
+                        <div>
+                            <div className="text-xs text-slate-400 uppercase tracking-[0.2em]">
+                                Avatare & Booster
+                            </div>
+                            <div className="font-game text-lg text-slate-50">
+                                Wähle dein Lern-Team
+                            </div>
+                        </div>
+                        {shopMessage && (
+                            <div className="text-xs text-sky-300">
+                                {shopMessage}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                        {SHOP_ITEMS.map(item => {
+                            const ownedItem = owned.includes(item.id);
+                            const isAvatar = item.type === "avatar";
+                            const selectedAvatar = isAvatar && avatar === item.id;
+                            return (
+                                <div
+                                    key={item.id}
+                                    className={`shop-card rarity-${item.rarity} ${selectedAvatar ? "ring-2 ring-amber-300" : ""}`}
+                                    onClick={() => (isAvatar && ownedItem) ? selectAvatar(item) : buyItem(item)}
+                                >
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="text-2xl">{item.emoji}</div>
+                                        <div className="text-[0.7rem] uppercase tracking-[0.2em] text-slate-400">
+                                            {item.rarity === "common" && "Normal"}
+                                            {item.rarity === "rare" && "Selten"}
+                                            {item.rarity === "epic" && "Episch"}
+                                            {item.rarity === "legendary" && "Legendär"}
+                                        </div>
+                                    </div>
+                                    <div className="font-game text-lg text-slate-50">{item.name}</div>
+                                    <div className="text-[0.8rem] text-slate-300 flex-1 mt-1">
+                                        {item.desc}
+                                    </div>
+                                    <div className="mt-2 flex items-center justify-between text-xs font-bold">
+                                        <span className={`${ownedItem ? "text-emerald-300" : "text-amber-300"}`}>
+                                            {ownedItem ? "GEKAUFT" : `Preis: ${item.price} 💰`}
+                                        </span>
+                                        {isAvatar && selectedAvatar && (
+                                            <span className="text-sky-300">Aktiv</span>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                <div className="glass-panel p-4 flex flex-col gap-3">
+                    <div>
+                        <div className="text-xs text-slate-400 uppercase tracking-[0.2em]">
+                            Glücksrad
+                        </div>
+                        <div className="font-game text-lg text-slate-50">
+                            Einmal pro Tag drehen
+                        </div>
+                    </div>
+                    <div className="flex flex-col items-center justify-center gap-3 py-3">
+                        <div className="text-5xl animate-pulse">🎡</div>
+                        <button
+                            className="btn-main btn-yellow text-xs"
+                            disabled={!canSpinToday() || spinBusy}
+                            onClick={doSpin}
+                        >
+                            {canSpinToday() ? (spinBusy ? "Dreht..." : "Jetzt drehen") : "Heute schon gedreht"}
+                        </button>
+                        {spinResult && (
+                            <div className="text-xs text-center text-sky-300">
+                                {spinResult}
+                            </div>
+                        )}
+                    </div>
+                    <div className="text-[0.7rem] text-slate-400">
+                        Belohnungen können Münzen, XP oder seltene Avatare sein.
+                        Wenn du einen Avatar doppelt bekommst, gibt es stattdessen Bonus-Münzen.
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
+    return (
+        <main className="max-w-5xl mx-auto px-4 pt-6 pb-10">
+            {renderHeader()}
+
+            {mode === "menu"   && renderMenu()}
+            {mode === "memory" && renderMemory()}
+            {mode === "listen" && renderListen()}
+            {mode === "write"  && renderWrite()}
+            {mode === "shop"   && renderShop()}
+        </main>
+    );
+};
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 </script>
 </body>
 </html>
