@@ -245,7 +245,7 @@
                 <span class="inline-flex items-center justify-center w-7 h-7 rounded-xl bg-indigo-500 text-xs font-bold">
                     L
                 </span>
-                <div>
+            <div>
                     <div class="text-sm font-semibold">Lern-App Schweiz</div>
                     <div class="text-[11px] text-slate-300">Lehrplan 21 – 4. Klasse</div>
                 </div>
@@ -398,10 +398,8 @@
                         👂 Hör zu & wähle die Bedeutung
                     </h2>
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <div className="text-sm text-slate-300">
-                            <p class="text-sm text-slate-300">
-                                Höre das französische Wort (🇫🇷) und wähle die richtige deutsche Bedeutung.
-                            </p>
+                        <div class="text-sm text-slate-300">
+                            <p>Höre das französische Wort (🇫🇷) und wähle die richtige deutsche Bedeutung.</p>
                             <p class="mt-1 text-xs text-slate-400">
                                 Punkte gibt es nur, wenn du beim <strong>ersten Versuch</strong> richtig liegst.
                             </p>
@@ -523,13 +521,13 @@
 
             <!-- Footer -->
             <div class="mt-6 text-[0.7rem] text-slate-500 text-center">
-                Tipp für dich: Wenn du später neue Wörter in <code>data/franz_words.json</code> einträgst,
+                Tipp für dich: Wenn du später neue Wörter in deinen JSON-Dateien einträgst,
                 erscheinen sie automatisch in allen Modi (Memory, Hör zu, Schreiben).
             </div>
 
             <!-- Fehleranzeige für Wörter -->
             <div id="wordsError" class="mt-2 text-center text-xs text-rose-300 hidden">
-                Keine Wörter geladen. Prüfe, ob <code>data/franz_words.json</code> existiert und gültiges JSON enthält.
+                Keine Wörter geladen. Prüfe, ob deine JSON-Dateien existieren und gültiges JSON enthalten.
             </div>
         </div>
     </div>
@@ -675,7 +673,7 @@
             bear: '🐻'
         };
 
-        // Shop-Items
+        // Shop-Items (hart im Code, shop.json wird nicht benutzt)
         const shopItems = [
             { id: 'cat',    name: 'Katze',       emoji: '🐱', cost: 20,  rarity: 'common' },
             { id: 'turtle', name: 'Schildkröte', emoji: '🐢', cost: 25,  rarity: 'common' },
@@ -749,7 +747,6 @@
                 }
             });
 
-            // Panel-spezifische Initialisierung
             if (newMode === 'memory') {
                 buildMemoryDeck();
             } else if (newMode === 'listen') {
@@ -784,9 +781,7 @@
             };
             try {
                 localStorage.setItem('franzProgressV1', JSON.stringify(obj));
-            } catch (e) {
-                // ignorieren
-            }
+            } catch (e) {}
         }
 
         function loadProgress() {
@@ -802,9 +797,7 @@
                 if (obj.activeAvatar && avatarMap[obj.activeAvatar]) {
                     state.activeAvatar = obj.activeAvatar;
                 }
-            } catch (e) {
-                // ignorieren
-            }
+            } catch (e) {}
         }
 
         function resetAll() {
@@ -919,7 +912,7 @@
                         state.memory.flipped = [];
                         updateMemoryFlips();
                         playBeep('good');
-                        addReward(10, 5); // XP, Coins
+                        addReward(10, 5);
                         if (state.memory.matched.length === deck.length) {
                             fireConfetti();
                             setTimeout(buildMemoryDeck, 800);
@@ -978,7 +971,8 @@
             opts.forEach((w, idx) => {
                 const btn = document.createElement('button');
                 btn.className = 'w-full text-left shop-card shop-common flex items-center justify-between';
-                btn.innerHTML = '<div class="text-sm sm:text-base font-semibold">' +
+                btn.innerHTML =
+                    '<div class="text-sm sm:text-base font-semibold">' +
                     w.de +
                     '</div>' +
                     '<button type="button" class="ml-3 w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center text-xs">🔊</button>';
@@ -988,7 +982,6 @@
                     handleListenChoose(w);
                 });
 
-                // kleiner Trick: extra Listener nur für den inneren Button
                 const innerBtn = btn.querySelector('button');
                 innerBtn.addEventListener('click', function (e) {
                     e.stopPropagation();
@@ -998,7 +991,6 @@
                 optionsContainer.appendChild(btn);
             });
 
-            // direkt beim Erstellen abspielen
             speak(correct.fr, 'fr-FR');
         }
 
@@ -1149,7 +1141,7 @@
                             alert('Zu wenig Münzen für dieses Tier.');
                             return;
                         }
-                            if (!window.confirm('"' + it.name + '" für ' + it.cost + ' Münzen kaufen?')) return;
+                        if (!window.confirm('"' + it.name + '" für ' + it.cost + ' Münzen kaufen?')) return;
                         state.coins -= it.cost;
                         state.ownedAvatars.push(it.id);
                         state.activeAvatar = it.id;
@@ -1164,6 +1156,66 @@
             });
         }
 
+        // ---------- Wörter aus mehreren Dateien laden ----------
+
+        function loadAllWordFiles() {
+            const files = [
+                'data/franzwords.json',
+                'data/franzverbs.json',
+                'data/franzvocab.json',
+                'data/franzplaces.json',
+                'data/franz_words.json' // optional Sammel-Datei
+            ];
+
+            const requests = files.map(function (path) {
+                return fetch(path)
+                    .then(function (res) {
+                        if (!res.ok) return null; // Datei existiert evtl. nicht -> ignorieren
+                        return res.json();
+                    })
+                    .catch(function () {
+                        return null;
+                    });
+            });
+
+            Promise.all(requests)
+                .then(function (results) {
+                    const all = [];
+
+                    results.forEach(function (data) {
+                        if (Array.isArray(data)) {
+                            data.forEach(function (entry) {
+                                if (entry && entry.fr && entry.de) {
+                                    all.push({
+                                        fr: entry.fr,
+                                        de: entry.de
+                                    });
+                                }
+                            });
+                        }
+                    });
+
+                    if (all.length === 0) {
+                        const errEl = document.getElementById('wordsError');
+                        if (errEl) errEl.classList.remove('hidden');
+                        console.error('Keine gültigen Wörter aus den JSON-Dateien geladen.');
+                        return;
+                    }
+
+                    state.words = all;
+                    const errEl = document.getElementById('wordsError');
+                    if (errEl) errEl.classList.add('hidden');
+
+                    // Start im Menü, alles bereit
+                    setMode('menu');
+                })
+                .catch(function (err) {
+                    console.error(err);
+                    const errEl = document.getElementById('wordsError');
+                    if (errEl) errEl.classList.remove('hidden');
+                });
+        }
+
         // ---------- Init ----------
 
         document.addEventListener('DOMContentLoaded', function () {
@@ -1171,7 +1223,6 @@
             loadProgress();
             applyProgressUI();
 
-            // Navigation
             const btnBackHome = document.getElementById('btnBackHome');
             if (btnBackHome) {
                 btnBackHome.addEventListener('click', function () {
@@ -1179,7 +1230,6 @@
                 });
             }
 
-            // Mode-Tabs
             const modeButtons = document.querySelectorAll('.mode-tab');
             modeButtons.forEach(btn => {
                 const m = btn.getAttribute('data-mode');
@@ -1189,7 +1239,6 @@
                 });
             });
 
-            // Menü-Buttons, die in andere Modi springen
             const gotoButtons = document.querySelectorAll('[data-goto]');
             gotoButtons.forEach(btn => {
                 const target = btn.getAttribute('data-goto');
@@ -1198,19 +1247,16 @@
                 });
             });
 
-            // Reset
             const btnResetAll = document.getElementById('btnResetAll');
             if (btnResetAll) {
                 btnResetAll.addEventListener('click', resetAll);
             }
 
-            // Memory
             const btnMemoryShuffle = document.getElementById('btnMemoryShuffle');
             if (btnMemoryShuffle) {
                 btnMemoryShuffle.addEventListener('click', buildMemoryDeck);
             }
 
-            // Hör zu
             const btnListenReplay = document.getElementById('btnListenReplay');
             if (btnListenReplay) {
                 btnListenReplay.addEventListener('click', function () {
@@ -1224,7 +1270,6 @@
                 });
             }
 
-            // Schreiben
             const btnWritePlayFr = document.getElementById('btnWritePlayFr');
             if (btnWritePlayFr) {
                 btnWritePlayFr.addEventListener('click', function () {
@@ -1246,22 +1291,8 @@
                 });
             }
 
-            // Wörter laden
-            fetch('data/franz_words.json')
-                .then(function (res) { return res.json(); })
-                .then(function (data) {
-                    if (!Array.isArray(data)) throw new Error('Kein Array');
-                    state.words = data;
-                    const errEl = document.getElementById('wordsError');
-                    if (errEl) errEl.classList.add('hidden');
-                    // Start im Menü, aber schon mal Memory/Listen/Write vorbereiten
-                    setMode('menu');
-                })
-                .catch(function (err) {
-                    console.error(err);
-                    const errEl = document.getElementById('wordsError');
-                    if (errEl) errEl.classList.remove('hidden');
-                });
+            // Hier ALLE Word-Dateien laden
+            loadAllWordFiles();
         });
     </script>
 </body>
