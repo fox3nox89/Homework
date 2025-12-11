@@ -11,7 +11,7 @@
     <!-- Konfetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-    <!-- Gemeinsames CSS, falls vorhanden -->
+    <!-- Optional: dein gemeinsames CSS -->
     <link rel="stylesheet" href="style.css">
 
     <style>
@@ -245,7 +245,7 @@
                 <span class="inline-flex items-center justify-center w-7 h-7 rounded-xl bg-indigo-500 text-xs font-bold">
                     L
                 </span>
-            <div>
+                <div>
                     <div class="text-sm font-semibold">Lern-App Schweiz</div>
                     <div class="text-[11px] text-slate-300">Lehrplan 21 – 4. Klasse</div>
                 </div>
@@ -377,9 +377,7 @@
                     <p class="text-sm text-slate-300 text-center">
                         Tipp: Klick zuerst auf Französisch (🇫🇷), höre zu, merk dir das Wort – dann suche die deutsche Karte (🇩🇪).
                     </p>
-                    <div class="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-3" id="memoryGrid">
-                        <!-- Karten per JS -->
-                    </div>
+                    <div class="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-3" id="memoryGrid"></div>
                     <div class="flex justify-center mt-2">
                         <button
                             id="btnMemoryShuffle"
@@ -432,13 +430,10 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="listenOptions">
-                        <!-- Optionen per JS -->
-                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="listenOptions"></div>
 
                     <div id="listenFeedback"
-                         class="mt-2 text-sm text-center font-semibold text-slate-300 min-h-[1.5rem]">
-                    </div>
+                         class="mt-2 text-sm text-center font-semibold text-slate-300 min-h-[1.5rem]"></div>
                 </div>
             </div>
 
@@ -497,8 +492,7 @@
 
                     <div
                         id="writeFeedback"
-                        class="mt-1 text-sm text-center font-semibold text-slate-300 min-h-[1.5rem]">
-                    </div>
+                        class="mt-1 text-sm text-center font-semibold text-slate-300 min-h-[1.5rem]"></div>
                 </div>
             </div>
 
@@ -513,28 +507,43 @@
                         etwas Besonderes. Kinder können den aktiven Avatar selbst auswählen.
                     </p>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-3" id="shopGrid">
-                        <!-- Shopkarten per JS -->
-                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-3" id="shopGrid"></div>
                 </div>
             </div>
 
-            <!-- Footer -->
             <div class="mt-6 text-[0.7rem] text-slate-500 text-center">
-                Tipp für dich: Wenn du später neue Wörter in deinen JSON-Dateien einträgst,
-                erscheinen sie automatisch in allen Modi (Memory, Hör zu, Schreiben).
-            </div>
-
-            <!-- Fehleranzeige für Wörter -->
-            <div id="wordsError" class="mt-2 text-center text-xs text-rose-300 hidden">
-                Keine Wörter geladen. Prüfe, ob deine JSON-Dateien existieren und gültiges JSON enthalten.
+                Diese Seite funktioniert komplett ohne externe JSON-Dateien. Später können wir deine vorhandenen
+                franz*.json wieder anschliessen.
             </div>
         </div>
     </div>
 
     <script>
-        // ---------- Hilfsfunktionen ----------
+        // ---------- Feste Wörter im Code (Fallback) ----------
+        const DEFAULT_WORDS = [
+            { fr: "un",        de: "eins" },
+            { fr: "deux",      de: "zwei" },
+            { fr: "trois",     de: "drei" },
+            { fr: "quatre",    de: "vier" },
+            { fr: "cinq",      de: "fünf" },
+            { fr: "six",       de: "sechs" },
+            { fr: "sept",      de: "sieben" },
+            { fr: "huit",      de: "acht" },
+            { fr: "neuf",      de: "neun" },
+            { fr: "dix",       de: "zehn" },
+            { fr: "rouge",     de: "rot" },
+            { fr: "bleu",      de: "blau" },
+            { fr: "vert",      de: "grün" },
+            { fr: "noir",      de: "schwarz" },
+            { fr: "blanc",     de: "weiss" },
+            { fr: "bonjour",   de: "guten Tag" },
+            { fr: "merci",     de: "danke" },
+            { fr: "salut",     de: "hallo" },
+            { fr: "au revoir", de: "auf Wiedersehen" },
+            { fr: "école",     de: "Schule" }
+        ];
 
+        // ---------- Hilfsfunktionen ----------
         function createStars() {
             const container = document.getElementById('stars');
             if (!container) return;
@@ -623,43 +632,26 @@
             return lower;
         }
 
-        function randInt(min, maxInclusive) {
-            return Math.floor(Math.random() * (maxInclusive - min + 1)) + min;
-        }
-
-        function shuffle(array) {
-            for (let i = array.length - 1; i > 0; i--) {
+        function shuffle(arr) {
+            const a = arr.slice();
+            for (let i = a.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
-                const tmp = array[i];
-                array[i] = array[j];
-                array[j] = tmp;
+                [a[i], a[j]] = [a[j], a[i]];
             }
-            return array;
+            return a;
         }
 
         // ---------- Globaler State ----------
-
         const state = {
             mode: 'menu',
             xp: 0,
             coins: 0,
             ownedAvatars: ['cat'],
             activeAvatar: 'cat',
-            words: [],
-            memory: {
-                deck: [],
-                flipped: [],
-                matched: []
-            },
-            listen: {
-                current: null,
-                options: [],
-                attempts: 0
-            },
-            write: {
-                current: null,
-                attempts: 0
-            }
+            words: DEFAULT_WORDS.slice(),
+            memory: { deck: [], flipped: [], matched: [] },
+            listen: { current: null, options: [], attempts: 0 },
+            write: { current: null, attempts: 0 }
         };
 
         const avatarMap = {
@@ -673,7 +665,6 @@
             bear: '🐻'
         };
 
-        // Shop-Items (hart im Code, shop.json wird nicht benutzt)
         const shopItems = [
             { id: 'cat',    name: 'Katze',       emoji: '🐱', cost: 20,  rarity: 'common' },
             { id: 'turtle', name: 'Schildkröte', emoji: '🐢', cost: 25,  rarity: 'common' },
@@ -691,7 +682,6 @@
             if (r === 'legendary') return 'shop-legendary';
             return 'shop-common';
         }
-
         function rarityLabel(r) {
             if (r === 'rare') return 'Selten';
             if (r === 'epic') return 'Episch';
@@ -699,8 +689,7 @@
             return 'Normal';
         }
 
-        // ---------- UI Updates ----------
-
+        // ---------- Progress ----------
         function applyProgressUI() {
             const level = getLevelFromXP(state.xp);
             const nextXP = getNextLevelXP(level);
@@ -709,53 +698,12 @@
             const spanXP = Math.max(nextXP - prevXP, 1);
             const xpPercent = Math.min(100, (relXP / spanXP) * 100);
 
-            const levelDisplay = document.getElementById('levelDisplay');
-            const coinsDisplay = document.getElementById('coinsDisplay');
-            const xpFill = document.getElementById('xpFill');
-            const relXpLabel = document.getElementById('relXpLabel');
-            const nextXpLabel = document.getElementById('nextXpLabel');
-            const avatarEmojiEl = document.getElementById('avatarEmoji');
-
-            if (levelDisplay) levelDisplay.textContent = level;
-            if (coinsDisplay) coinsDisplay.textContent = state.coins;
-            if (xpFill) xpFill.style.width = xpPercent + '%';
-            if (relXpLabel) relXpLabel.textContent = relXP + ' XP';
-            if (nextXpLabel) nextXpLabel.textContent = 'bis ' + nextXP + ' XP';
-            if (avatarEmojiEl) avatarEmojiEl.textContent = avatarMap[state.activeAvatar] || '🐱';
-        }
-
-        function setMode(newMode) {
-            state.mode = newMode;
-            const panels = ['menu', 'memory', 'listen', 'write', 'shop'];
-            panels.forEach(m => {
-                const panel = document.getElementById('panel-' + m);
-                if (!panel) return;
-                if (m === newMode) panel.classList.remove('hidden');
-                else panel.classList.add('hidden');
-            });
-
-            const tabEls = document.querySelectorAll('.mode-tab');
-            tabEls.forEach(btn => {
-                const dataMode = btn.getAttribute('data-mode');
-                if (!dataMode) return;
-                if (dataMode === newMode) {
-                    btn.classList.add('active');
-                    btn.classList.remove('inactive');
-                } else {
-                    btn.classList.remove('active');
-                    btn.classList.add('inactive');
-                }
-            });
-
-            if (newMode === 'memory') {
-                buildMemoryDeck();
-            } else if (newMode === 'listen') {
-                buildListenQuestion();
-            } else if (newMode === 'write') {
-                buildWriteQuestion();
-            } else if (newMode === 'shop') {
-                renderShop();
-            }
+            document.getElementById('levelDisplay').textContent = level;
+            document.getElementById('coinsDisplay').textContent = state.coins;
+            document.getElementById('xpFill').style.width = xpPercent + '%';
+            document.getElementById('relXpLabel').textContent = relXP + ' XP';
+            document.getElementById('nextXpLabel').textContent = 'bis ' + nextXP + ' XP';
+            document.getElementById('avatarEmoji').textContent = avatarMap[state.activeAvatar] || '🐱';
         }
 
         function addReward(xpGain, coinGain) {
@@ -765,38 +713,31 @@
                 const newLvl = getLevelFromXP(state.xp);
                 if (newLvl > oldLvl) fireConfetti();
             }
-            if (coinGain > 0) {
-                state.coins += coinGain;
-            }
+            if (coinGain > 0) state.coins += coinGain;
             applyProgressUI();
             persistProgress();
         }
 
         function persistProgress() {
-            const obj = {
-                xp: state.xp,
-                coins: state.coins,
-                ownedAvatars: state.ownedAvatars,
-                activeAvatar: state.activeAvatar
-            };
             try {
-                localStorage.setItem('franzProgressV1', JSON.stringify(obj));
+                localStorage.setItem('franzProgressV1', JSON.stringify({
+                    xp: state.xp,
+                    coins: state.coins,
+                    ownedAvatars: state.ownedAvatars,
+                    activeAvatar: state.activeAvatar
+                }));
             } catch (e) {}
         }
 
         function loadProgress() {
             try {
-                const saved = localStorage.getItem('franzProgressV1');
-                if (!saved) return;
-                const obj = JSON.parse(saved);
+                const raw = localStorage.getItem('franzProgressV1');
+                if (!raw) return;
+                const obj = JSON.parse(raw);
                 if (typeof obj.xp === 'number') state.xp = obj.xp;
                 if (typeof obj.coins === 'number') state.coins = obj.coins;
-                if (Array.isArray(obj.ownedAvatars) && obj.ownedAvatars.length > 0) {
-                    state.ownedAvatars = obj.ownedAvatars;
-                }
-                if (obj.activeAvatar && avatarMap[obj.activeAvatar]) {
-                    state.activeAvatar = obj.activeAvatar;
-                }
+                if (Array.isArray(obj.ownedAvatars) && obj.ownedAvatars.length > 0) state.ownedAvatars = obj.ownedAvatars;
+                if (obj.activeAvatar && avatarMap[obj.activeAvatar]) state.activeAvatar = obj.activeAvatar;
             } catch (e) {}
         }
 
@@ -806,42 +747,54 @@
             state.coins = 0;
             state.ownedAvatars = ['cat'];
             state.activeAvatar = 'cat';
-            try {
-                localStorage.removeItem('franzProgressV1');
-            } catch (e) {}
+            localStorage.removeItem('franzProgressV1');
             applyProgressUI();
         }
 
-        // ---------- Memory ----------
+        // ---------- Mode ----------
+        function setMode(mode) {
+            state.mode = mode;
+            ['menu','memory','listen','write','shop'].forEach(m => {
+                const p = document.getElementById('panel-' + m);
+                if (!p) return;
+                if (m === mode) p.classList.remove('hidden');
+                else p.classList.add('hidden');
+            });
 
+            document.querySelectorAll('.mode-tab').forEach(btn => {
+                const m = btn.getAttribute('data-mode');
+                if (!m) return;
+                if (m === mode) {
+                    btn.classList.add('active');
+                    btn.classList.remove('inactive');
+                } else {
+                    btn.classList.remove('active');
+                    btn.classList.add('inactive');
+                }
+            });
+
+            if (mode === 'memory') buildMemoryDeck();
+            if (mode === 'listen') buildListenQuestion();
+            if (mode === 'write') buildWriteQuestion();
+            if (mode === 'shop') renderShop();
+        }
+
+        // ---------- Memory ----------
         function buildMemoryDeck() {
             const grid = document.getElementById('memoryGrid');
-            if (!grid) return;
             grid.innerHTML = '';
 
-            if (!state.words || state.words.length < 4) {
-                grid.innerHTML = '<p class="col-span-full text-center text-sm text-slate-300">Zu wenige Wörter geladen.</p>';
+            if (state.words.length < 4) {
+                grid.innerHTML = '<p class="col-span-full text-center text-sm text-slate-300">Zu wenige Wörter.</p>';
                 return;
             }
 
-            const pool = shuffle(state.words.slice()).slice(0, 6);
+            const pool = shuffle(state.words).slice(0, 6);
             const deck = [];
-
-            pool.forEach((w, idx) => {
-                deck.push({
-                    id: 'fr-' + idx,
-                    key: w.fr,
-                    label: w.fr,
-                    lang: 'fr'
-                });
-                deck.push({
-                    id: 'de-' + idx,
-                    key: w.fr,
-                    label: w.de,
-                    lang: 'de'
-                });
+            pool.forEach((w, i) => {
+                deck.push({ id: 'fr-' + i, key: w.fr, label: w.fr, lang: 'fr' });
+                deck.push({ id: 'de-' + i, key: w.fr, label: w.de, lang: 'de' });
             });
-
             state.memory.deck = shuffle(deck);
             state.memory.flipped = [];
             state.memory.matched = [];
@@ -849,10 +802,9 @@
             state.memory.deck.forEach(card => {
                 const scene = document.createElement('div');
                 scene.className = 'memory-scene';
-
-                const wrapper = document.createElement('div');
-                wrapper.className = 'memory-card';
-                wrapper.dataset.cardId = card.id;
+                const wrap = document.createElement('div');
+                wrap.className = 'memory-card';
+                wrap.dataset.cardId = card.id;
 
                 const front = document.createElement('div');
                 front.className = 'memory-face memory-front';
@@ -861,44 +813,46 @@
                 const back = document.createElement('div');
                 back.className = 'memory-face memory-back ' + (card.lang === 'fr' ? 'fr' : 'de');
 
-                const langSpan = document.createElement('span');
-                langSpan.className = 'text-xs opacity-70 mb-1 block';
-                langSpan.textContent = card.lang === 'fr' ? 'FR' : 'DE';
+                const top = document.createElement('span');
+                top.className = 'text-xs opacity-70 mb-1 block';
+                top.textContent = card.lang === 'fr' ? 'FR' : 'DE';
 
-                const labelSpan = document.createElement('span');
-                labelSpan.className = 'text-base sm:text-lg leading-tight';
-                labelSpan.textContent = card.label;
+                const lab = document.createElement('span');
+                lab.className = 'text-base sm:text-lg leading-tight';
+                lab.textContent = card.label;
 
-                back.appendChild(langSpan);
-                back.appendChild(labelSpan);
+                back.appendChild(top);
+                back.appendChild(lab);
 
-                wrapper.appendChild(front);
-                wrapper.appendChild(back);
-                scene.appendChild(wrapper);
+                wrap.appendChild(front);
+                wrap.appendChild(back);
+                scene.appendChild(wrap);
                 grid.appendChild(scene);
 
-                scene.addEventListener('click', function () {
-                    handleMemoryClick(card.id);
-                });
+                scene.addEventListener('click', () => handleMemoryClick(card.id));
+            });
+        }
+
+        function updateMemoryFlips() {
+            document.querySelectorAll('.memory-card').forEach(el => {
+                const id = el.dataset.cardId;
+                const flipped = state.memory.flipped.includes(id) || state.memory.matched.includes(id);
+                if (flipped) el.classList.add('flipped');
+                else el.classList.remove('flipped');
             });
         }
 
         function handleMemoryClick(cardId) {
             const deck = state.memory.deck;
-            const flipped = state.memory.flipped;
-            const matched = state.memory.matched;
-
-            if (matched.includes(cardId)) return;
-            if (flipped.includes(cardId)) return;
-            if (flipped.length === 2) return;
+            if (state.memory.matched.includes(cardId)) return;
+            if (state.memory.flipped.includes(cardId)) return;
+            if (state.memory.flipped.length === 2) return;
 
             state.memory.flipped.push(cardId);
             updateMemoryFlips();
 
             const card = deck.find(c => c.id === cardId);
-            if (card) {
-                speak(card.label, card.lang === 'fr' ? 'fr-FR' : 'de-DE');
-            }
+            if (card) speak(card.label, card.lang === 'fr' ? 'fr-FR' : 'de-DE');
 
             if (state.memory.flipped.length === 2) {
                 const [aId, bId] = state.memory.flipped;
@@ -907,7 +861,7 @@
                 if (!a || !b) return;
 
                 if (a.key === b.key && a.lang !== b.lang) {
-                    setTimeout(function () {
+                    setTimeout(() => {
                         state.memory.matched.push(aId, bId);
                         state.memory.flipped = [];
                         updateMemoryFlips();
@@ -919,7 +873,7 @@
                         }
                     }, 500);
                 } else {
-                    setTimeout(function () {
+                    setTimeout(() => {
                         playBeep('bad');
                         state.memory.flipped = [];
                         updateMemoryFlips();
@@ -928,123 +882,99 @@
             }
         }
 
-        function updateMemoryFlips() {
-            const cards = document.querySelectorAll('.memory-card');
-            cards.forEach(cardEl => {
-                const id = cardEl.dataset.cardId;
-                const isFlipped = state.memory.flipped.includes(id) || state.memory.matched.includes(id);
-                if (isFlipped) cardEl.classList.add('flipped');
-                else cardEl.classList.remove('flipped');
-            });
-        }
-
         // ---------- Hör zu ----------
-
         function buildListenQuestion() {
-            const feedback = document.getElementById('listenFeedback');
-            if (feedback) feedback.textContent = '';
+            const fb = document.getElementById('listenFeedback');
+            fb.textContent = '';
 
-            if (!state.words || state.words.length < 4) {
-                const optionsContainer = document.getElementById('listenOptions');
-                if (optionsContainer) {
-                    optionsContainer.innerHTML = '<p class="col-span-full text-center text-sm text-slate-300">Zu wenige Wörter geladen.</p>';
-                }
+            if (state.words.length < 4) {
+                document.getElementById('listenOptions').innerHTML =
+                    '<p class="col-span-full text-center text-sm text-slate-300">Zu wenige Wörter.</p>';
                 return;
             }
 
-            const all = state.words.slice();
-            const correct = all[Math.floor(Math.random() * all.length)];
-            const others = shuffle(all.filter(w => w !== correct)).slice(0, 3);
-            const opts = shuffle(others.concat([correct]));
+            const all = shuffle(state.words);
+            const correct = all[0];
+            const opts = shuffle([correct, all[1], all[2], all[3]]);
 
             state.listen.current = correct;
             state.listen.options = opts;
             state.listen.attempts = 0;
 
-            const frLabel = document.getElementById('listenWordFr');
-            if (frLabel) frLabel.textContent = correct.fr;
+            document.getElementById('listenWordFr').textContent = correct.fr;
 
-            const optionsContainer = document.getElementById('listenOptions');
-            if (!optionsContainer) return;
-            optionsContainer.innerHTML = '';
-
-            opts.forEach((w, idx) => {
+            const cont = document.getElementById('listenOptions');
+            cont.innerHTML = '';
+            opts.forEach(w => {
                 const btn = document.createElement('button');
                 btn.className = 'w-full text-left shop-card shop-common flex items-center justify-between';
                 btn.innerHTML =
-                    '<div class="text-sm sm:text-base font-semibold">' +
-                    w.de +
-                    '</div>' +
+                    '<div class="text-sm sm:text-base font-semibold">' + w.de + '</div>' +
                     '<button type="button" class="ml-3 w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center text-xs">🔊</button>';
+                const inner = btn.querySelector('button');
 
-                btn.addEventListener('click', function (e) {
+                btn.addEventListener('click', e => {
                     e.stopPropagation();
                     handleListenChoose(w);
                 });
-
-                const innerBtn = btn.querySelector('button');
-                innerBtn.addEventListener('click', function (e) {
+                inner.addEventListener('click', e => {
                     e.stopPropagation();
                     speak(w.de, 'de-DE');
                 });
 
-                optionsContainer.appendChild(btn);
+                cont.appendChild(btn);
             });
 
             speak(correct.fr, 'fr-FR');
         }
 
         function handleListenChoose(opt) {
-            const feedback = document.getElementById('listenFeedback');
-            if (!state.listen.current || !feedback) return;
+            const fb = document.getElementById('listenFeedback');
+            if (!state.listen.current) return;
 
             state.listen.attempts += 1;
-
             const correct = state.listen.current;
+
             if (opt.de === correct.de) {
                 playBeep('good');
                 if (state.listen.attempts === 1) {
                     addReward(8, 4);
-                    feedback.className = 'mt-2 text-sm text-center font-semibold text-emerald-300';
-                    feedback.textContent = 'Richtig! Volle Punkte. 👌';
+                    fb.className = 'mt-2 text-sm text-center font-semibold text-emerald-300';
+                    fb.textContent = 'Richtig! Volle Punkte. 👌';
                 } else {
-                    feedback.className = 'mt-2 text-sm text-center font-semibold text-emerald-300';
-                    feedback.textContent = 'Richtig – aber ohne Punkte, weil du geraten hast.';
+                    fb.className = 'mt-2 text-sm text-center font-semibold text-emerald-300';
+                    fb.textContent = 'Richtig – aber ohne Punkte, weil du geraten hast.';
                 }
                 setTimeout(buildListenQuestion, 900);
             } else {
                 playBeep('bad');
-                feedback.className = 'mt-2 text-sm text-center font-semibold text-rose-300';
-                feedback.textContent = 'Falsch. Hör nochmals gut hin und versuch es erneut.';
+                fb.className = 'mt-2 text-sm text-center font-semibold text-rose-300';
+                fb.textContent = 'Falsch. Hör nochmals gut hin und versuch es erneut.';
             }
         }
 
         // ---------- Schreiben ----------
-
         function buildWriteQuestion() {
-            const feedback = document.getElementById('writeFeedback');
-            if (feedback) feedback.textContent = '';
+            const fb = document.getElementById('writeFeedback');
+            fb.textContent = '';
 
-            if (!state.words || state.words.length === 0) {
-                const wordEl = document.getElementById('writeWordFr');
-                if (wordEl) wordEl.textContent = '–';
+            if (state.words.length === 0) {
+                document.getElementById('writeWordFr').textContent = '–';
                 return;
             }
 
-            const w = state.words[Math.floor(Math.random() * state.words.length)];
+            const w = shuffle(state.words)[0];
             state.write.current = w;
             state.write.attempts = 0;
 
-            const wordEl = document.getElementById('writeWordFr');
-            const input = document.getElementById('writeInput');
-            if (wordEl) wordEl.textContent = w.fr;
-            if (input) input.value = '';
+            document.getElementById('writeWordFr').textContent = w.fr;
+            document.getElementById('writeInput').value = '';
         }
 
         function handleWriteCheck() {
-            const feedback = document.getElementById('writeFeedback');
+            const fb = document.getElementById('writeFeedback');
             const input = document.getElementById('writeInput');
-            if (!state.write.current || !feedback || !input) return;
+            if (!state.write.current) return;
 
             const user = input.value.trim();
             if (!user) return;
@@ -1052,9 +982,8 @@
             const correct = state.write.current.de;
             const normUser = user.toLowerCase();
             const normCorrect = correct.toLowerCase();
-            const strippedUser = stripArticle(user);
-            const strippedCorrect = stripArticle(correct);
-            const sameMainWord = strippedUser === strippedCorrect;
+            const mainUser = stripArticle(user);
+            const mainCorrect = stripArticle(correct);
 
             let ok = false;
             let msg = '';
@@ -1062,11 +991,10 @@
             if (normUser === normCorrect) {
                 ok = true;
                 msg = 'Perfekt geschrieben! ✅';
-            } else if (sameMainWord) {
+            } else if (mainUser === mainCorrect) {
                 ok = true;
                 msg = 'Hauptwort richtig, Artikel nicht ganz. Zählt als richtig – achte auf der/die/das.';
             } else {
-                ok = false;
                 msg = 'Nicht ganz. Prüfe nochmal Rechtschreibung und Bedeutung.';
             }
 
@@ -1080,41 +1008,37 @@
                 } else {
                     msg += ' (Richtig, aber ohne Punkte – du hast probiert.)';
                 }
-                feedback.className = 'mt-1 text-sm text-center font-semibold text-emerald-300';
-                feedback.textContent = msg;
+                fb.className = 'mt-1 text-sm text-center font-semibold text-emerald-300';
+                fb.textContent = msg;
                 setTimeout(buildWriteQuestion, 1200);
             } else {
                 playBeep('bad');
-                feedback.className = 'mt-1 text-sm text-center font-semibold text-amber-200';
-                feedback.textContent = msg;
+                fb.className = 'mt-1 text-sm text-center font-semibold text-amber-200';
+                fb.textContent = msg;
             }
         }
 
         function handleWriteShowSolution() {
-            const feedback = document.getElementById('writeFeedback');
-            if (!state.write.current || !feedback) return;
-            feedback.className = 'mt-1 text-sm text-center font-semibold text-slate-200';
-            feedback.textContent = 'Lösung: "' + state.write.current.de + '". Versuche beim nächsten Mal wieder ohne Hilfe.';
+            const fb = document.getElementById('writeFeedback');
+            if (!state.write.current) return;
+            fb.className = 'mt-1 text-sm text-center font-semibold text-slate-200';
+            fb.textContent = 'Lösung: "' + state.write.current.de + '". Versuche beim nächsten Mal wieder ohne Hilfe.';
         }
 
         // ---------- Shop ----------
-
         function renderShop() {
             const grid = document.getElementById('shopGrid');
-            if (!grid) return;
             grid.innerHTML = '';
-
             shopItems.forEach(it => {
-                const isOwned = state.ownedAvatars.includes(it.id);
-                const isActive = state.activeAvatar === it.id;
+                const owned = state.ownedAvatars.includes(it.id);
+                const active = state.activeAvatar === it.id;
 
                 const card = document.createElement('div');
                 card.className = 'shop-card flex flex-col items-center text-center ' + rarityClass(it.rarity);
-
                 card.innerHTML =
                     '<div class="flex items-center gap-2 mb-1">' +
                     '<span class="text-3xl">' + it.emoji + '</span>' +
-                    (isActive ? '<span class="pill bg-emerald-500 text-xs text-slate-900">Aktiv</span>' : '') +
+                    (active ? '<span class="pill bg-emerald-500 text-xs text-slate-900">Aktiv</span>' : '') +
                     '</div>' +
                     '<div class="font-bold text-sm">' + it.name + '</div>' +
                     '<div class="text-[0.7rem] text-slate-200 mt-1">' + rarityLabel(it.rarity) + '</div>' +
@@ -1123,14 +1047,14 @@
                     '<span>🪙</span>' +
                     '</div>' +
                     '<div class="mt-1">' +
-                    (isOwned ? '<span class="owned-badge">Gekauft</span>' : '') +
+                    (owned ? '<span class="owned-badge">Gekauft</span>' : '') +
                     '</div>' +
                     '<div class="mt-2 text-[0.68rem] text-slate-300">' +
-                    'Klick zum ' + (isOwned ? 'Auswählen' : 'Kaufen') + '.' +
+                    'Klick zum ' + (owned ? 'Auswählen' : 'Kaufen') + '.' +
                     '</div>';
 
-                card.addEventListener('click', function () {
-                    if (isOwned) {
+                card.addEventListener('click', () => {
+                    if (owned) {
                         state.activeAvatar = it.id;
                         playBeep('good');
                         applyProgressUI();
@@ -1142,7 +1066,7 @@
                             return;
                         }
                         if (!window.confirm('"' + it.name + '" für ' + it.cost + ' Münzen kaufen?')) return;
-                        state.coins -= it.cost;
+                            state.coins -= it.cost;
                         state.ownedAvatars.push(it.id);
                         state.activeAvatar = it.id;
                         playBeep('good');
@@ -1156,143 +1080,48 @@
             });
         }
 
-        // ---------- Wörter aus mehreren Dateien laden ----------
-
-        function loadAllWordFiles() {
-            const files = [
-                'data/franzwords.json',
-                'data/franzverbs.json',
-                'data/franzvocab.json',
-                'data/franzplaces.json',
-                'data/franz_words.json' // optional Sammel-Datei
-            ];
-
-            const requests = files.map(function (path) {
-                return fetch(path)
-                    .then(function (res) {
-                        if (!res.ok) return null; // Datei existiert evtl. nicht -> ignorieren
-                        return res.json();
-                    })
-                    .catch(function () {
-                        return null;
-                    });
-            });
-
-            Promise.all(requests)
-                .then(function (results) {
-                    const all = [];
-
-                    results.forEach(function (data) {
-                        if (Array.isArray(data)) {
-                            data.forEach(function (entry) {
-                                if (entry && entry.fr && entry.de) {
-                                    all.push({
-                                        fr: entry.fr,
-                                        de: entry.de
-                                    });
-                                }
-                            });
-                        }
-                    });
-
-                    if (all.length === 0) {
-                        const errEl = document.getElementById('wordsError');
-                        if (errEl) errEl.classList.remove('hidden');
-                        console.error('Keine gültigen Wörter aus den JSON-Dateien geladen.');
-                        return;
-                    }
-
-                    state.words = all;
-                    const errEl = document.getElementById('wordsError');
-                    if (errEl) errEl.classList.add('hidden');
-
-                    // Start im Menü, alles bereit
-                    setMode('menu');
-                })
-                .catch(function (err) {
-                    console.error(err);
-                    const errEl = document.getElementById('wordsError');
-                    if (errEl) errEl.classList.remove('hidden');
-                });
-        }
-
         // ---------- Init ----------
-
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', () => {
             createStars();
             loadProgress();
             applyProgressUI();
 
-            const btnBackHome = document.getElementById('btnBackHome');
-            if (btnBackHome) {
-                btnBackHome.addEventListener('click', function () {
-                    window.location.href = 'index.html';
-                });
-            }
-
-            const modeButtons = document.querySelectorAll('.mode-tab');
-            modeButtons.forEach(btn => {
-                const m = btn.getAttribute('data-mode');
-                if (!m) return;
-                btn.addEventListener('click', function () {
-                    setMode(m);
-                });
+            document.getElementById('btnBackHome').addEventListener('click', () => {
+                window.location.href = 'index.html';
             });
 
-            const gotoButtons = document.querySelectorAll('[data-goto]');
-            gotoButtons.forEach(btn => {
-                const target = btn.getAttribute('data-goto');
-                btn.addEventListener('click', function () {
-                    setMode(target);
-                });
+            document.querySelectorAll('.mode-tab').forEach(btn => {
+                const mode = btn.getAttribute('data-mode');
+                if (!mode) return;
+                btn.addEventListener('click', () => setMode(mode));
             });
 
-            const btnResetAll = document.getElementById('btnResetAll');
-            if (btnResetAll) {
-                btnResetAll.addEventListener('click', resetAll);
-            }
+            document.querySelectorAll('[data-goto]').forEach(btn => {
+                const mode = btn.getAttribute('data-goto');
+                btn.addEventListener('click', () => setMode(mode));
+            });
 
-            const btnMemoryShuffle = document.getElementById('btnMemoryShuffle');
-            if (btnMemoryShuffle) {
-                btnMemoryShuffle.addEventListener('click', buildMemoryDeck);
-            }
+            document.getElementById('btnResetAll').addEventListener('click', resetAll);
 
-            const btnListenReplay = document.getElementById('btnListenReplay');
-            if (btnListenReplay) {
-                btnListenReplay.addEventListener('click', function () {
-                    if (state.listen.current) speak(state.listen.current.fr, 'fr-FR');
-                });
-            }
-            const btnListenPlayFr = document.getElementById('btnListenPlayFr');
-            if (btnListenPlayFr) {
-                btnListenPlayFr.addEventListener('click', function () {
-                    if (state.listen.current) speak(state.listen.current.fr, 'fr-FR');
-                });
-            }
+            document.getElementById('btnMemoryShuffle').addEventListener('click', buildMemoryDeck);
 
-            const btnWritePlayFr = document.getElementById('btnWritePlayFr');
-            if (btnWritePlayFr) {
-                btnWritePlayFr.addEventListener('click', function () {
-                    if (state.write.current) speak(state.write.current.fr, 'fr-FR');
-                });
-            }
-            const btnWriteCheck = document.getElementById('btnWriteCheck');
-            if (btnWriteCheck) {
-                btnWriteCheck.addEventListener('click', handleWriteCheck);
-            }
-            const btnWriteShowSolution = document.getElementById('btnWriteShowSolution');
-            if (btnWriteShowSolution) {
-                btnWriteShowSolution.addEventListener('click', handleWriteShowSolution);
-            }
-            const writeInput = document.getElementById('writeInput');
-            if (writeInput) {
-                writeInput.addEventListener('keydown', function (e) {
-                    if (e.key === 'Enter') handleWriteCheck();
-                });
-            }
+            document.getElementById('btnListenReplay').addEventListener('click', () => {
+                if (state.listen.current) speak(state.listen.current.fr, 'fr-FR');
+            });
+            document.getElementById('btnListenPlayFr').addEventListener('click', () => {
+                if (state.listen.current) speak(state.listen.current.fr, 'fr-FR');
+            });
 
-            // Hier ALLE Word-Dateien laden
-            loadAllWordFiles();
+            document.getElementById('btnWritePlayFr').addEventListener('click', () => {
+                if (state.write.current) speak(state.write.current.fr, 'fr-FR');
+            });
+            document.getElementById('btnWriteCheck').addEventListener('click', handleWriteCheck);
+            document.getElementById('btnWriteShowSolution').addEventListener('click', handleWriteShowSolution);
+            document.getElementById('writeInput').addEventListener('keydown', e => {
+                if (e.key === 'Enter') handleWriteCheck();
+            });
+
+            setMode('menu');
         });
     </script>
 </body>
