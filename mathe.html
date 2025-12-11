@@ -2,214 +2,776 @@
 <html lang="de-CH">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mathe – Rechen-Quest</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mathematik 4. Klasse – Lernapp</title>
 
-    <!-- Tailwind -->
+    <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Fonts / Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-
-</head>
-
-<body>
-
-    <!-- WALD-HINTERGRUND (optional, kindgerecht) -->
-    <div class="blob bg-blue-200 w-64 h-64 top-0 left-0"></div>
-    <div class="blob bg-yellow-200 w-64 h-64 bottom-0 right-0"></div>
-
-    <div class="app-page-wrapper">
-
-        <!-- ================================
-             GLOBALES LEVEL / COINS HUD
-        =================================== -->
-        <div class="flex justify-between items-center mb-6">
-
-            <div>
-                <div class="font-fun text-3xl font-black text-slate-800">
-                    Mathe – Rechen-Quest 🧮
-                </div>
-                <div class="text-slate-600 font-bold">Werde stärker, indem du Aufgaben löst!</div>
-            </div>
-
-            <div class="text-right">
-                <div class="badge badge-blue mb-1">Level: <span id="level">1</span></div><br>
-                <div class="badge badge-yellow">Coins: <span id="coins">0</span></div>
-            </div>
-
-        </div>
-
-        <!-- XP-Bar -->
-        <div class="xp-bar mb-8">
-            <div class="xp-bar-fill" id="xpBar"></div>
-        </div>
-
-
-        <!-- ================================
-             MATHE – QUIZ BEREICH
-        =================================== -->
-
-        <div class="glass-panel p-6 mt-4">
-            <h2 class="font-fun text-2xl font-black mb-4">Neue Aufgabe:</h2>
-
-            <div id="task" class="text-4xl font-black text-center my-6"></div>
-
-            <input 
-                id="answer"
-                type="number" 
-                class="w-full text-center text-3xl p-4 rounded-xl border-4 border-slate-300 focus:border-blue-500 outline-none transition-all"
-                placeholder="Deine Antwort..."
-            >
-
-            <button id="submitAnswer" class="btn-action btn-green w-full mt-5 py-4 text-xl">
-                Antwort prüfen
-            </button>
-
-            <div id="feedback" class="text-center font-fun text-xl mt-4"></div>
-        </div>
-
-
-        <!-- ================================
-             LEVEL-UP POPUP
-        =================================== -->
-
-        <div id="levelUpPopup" class="modal-overlay hidden">
-            <div class="glass-panel p-10 text-center pop-in">
-
-                <h2 class="font-fun text-4xl font-black text-green-400 mb-4">LEVEL UP!</h2>
-                <p class="text-xl text-white mb-6">Du bist jetzt Level <span id="newLevel"></span>! ⭐</p>
-
-                <button id="closePopup" class="btn-action btn-blue w-full py-3 text-xl">Weiter</button>
-            </div>
-        </div>
-
-    </div> <!-- wrapper end -->
-
-
-    <!-- ================================
-         GLOBAL GAME ENGINE (XP / LEVEL)
-    =================================== -->
-
     <script>
-        /* =============================
-           SPEICHER / RPG SYSTEM
-        ============================== */
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['system-ui', 'ui-sans-serif', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
 
-        const player = {
-            level: parseInt(localStorage.getItem("lc_level")) || 1,
-            xp: parseInt(localStorage.getItem("lc_xp")) || 0,
-            coins: parseInt(localStorage.getItem("lc_coins")) || 0,
+    <style>
+        body {
+            background: radial-gradient(circle at top left, #e0f2fe, #eef2ff 45%, #e0f2fe);
+        }
+
+        .toggle-selected {
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.8);
+            transform: translateY(-1px);
+        }
+
+        .answer-selected {
+            box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.9);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-900">
+    <!-- Navigation oben für Integration -->
+    <nav class="w-full bg-slate-900 text-slate-50">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center justify-center w-7 h-7 rounded-xl bg-indigo-500 text-xs font-bold">
+                    L
+                </span>
+                <div>
+                    <div class="text-sm font-semibold">Lern-App Schweiz</div>
+                    <div class="text-[11px] text-slate-300">Lehrplan 21 – 4. Klasse</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 text-xs sm:text-sm">
+                <a href="index.html"
+                   class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 transition">
+                    Startseite
+                </a>
+                <a href="franz.html"
+                   class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 transition">
+                    Französisch
+                </a>
+                <a href="math.html"
+                   class="px-3 py-1.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 transition font-semibold">
+                    Mathematik
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-5xl mx-auto px-4 py-6 sm:py-8">
+        <!-- Header -->
+        <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold text-slate-900">
+                    Mathematik – 4. Klasse
+                </h1>
+                <p class="text-sm sm:text-base text-slate-600 mt-1">
+                    Trainiere Kopfrechnen und Textaufgaben nach Lehrplan 21: Plus, Minus, Mal, Geteilt – mit Punkten und Level.
+                </p>
+            </div>
+            <div class="flex gap-3">
+                <div class="bg-white/80 backdrop-blur rounded-2xl px-4 py-2 shadow-sm border border-slate-200">
+                    <div class="text-[11px] uppercase tracking-wide text-slate-500">Punkte</div>
+                    <div id="pointsDisplay" class="text-xl font-bold text-slate-900">0</div>
+                </div>
+                <div class="bg-white/80 backdrop-blur rounded-2xl px-4 py-2 shadow-sm border border-slate-200">
+                    <div class="text-[11px] uppercase tracking-wide text-slate-500">Level</div>
+                    <div id="levelDisplay" class="text-xl font-bold text-emerald-700">1</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Einstellungen: Modus + Schwierigkeit -->
+        <section class="mb-6 grid gap-4 md:grid-cols-[3fr,2fr]">
+            <!-- Aufgaben-Typ (MC-Modus) -->
+            <div class="bg-white/80 backdrop-blur rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5">
+                <h2 class="text-sm font-semibold text-slate-700 mb-3">
+                    Kopfrechnen – Aufgaben-Typ
+                </h2>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <button
+                        class="mode-btn inline-flex items-center justify-center px-2.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 transition"
+                        data-mode="plusminus">
+                        Plus / Minus
+                    </button>
+                    <button
+                        class="mode-btn inline-flex items-center justify-center px-2.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 transition"
+                        data-mode="multdiv">
+                        Mal / Geteilt
+                    </button>
+                    <button
+                        class="mode-btn inline-flex items-center justify-center px-2.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 transition"
+                        data-mode="mix">
+                        Gemischt
+                    </button>
+                    <button
+                        class="mode-btn inline-flex items-center justify-center px-2.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 transition"
+                        data-mode="easy">
+                        Nur einfach
+                    </button>
+                </div>
+                <p class="mt-3 text-xs text-slate-500">
+                    Tipp: Starte mit <span class="font-semibold">„Nur einfach“</span>, wenn dein Kind noch unsicher ist,
+                    und wechsle später zu <span class="font-semibold">„Gemischt“</span>.
+                </p>
+            </div>
+
+            <!-- Schwierigkeit -->
+            <div class="bg-white/80 backdrop-blur rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5">
+                <h2 class="text-sm font-semibold text-slate-700 mb-3">
+                    Schwierigkeitsgrad (beide Spiele)
+                </h2>
+                <div class="flex gap-2">
+                    <button
+                        class="difficulty-btn flex-1 px-2.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 transition"
+                        data-diff="1">
+                        Stufe 1<br><span class="text-[11px] text-slate-500">Zahlen bis 100</span>
+                    </button>
+                    <button
+                        class="difficulty-btn flex-1 px-2.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 transition"
+                        data-diff="2">
+                        Stufe 2<br><span class="text-[11px] text-slate-500">Zahlen bis 500</span>
+                    </button>
+                    <button
+                        class="difficulty-btn flex-1 px-2.5 py-2 text-xs sm:text-sm rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 transition"
+                        data-diff="3">
+                        Stufe 3<br><span class="text-[11px] text-slate-500">Zahlen bis 1000</span>
+                    </button>
+                </div>
+                <div class="mt-3">
+                    <div class="flex justify-between text-[11px] text-slate-500 mb-1">
+                        <span>Fortschritt zum nächsten Level</span>
+                        <span id="xpPercentLabel">0%</span>
+                    </div>
+                    <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div id="xpBar" class="h-full bg-emerald-500 rounded-full transition-all duration-300" style="width: 0%;"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tabs für Spielauswahl -->
+        <section class="mb-4">
+            <div class="inline-flex rounded-2xl bg-white/70 border border-slate-200 p-1">
+                <button id="tab-mc"
+                        class="game-tab px-3 sm:px-4 py-1.5 text-xs sm:text-sm rounded-2xl font-medium bg-indigo-600 text-white shadow-sm">
+                    Kopfrechnen (Auswahl)
+                </button>
+                <button id="tab-word"
+                        class="game-tab px-3 sm:px-4 py-1.5 text-xs sm:text-sm rounded-2xl font-medium text-slate-700 hover:bg-slate-100">
+                    Textaufgaben
+                </button>
+            </div>
+        </section>
+
+        <!-- Spiel 1: Kopfrechnen (Multiple Choice) -->
+        <main id="panel-mc" class="bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6 mb-5">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-sm sm:text-base font-semibold text-slate-800">
+                    Kopfrechnen – aktuelle Aufgabe
+                </h2>
+                <button id="newTaskBtn"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 transition">
+                    Neue Aufgabe
+                    <span class="text-slate-400 text-xs">⟳</span>
+                </button>
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-[2fr,3fr] items-start">
+                <!-- Aufgabe -->
+                <div class="rounded-2xl bg-gradient-to-br from-sky-50 to-indigo-50 border border-sky-100 p-4 sm:p-5">
+                    <div class="text-[11px] font-semibold uppercase tracking-wide text-sky-700 mb-2">
+                        Rechne im Kopf
+                    </div>
+                    <div id="taskText"
+                         class="text-3xl sm:text-4xl font-bold text-slate-900 mb-3 select-none text-center">
+                        8 + 5 =
+                    </div>
+                    <div class="text-xs text-slate-500 text-center">
+                        Wähle unten die richtige Antwort.
+                    </div>
+                </div>
+
+                <!-- Antworten -->
+                <div>
+                    <div class="grid grid-cols-2 gap-2 mb-3" id="answersContainer">
+                        <!-- Buttons per JS -->
+                    </div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <button id="checkBtn"
+                                class="inline-flex items-center justify-center px-3 py-1.5 text-xs sm:text-sm rounded-xl bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition disabled:opacity-40 disabled:cursor-not-allowed">
+                            Antwort prüfen
+                        </button>
+                        <button id="skipBtn"
+                                class="inline-flex items-center justify-center px-3 py-1.5 text-xs sm:text-sm rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition">
+                            Überspringen
+                        </button>
+                    </div>
+                    <div id="feedback"
+                         class="text-sm font-semibold h-5 flex items-center text-slate-700">
+                        <!-- Feedback -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Spiel 2: Textaufgaben -->
+        <section id="panel-word" class="hidden bg-white/90 backdrop-blur rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6 mb-5">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-sm sm:text-base font-semibold text-slate-800">
+                    Textaufgaben – Sachrechnen
+                </h2>
+                <button id="wordNewBtn"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 transition">
+                    Neue Textaufgabe
+                    <span class="text-slate-400 text-xs">⟳</span>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div class="rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 p-4 sm:p-5">
+                    <div class="text-[11px] font-semibold uppercase tracking-wide text-emerald-700 mb-2">
+                        Lies genau
+                    </div>
+                    <p id="wordProblemText" class="text-sm sm:text-base text-slate-800">
+                        Textaufgabe wird geladen…
+                    </p>
+                </div>
+
+                <div class="grid gap-3 sm:grid-cols-[2fr,3fr] items-start">
+                    <div>
+                        <label for="wordAnswerInput" class="text-xs font-medium text-slate-700">
+                            Ergebnis (Zahl)
+                        </label>
+                        <input id="wordAnswerInput"
+                               type="number"
+                               class="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                               placeholder="Deine Antwort hier eingeben">
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <button id="wordCheckBtn"
+                                    class="inline-flex items-center justify-center px-3 py-1.5 text-xs sm:text-sm rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition disabled:opacity-40 disabled:cursor-not-allowed">
+                                Antwort prüfen
+                            </button>
+                            <button id="wordShowResultBtn"
+                                    class="inline-flex items-center justify-center px-3 py-1.5 text-xs sm:text-sm rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition">
+                                Lösung anzeigen
+                            </button>
+                        </div>
+                        <div id="wordFeedback"
+                             class="text-sm font-semibold h-5 flex items-center text-slate-700">
+                            <!-- Feedback -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Info / Lern-Tipps -->
+        <section class="grid gap-4 md:grid-cols-2">
+            <div class="bg-white/80 backdrop-blur rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5">
+                <h3 class="text-sm font-semibold text-slate-800 mb-2">
+                    Lerntipps für Eltern
+                </h3>
+                <ul class="text-xs sm:text-sm text-slate-600 space-y-1.5 list-disc list-inside">
+                    <li>Lass dein Kind laut denken: „8 + 7 ist wie 8 + 2 + 5 = 10 + 5“.</li>
+                    <li>Kurze Sessions (5–10 Minuten), dafür regelmässig.</li>
+                    <li>Bei Fehlern gemeinsam anschauen: Wo genau ist der Denkfehler?</li>
+                    <li>Bei Textaufgaben: zuerst die Frage markieren, dann wichtige Zahlen farblich hervorheben.</li>
+                </ul>
+            </div>
+
+            <div class="bg-white/80 backdrop-blur rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5">
+                <h3 class="text-sm font-semibold text-slate-800 mb-2">
+                    Was wird hier trainiert?
+                </h3>
+                <p class="text-xs sm:text-sm text-slate-600 mb-2">
+                    Die Aufgaben decken zentrale Kompetenzen des Lehrplans 21 ab:
+                </p>
+                <ul class="text-xs sm:text-sm text-slate-600 space-y-1.5 list-disc list-inside">
+                    <li>Addieren und Subtrahieren im Zahlenraum bis 1000.</li>
+                    <li>Einmaleins, Malnehmen und Dividieren mit Rest = 0.</li>
+                    <li>Kopfrechnen, Zahlverständnis, Zerlegen von Zahlen.</li>
+                    <li>Sachrechnen: Textaufgaben verstehen und in Rechnungen übersetzen.</li>
+                </ul>
+            </div>
+        </section>
+    </div>
+
+    <!-- Logik -->
+    <script>
+        const state = {
+            mode: 'mix',          // plusminus | multdiv | mix | easy
+            difficulty: 1,        // 1, 2, 3
+            points: 0,
+            xp: 0,                // 0–100, danach Level up
+            level: 1,
+            currentTask: null,
+            selectedAnswer: null,
+            locked: false,
+            currentWordTask: null
         };
 
-        function requiredXP(level) {
-            // RPG-Levelkurve (leicht steigend)
-            return Math.floor(30 * Math.pow(1.45, level - 1));
+        const pointsDisplay = document.getElementById('pointsDisplay');
+        const levelDisplay = document.getElementById('levelDisplay');
+        const xpBar = document.getElementById('xpBar');
+        const xpPercentLabel = document.getElementById('xpPercentLabel');
+        const taskText = document.getElementById('taskText');
+        const answersContainer = document.getElementById('answersContainer');
+        const feedbackEl = document.getElementById('feedback');
+        const newTaskBtn = document.getElementById('newTaskBtn');
+        const checkBtn = document.getElementById('checkBtn');
+        const skipBtn = document.getElementById('skipBtn');
+
+        const modeButtons = Array.from(document.querySelectorAll('.mode-btn'));
+        const diffButtons = Array.from(document.querySelectorAll('.difficulty-btn'));
+
+        // Tabs
+        const tabMc = document.getElementById('tab-mc');
+        const tabWord = document.getElementById('tab-word');
+        const panelMc = document.getElementById('panel-mc');
+        const panelWord = document.getElementById('panel-word');
+
+        // Textaufgaben-Elemente
+        const wordProblemText = document.getElementById('wordProblemText');
+        const wordAnswerInput = document.getElementById('wordAnswerInput');
+        const wordCheckBtn = document.getElementById('wordCheckBtn');
+        const wordNewBtn = document.getElementById('wordNewBtn');
+        const wordShowResultBtn = document.getElementById('wordShowResultBtn');
+        const wordFeedback = document.getElementById('wordFeedback');
+
+        function randInt(min, maxInclusive) {
+            return Math.floor(Math.random() * (maxInclusive - min + 1)) + min;
         }
 
-        function saveData() {
-            localStorage.setItem("lc_level", player.level);
-            localStorage.setItem("lc_xp", player.xp);
-            localStorage.setItem("lc_coins", player.coins);
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
         }
 
-        function updateHUD() {
-            document.getElementById("level").textContent = player.level;
-            document.getElementById("coins").textContent = player.coins;
+        function applyUIState() {
+            // Modus-Buttons
+            modeButtons.forEach(btn => {
+                if (btn.dataset.mode === state.mode) {
+                    btn.classList.add('bg-indigo-600', 'text-white', 'border-indigo-600', 'toggle-selected');
+                    btn.classList.remove('bg-slate-50', 'text-slate-900');
+                } else {
+                    btn.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-600', 'toggle-selected');
+                    btn.classList.add('bg-slate-50', 'text-slate-900');
+                }
+            });
 
-            const req = requiredXP(player.level);
-            const percent = Math.min(100, (player.xp / req) * 100);
-            document.getElementById("xpBar").style.width = percent + "%";
+            // Schwierigkeits-Buttons
+            diffButtons.forEach(btn => {
+                if (btn.dataset.diff === String(state.difficulty)) {
+                    btn.classList.add('bg-emerald-600', 'text-white', 'border-emerald-600', 'toggle-selected');
+                    btn.classList.remove('bg-slate-50', 'text-slate-900');
+                } else {
+                    btn.classList.remove('bg-emerald-600', 'text-white', 'border-emerald-600', 'toggle-selected');
+                    btn.classList.add('bg-slate-50', 'text-slate-900');
+                }
+            });
+
+            // Punkte / Level
+            pointsDisplay.textContent = state.points;
+            levelDisplay.textContent = state.level;
+            xpBar.style.width = state.xp + '%';
+            xpPercentLabel.textContent = state.xp + '%';
         }
 
-        function addXP(amount) {
-            player.xp += amount;
-            player.coins += Math.floor(amount / 5); // Bonus Coins
-            checkLevelUp();
-            saveData();
-            updateHUD();
-        }
-
-        function checkLevelUp() {
-            const req = requiredXP(player.level);
-            while (player.xp >= req) {
-                player.xp -= req;
-                player.level++;
-                showLevelUpPopup(player.level);
+        function getMaxNumberForDifficulty() {
+            switch (state.difficulty) {
+                case 1: return 100;
+                case 2: return 500;
+                case 3: return 1000;
+                default: return 100;
             }
         }
 
-        function showLevelUpPopup(lvl) {
-            document.getElementById("newLevel").textContent = lvl;
-            document.getElementById("levelUpPopup").classList.remove("hidden");
+        // ---------- KOPFRECHNEN (Multiple Choice) ----------
+
+        function generatePlusMinusTask(max) {
+            const addOrSub = Math.random() < 0.5 ? '+' : '-';
+
+            let a, b, result;
+            if (addOrSub === '+') {
+                a = randInt(0, max);
+                b = randInt(0, max - a);
+                result = a + b;
+            } else {
+                result = randInt(0, max);
+                b = randInt(0, result);
+                a = result + b;
+            }
+
+            return {
+                text: `${a} ${addOrSub} ${b} =`,
+                correct: result
+            };
         }
 
-        document.getElementById("closePopup").addEventListener("click", () => {
-            document.getElementById("levelUpPopup").classList.add("hidden");
-        });
+        function generateMultDivTask(max) {
+            const limit = state.difficulty === 1 ? 10 : (state.difficulty === 2 ? 15 : 20);
+            const isMult = Math.random() < 0.5;
 
+            let a, b, result, text;
 
-        /* =============================
-           MATHE – AUFGABEN SYSTEM
-        ============================== */
+            if (isMult) {
+                a = randInt(2, limit);
+                b = randInt(2, limit);
+                result = a * b;
+                text = `${a} · ${b} =`;
+            } else {
+                a = randInt(2, limit);
+                b = randInt(2, limit);
+                result = a;
+                const product = a * b;
+                text = `${product} : ${b} =`;
+            }
 
-        let currentAnswer = 0;
+            if (result > max) {
+                result = max;
+            }
 
-        function newTask() {
-            const a = Math.floor(Math.random() * 20 + 1);
-            const b = Math.floor(Math.random() * 20 + 1);
-
-            const ops = ["+", "-", "×"];
-            const op = ops[Math.floor(Math.random() * ops.length)];
-
-            let result = 0;
-
-            if (op === "+") result = a + b;
-            if (op === "-") result = a - b;
-            if (op === "×") result = a * b;
-
-            currentAnswer = result;
-
-            document.getElementById("task").textContent = `${a} ${op} ${b}`;
+            return {
+                text,
+                correct: result
+            };
         }
 
-        document.getElementById("submitAnswer").addEventListener("click", () => {
-            const user = parseInt(document.getElementById("answer").value);
-            const feedback = document.getElementById("feedback");
+        function generateEasyTask() {
+            const type = randInt(1, 3); // 1 = plus, 2 = minus, 3 = mal
+            let a, b, result, text;
 
-            if (isNaN(user)) {
-                feedback.textContent = "Bitte gib eine Zahl ein!";
-                feedback.className = "text-red-500 font-fun text-xl";
+            if (type === 1) {
+                a = randInt(0, 50);
+                b = randInt(0, 50 - a);
+                result = a + b;
+                text = `${a} + ${b} =`;
+            } else if (type === 2) {
+                result = randInt(0, 50);
+                b = randInt(0, result);
+                a = result + b;
+                text = `${a} - ${b} =`;
+            } else {
+                a = randInt(2, 10);
+                b = randInt(2, 10);
+                result = a * b;
+                text = `${a} · ${b} =`;
+            }
+
+            return {
+                text,
+                correct: result
+            };
+        }
+
+        function generateTask() {
+            const max = getMaxNumberForDifficulty();
+            let baseTask;
+
+            if (state.mode === 'plusminus') {
+                baseTask = generatePlusMinusTask(max);
+            } else if (state.mode === 'multdiv') {
+                baseTask = generateMultDivTask(max);
+            } else if (state.mode === 'easy') {
+                baseTask = generateEasyTask();
+            } else {
+                const r = Math.random();
+                if (r < 0.4) {
+                    baseTask = generatePlusMinusTask(max);
+                } else {
+                    baseTask = generateMultDivTask(max);
+                }
+            }
+
+            const correct = baseTask.correct;
+            const answers = new Set([correct]);
+
+            while (answers.size < 4) {
+                const delta = randInt(-15, 15);
+                let candidate = correct + delta;
+                if (candidate < 0) candidate = 0;
+                if (candidate === correct) continue;
+                answers.add(candidate);
+            }
+
+            const choices = shuffle(Array.from(answers));
+
+            state.currentTask = {
+                text: baseTask.text,
+                correct,
+                choices
+            };
+            state.selectedAnswer = null;
+            state.locked = false;
+            renderTask();
+        }
+
+        function renderTask() {
+            if (!state.currentTask) return;
+            taskText.textContent = state.currentTask.text;
+
+            answersContainer.innerHTML = '';
+            state.currentTask.choices.forEach(value => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.textContent = value;
+                btn.className =
+                    'answer-btn w-full px-3 py-2 sm:py-3 rounded-xl border border-slate-200 bg-slate-50 ' +
+                    'hover:bg-slate-100 text-sm sm:text-base font-medium text-slate-900 ' +
+                    'transition select-none';
+                btn.dataset.value = value;
+                btn.addEventListener('click', () => selectAnswer(value, btn));
+                answersContainer.appendChild(btn);
+            });
+
+            feedbackEl.textContent = '';
+            checkBtn.disabled = false;
+        }
+
+        function selectAnswer(value, btn) {
+            if (state.locked) return;
+
+            state.selectedAnswer = value;
+            document.querySelectorAll('.answer-btn').forEach(b => {
+                b.classList.remove('answer-selected', 'bg-indigo-600', 'text-white', 'border-indigo-600');
+                b.classList.add('bg-slate-50', 'text-slate-900', 'border-slate-200');
+            });
+
+            btn.classList.add('answer-selected', 'bg-indigo-600', 'text-white', 'border-indigo-600');
+            btn.classList.remove('bg-slate-50', 'text-slate-900', 'border-slate-200');
+            feedbackEl.textContent = '';
+        }
+
+        function addPointsAndXp(amountPoints, amountXp) {
+            state.points += amountPoints;
+            if (state.points < 0) state.points = 0;
+
+            state.xp += amountXp;
+            while (state.xp >= 100) {
+                state.xp -= 100;
+                state.level += 1;
+            }
+
+            applyUIState();
+        }
+
+        function handleCheck() {
+            if (state.locked) return;
+            if (state.selectedAnswer === null) {
+                feedbackEl.textContent = 'Bitte zuerst eine Antwort anklicken.';
+                feedbackEl.className = 'text-sm font-semibold h-5 flex items-center text-amber-600';
                 return;
             }
 
-            if (user === currentAnswer) {
+            state.locked = true;
+            const correct = state.currentTask.correct;
+            const sel = state.selectedAnswer;
 
-                // XP je nach Schwierigkeit
-                let xpGain = 5;
+            if (Number(sel) === Number(correct)) {
+                feedbackEl.textContent = 'Richtig! +10 Punkte';
+                feedbackEl.className = 'text-sm font-semibold h-5 flex items-center text-emerald-700';
+                addPointsAndXp(10, 20);
 
-                if (Math.abs(currentAnswer) > 20) xpGain = 8;
-                if (Math.abs(currentAnswer) > 50) xpGain = 12;
+                document.querySelectorAll('.answer-btn').forEach(b => {
+                    const val = Number(b.dataset.value);
+                    if (val === correct) {
+                        b.classList.remove('bg-indigo-600');
+                        b.classList.add('bg-emerald-600', 'text-white', 'border-emerald-600');
+                    }
+                });
 
-                feedback.textContent = `Richtig! 🎉 (+${xpGain} XP)`;
-                feedback.className = "text-green-500 font-fun text-xl";
-
-                addXP(xpGain);
-
+                setTimeout(() => {
+                    generateTask();
+                }, 700);
             } else {
-                feedback.textContent = "Falsch! Versuch es nochmal! ❌";
-                feedback.className = "text-red-500 font-fun text-xl shake";
+                feedbackEl.textContent = `Nicht ganz. Richtig wäre: ${correct}`;
+                feedbackEl.className = 'text-sm font-semibold h-5 flex items-center text-rose-700';
+                addPointsAndXp(-2, 5);
+
+                document.querySelectorAll('.answer-btn').forEach(b => {
+                    const val = Number(b.dataset.value);
+                    if (val === correct) {
+                        b.classList.add('bg-emerald-600', 'text-white', 'border-emerald-600');
+                    }
+                    if (val === Number(sel)) {
+                        b.classList.add('bg-rose-600', 'text-white', 'border-rose-600');
+                    }
+                });
+
+                checkBtn.disabled = true;
+            }
+        }
+
+        function handleSkip() {
+            generateTask();
+        }
+
+        // ---------- TEXTAUFGABEN ----------
+
+        const names = ['Lena', 'Noah', 'Mia', 'Luca', 'Lea', 'Ben', 'Sara', 'Tim'];
+        const items = ['Kugeln', 'Bonbons', 'Äpfel', 'Bleistifte', 'Aufkleber', 'Murmel'];
+
+        function generateWordTask() {
+            const max = getMaxNumberForDifficulty();
+            const type = randInt(1, 4); // 1=plus, 2=minus, 3=mal, 4=div
+            const name1 = names[randInt(0, names.length - 1)];
+            const name2 = names[randInt(0, names.length - 1)];
+            const thing = items[randInt(0, items.length - 1)];
+
+            let a, b, text, answer;
+
+            if (type === 1) {
+                a = randInt(5, Math.min(40, max));
+                b = randInt(5, Math.min(40, max - a));
+                answer = a + b;
+                text = `${name1} hat ${a} ${thing}. ${name2} gibt ihm/ihr noch ${b} ${thing} dazu. `
+                     + `Wie viele ${thing} hat ${name1} jetzt insgesamt?`;
+            } else if (type === 2) {
+                answer = randInt(5, Math.min(50, max));
+                b = randInt(1, Math.min(20, answer));
+                a = answer + b;
+                text = `${name1} hat ${a} ${thing}. ${b} ${thing} gehen verloren. `
+                     + `Wie viele ${thing} bleiben ${name1} noch übrig?`;
+            } else if (type === 3) {
+                const factor = state.difficulty === 1 ? randInt(2, 5) : randInt(2, 10);
+                const count = randInt(2, 10);
+                answer = factor * count;
+                text = `${name1} packt ${thing} in Säckchen. In jedes Säckchen legt er/sie ${factor} ${thing}. `
+                     + `Er/Sie hat ${count} Säckchen. Wie viele ${thing} sind es insgesamt?`;
+            } else {
+                const groupSize = state.difficulty === 1 ? randInt(2, 5) : randInt(2, 10);
+                const groups = randInt(2, 10);
+                const total = groupSize * groups;
+                answer = groups;
+                text = `${name1} hat ${total} ${thing} und möchte sie in Gruppen zu je ${groupSize} Stück aufteilen. `
+                     + `Wie viele Gruppen kann ${name1} bilden, wenn alle ${thing} aufgebraucht werden?`;
             }
 
-            document.getElementById("answer").value = "";
-            setTimeout(newTask, 700);
+            state.currentWordTask = {
+                text,
+                answer
+            };
+
+            wordProblemText.textContent = text;
+            wordAnswerInput.value = '';
+            wordFeedback.textContent = '';
+            wordFeedback.className = 'text-sm font-semibold h-5 flex items-center text-slate-700';
+        }
+
+        function handleWordCheck() {
+            if (!state.currentWordTask) return;
+
+            const raw = wordAnswerInput.value.trim();
+            if (raw === '') {
+                wordFeedback.textContent = 'Bitte gib zuerst eine Zahl ein.';
+                wordFeedback.className = 'text-sm font-semibold h-5 flex items-center text-amber-600';
+                return;
+            }
+
+            const given = Number(raw);
+            if (Number.isNaN(given)) {
+                wordFeedback.textContent = 'Das ist keine gültige Zahl.';
+                wordFeedback.className = 'text-sm font-semibold h-5 flex items-center text-amber-600';
+                return;
+            }
+
+            const correct = state.currentWordTask.answer;
+
+            if (given === correct) {
+                wordFeedback.textContent = 'Richtig! +12 Punkte';
+                wordFeedback.className = 'text-sm font-semibold h-5 flex items-center text-emerald-700';
+                addPointsAndXp(12, 25);
+                setTimeout(() => {
+                    generateWordTask();
+                }, 800);
+            } else {
+                wordFeedback.textContent = `Nicht ganz. Richtig wäre: ${correct}`;
+                wordFeedback.className = 'text-sm font-semibold h-5 flex items-center text-rose-700';
+                addPointsAndXp(-3, 8);
+            }
+        }
+
+        function handleWordShowResult() {
+            if (!state.currentWordTask) return;
+            const correct = state.currentWordTask.answer;
+            wordFeedback.textContent = `Die richtige Lösung ist: ${correct}`;
+            wordFeedback.className = 'text-sm font-semibold h-5 flex items-center text-slate-800';
+        }
+
+        // ---------- Tabs zwischen Spielen ----------
+
+        function activateTab(which) {
+            if (which === 'mc') {
+                panelMc.classList.remove('hidden');
+                panelWord.classList.add('hidden');
+
+                tabMc.classList.add('bg-indigo-600', 'text-white', 'shadow-sm');
+                tabWord.classList.remove('bg-indigo-600', 'text-white', 'shadow-sm');
+                tabWord.classList.add('text-slate-700');
+            } else {
+                panelMc.classList.add('hidden');
+                panelWord.classList.remove('hidden');
+
+                tabWord.classList.add('bg-indigo-600', 'text-white', 'shadow-sm');
+                tabMc.classList.remove('bg-indigo-600', 'text-white', 'shadow-sm');
+                tabMc.classList.add('text-slate-700');
+            }
+        }
+
+        // ---------- Event-Handler ----------
+
+        modeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                state.mode = btn.dataset.mode;
+                applyUIState();
+                generateTask();
+            });
         });
 
-        // START
-        updateHUD();
-        newTask();
-    </script>
+        diffButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                state.difficulty = Number(btn.dataset.diff);
+                applyUIState();
+                generateTask();
+                generateWordTask();
+            });
+        });
 
+        newTaskBtn.addEventListener('click', generateTask);
+        skipBtn.addEventListener('click', handleSkip);
+        checkBtn.addEventListener('click', handleCheck);
+
+        tabMc.addEventListener('click', () => activateTab('mc'));
+        tabWord.addEventListener('click', () => activateTab('word'));
+
+        wordNewBtn.addEventListener('click', generateWordTask);
+        wordCheckBtn.addEventListener('click', handleWordCheck);
+        wordShowResultBtn.addEventListener('click', handleWordShowResult);
+
+        // ---------- Initialzustand ----------
+
+        state.mode = 'mix';
+        state.difficulty = 1;
+        state.points = 0;
+        state.level = 1;
+        state.xp = 0;
+
+        applyUIState();
+        generateTask();
+        generateWordTask();
+        activateTab('mc');
+    </script>
 </body>
 </html>
