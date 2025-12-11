@@ -5,27 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Französisch Galaxy – 4. Klasse</title>
 
-    <!-- ENGINE -->
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
 
-    <!-- Gemeinsames CSS (Hintergrund, Karten usw. von deiner index-Seite) -->
+    <!-- Konfetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- Gemeinsames CSS, falls vorhanden -->
     <link rel="stylesheet" href="style.css">
 
     <style>
         body {
-            font-family: 'Nunito', sans-serif;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             background: radial-gradient(circle at top, #1e293b 0%, #020617 55%, #000 100%);
             color: #e5e7eb;
             overflow-x: hidden;
         }
 
         .font-game {
-            font-family: 'Baloo 2', cursive;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-stretch: expanded;
         }
 
         /* Sterne-Hintergrund */
@@ -49,10 +48,10 @@
 
         /* Glas-Panel */
         .glass-panel {
-            background: rgba(15, 23, 42, 0.85);
+            background: rgba(15, 23, 42, 0.9);
             border-radius: 24px;
             border: 1px solid rgba(148, 163, 184, 0.4);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
             backdrop-filter: blur(18px);
         }
 
@@ -70,6 +69,7 @@
             box-shadow: 0 6px 0 rgba(0,0,0,0.4);
             transition: all 0.1s;
             border-bottom-width: 6px;
+            font-size: 0.78rem;
         }
         .big-btn:active {
             transform: translateY(3px);
@@ -105,12 +105,14 @@
             inset: 0;
             border-radius: 18px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             font-weight: 800;
             box-shadow: 0 6px 16px rgba(0,0,0,0.4);
             border: 3px solid rgba(148, 163, 184, 0.5);
             backface-visibility: hidden;
+            padding: 0.5rem;
         }
         .memory-front {
             background: linear-gradient(135deg, #4f46e5, #a855f7);
@@ -122,7 +124,6 @@
             transform: rotateY(180deg);
             font-size: 1.05rem;
             text-align: center;
-            padding: 0.5rem;
         }
         .memory-back.fr {
             border-color: #3b82f6;
@@ -234,38 +235,334 @@
     </style>
 </head>
 <body class="min-h-screen">
+    <!-- Sterne -->
     <div class="stars" id="stars"></div>
 
-    <div id="root" class="min-h-screen flex items-center justify-center py-8 px-4"></div>
+    <!-- Navigation -->
+    <nav class="w-full bg-slate-900/90 text-slate-50 border-b border-slate-800">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center justify-center w-7 h-7 rounded-xl bg-indigo-500 text-xs font-bold">
+                    L
+                </span>
+                <div>
+                    <div class="text-sm font-semibold">Lern-App Schweiz</div>
+                    <div class="text-[11px] text-slate-300">Lehrplan 21 – 4. Klasse</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 text-xs sm:text-sm">
+                <a href="index.html"
+                   class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 transition">
+                    Startseite
+                </a>
+                <a href="franz.html"
+                   class="px-3 py-1.5 rounded-xl bg-indigo-500 hover:bg-indigo-400 transition font-semibold">
+                    Französisch
+                </a>
+                <a href="math.html"
+                   class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 transition">
+                    Mathematik
+                </a>
+            </div>
+        </div>
+    </nav>
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
+    <!-- Hauptcontainer -->
+    <div class="min-h-[calc(100vh-56px)] flex items-center justify-center py-8 px-4">
+        <div class="w-full max-w-5xl glass-panel p-4 sm:p-6 md:p-8">
+            <!-- Header / Top-Bar -->
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+                <div class="flex items-center gap-3">
+                    <button
+                        id="btnBackHome"
+                        class="big-btn btn-gray text-xs px-3 py-2"
+                    >
+                        ⬅ Zur Startseite
+                    </button>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span id="avatarEmoji" class="text-2xl">🐱</span>
+                            <h1 class="font-game text-2xl sm:text-3xl font-black">
+                                Französisch-Galaxy
+                            </h1>
+                        </div>
+                        <p class="text-xs text-slate-400">
+                            4. Klasse – Hörverstehen, Vokabeln, Schreiben & Shop
+                        </p>
+                    </div>
+                </div>
+                <div class="flex flex-col items-end gap-2">
+                    <div class="flex items-center gap-3 text-xs">
+                        <div class="flex items-center gap-1 pill bg-slate-900 text-slate-100">
+                            <span>Level</span>
+                            <span id="levelDisplay" class="font-bold text-emerald-300">1</span>
+                        </div>
+                        <div class="flex items-center gap-1 pill bg-slate-900 text-amber-300">
+                            <span id="coinsDisplay">0</span>
+                            <span>🪙</span>
+                        </div>
+                    </div>
+                    <div class="w-40">
+                        <div class="xp-track">
+                            <div id="xpFill" class="xp-fill" style="width: 0%;"></div>
+                        </div>
+                        <div class="flex justify-between text-[0.65rem] text-slate-400 mt-1">
+                            <span id="relXpLabel">0 XP</span>
+                            <span id="nextXpLabel">bis 0 XP</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-        // Sterne erzeugen
-        const starContainer = document.getElementById('stars');
-        for (let i = 0; i < 70; i++) {
-            const d = document.createElement('div');
-            d.className = 'star-dot';
-            const size = Math.random() * 3 + 1;
-            d.style.width = size + 'px';
-            d.style.height = size + 'px';
-            d.style.top = Math.random() * 100 + '%';
-            d.style.left = Math.random() * 100 + '%';
-            d.style.animationDelay = (Math.random() * 5) + 's';
-            starContainer.appendChild(d);
+            <!-- Mode Auswahl -->
+            <div class="mb-4 flex flex-wrap gap-2 justify-center">
+                <button class="mode-tab active" data-mode="menu">Menü</button>
+                <button class="mode-tab inactive" data-mode="memory">Memory</button>
+                <button class="mode-tab inactive" data-mode="listen">Hör zu</button>
+                <button class="mode-tab inactive" data-mode="write">Schreiben</button>
+                <button class="mode-tab inactive" data-mode="shop">Shop</button>
+                <button id="btnResetAll" class="mode-tab inactive">Alles zurücksetzen</button>
+            </div>
+
+            <!-- Panels -->
+
+            <!-- Menü -->
+            <div id="panel-menu" class="mt-2">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button
+                        class="big-btn btn-blue flex-col items-start h-full"
+                        data-goto="memory"
+                    >
+                        <span class="text-xl">🧠 Memory</span>
+                        <span class="text-xs opacity-90">
+                            Finde zusammengehörende Paare (FR–DE).
+                        </span>
+                    </button>
+                    <button
+                        class="big-btn btn-green flex-col items-start h-full"
+                        data-goto="listen"
+                    >
+                        <span class="text-xl">👂 Hör zu</span>
+                        <span class="text-xs opacity-90">
+                            Höre Französisch und wähle die richtige Bedeutung.
+                        </span>
+                    </button>
+                    <button
+                        class="big-btn btn-purple flex-col items-start h-full"
+                        data-goto="write"
+                    >
+                        <span class="text-xl">✏️ Schreiben</span>
+                        <span class="text-xs opacity-90">
+                            Schreib das deutsche Wort zum französischen Wort.
+                        </span>
+                    </button>
+                    <button
+                        class="big-btn btn-yellow flex-col items-start h-full"
+                        data-goto="shop"
+                    >
+                        <span class="text-xl">🛒 Shop</span>
+                        <span class="text-xs opacity-90">
+                            Kaufe Avatare mit Münzen aus den Übungen.
+                        </span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Memory -->
+            <div id="panel-memory" class="mt-2 hidden">
+                <div class="space-y-4">
+                    <h2 class="font-game text-2xl md:text-3xl font-black text-indigo-300 text-center">
+                        🧠 Memory – Paare finden
+                    </h2>
+                    <p class="text-sm text-slate-300 text-center">
+                        Tipp: Klick zuerst auf Französisch (🇫🇷), höre zu, merk dir das Wort – dann suche die deutsche Karte (🇩🇪).
+                    </p>
+                    <div class="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-3" id="memoryGrid">
+                        <!-- Karten per JS -->
+                    </div>
+                    <div class="flex justify-center mt-2">
+                        <button
+                            id="btnMemoryShuffle"
+                            class="big-btn btn-gray text-xs px-4 py-2"
+                        >
+                            Neu mischen
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hör zu -->
+            <div id="panel-listen" class="mt-2 hidden">
+                <div class="space-y-4">
+                    <h2 class="font-game text-2xl md:text-3xl font-black text-sky-300 text-center">
+                        👂 Hör zu & wähle die Bedeutung
+                    </h2>
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div className="text-sm text-slate-300">
+                            <p class="text-sm text-slate-300">
+                                Höre das französische Wort (🇫🇷) und wähle die richtige deutsche Bedeutung.
+                            </p>
+                            <p class="mt-1 text-xs text-slate-400">
+                                Punkte gibt es nur, wenn du beim <strong>ersten Versuch</strong> richtig liegst.
+                            </p>
+                        </div>
+                        <button
+                            id="btnListenReplay"
+                            class="big-btn btn-blue text-xs"
+                        >
+                            Nochmal anhören 🔊
+                        </button>
+                    </div>
+
+                    <div class="glass-panel p-4 flex flex-col items-center gap-2">
+                        <span class="uppercase text-xs tracking-[0.2em] text-slate-400">
+                            Französisches Wort
+                        </span>
+                        <div class="flex items-center gap-2">
+                            <div
+                                id="listenWordFr"
+                                class="px-4 py-2 rounded-full bg-indigo-600/30 border border-indigo-400/60 text-indigo-100 font-bold text-sm sm:text-base"
+                            >
+                                –
+                            </div>
+                            <button
+                                id="btnListenPlayFr"
+                                class="w-9 h-9 rounded-full bg-indigo-700 flex items-center justify-center text-white text-lg"
+                            >
+                                🔊
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="listenOptions">
+                        <!-- Optionen per JS -->
+                    </div>
+
+                    <div id="listenFeedback"
+                         class="mt-2 text-sm text-center font-semibold text-slate-300 min-h-[1.5rem]">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schreiben -->
+            <div id="panel-write" class="mt-2 hidden">
+                <div class="space-y-4">
+                    <h2 class="font-game text-2xl md:text-3xl font-black text-rose-300 text-center">
+                        ✏️ Schreiben – Deutsch zum französischen Wort
+                    </h2>
+                    <p class="text-sm text-slate-300 text-center max-w-xl mx-auto">
+                        Du siehst das <span class="font-semibold text-indigo-200">französische Wort</span> und schreibst das deutsche Wort.
+                        Gross-/Kleinschreibung ist egal, aber versuch sie richtig zu schreiben.
+                    </p>
+
+                    <div class="glass-panel p-4 flex flex-col items-center gap-3">
+                        <span class="uppercase text-xs tracking-[0.2em] text-slate-400">
+                            Französisches Wort
+                        </span>
+                        <div class="flex items-center gap-2 flex-wrap justify-center">
+                            <div
+                                id="writeWordFr"
+                                class="px-4 py-2 rounded-full bg-rose-600/30 border border-rose-400/60 text-rose-100 font-bold text-sm sm:text-base"
+                            >
+                                –
+                            </div>
+                            <button
+                                id="btnWritePlayFr"
+                                class="w-9 h-9 rounded-full bg-rose-700 flex items-center justify-center text-white text-lg"
+                            >
+                                🔊
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <input
+                            id="writeInput"
+                            class="input-field"
+                            placeholder="Schreibe hier das deutsche Wort..."
+                        />
+                        <div class="flex flex-wrap gap-3 justify-center">
+                            <button
+                                id="btnWriteCheck"
+                                class="big-btn btn-purple text-xs px-6"
+                            >
+                                Prüfen
+                            </button>
+                            <button
+                                id="btnWriteShowSolution"
+                                class="big-btn btn-gray text-[0.68rem] px-4"
+                            >
+                                Lösung anzeigen (nur zur Kontrolle)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div
+                        id="writeFeedback"
+                        class="mt-1 text-sm text-center font-semibold text-slate-300 min-h-[1.5rem]">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shop -->
+            <div id="panel-shop" class="mt-2 hidden">
+                <div class="space-y-4">
+                    <h2 class="font-game text-2xl md:text-3xl font-black text-amber-300 text-center">
+                        🛒 Tier-Shop & Avatar
+                    </h2>
+                    <p class="text-sm text-slate-300 text-center max-w-xl mx-auto">
+                        Gib deine Münzen für Avatare aus. Legendäre Tiere sind teuer und damit
+                        etwas Besonderes. Kinder können den aktiven Avatar selbst auswählen.
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-3" id="shopGrid">
+                        <!-- Shopkarten per JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="mt-6 text-[0.7rem] text-slate-500 text-center">
+                Tipp für dich: Wenn du später neue Wörter in <code>data/franz_words.json</code> einträgst,
+                erscheinen sie automatisch in allen Modi (Memory, Hör zu, Schreiben).
+            </div>
+
+            <!-- Fehleranzeige für Wörter -->
+            <div id="wordsError" class="mt-2 text-center text-xs text-rose-300 hidden">
+                Keine Wörter geladen. Prüfe, ob <code>data/franz_words.json</code> existiert und gültiges JSON enthält.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ---------- Hilfsfunktionen ----------
+
+        function createStars() {
+            const container = document.getElementById('stars');
+            if (!container) return;
+            for (let i = 0; i < 70; i++) {
+                const d = document.createElement('div');
+                d.className = 'star-dot';
+                const size = Math.random() * 3 + 1;
+                d.style.width = size + 'px';
+                d.style.height = size + 'px';
+                d.style.top = Math.random() * 100 + '%';
+                d.style.left = Math.random() * 100 + '%';
+                d.style.animationDelay = (Math.random() * 5) + 's';
+                container.appendChild(d);
+            }
         }
 
-        // --- Helper: Audio / Sprache ---
-        const speak = (text, lang = 'fr-FR') => {
+        function speak(text, lang) {
             if (!('speechSynthesis' in window)) return;
             window.speechSynthesis.cancel();
             const u = new SpeechSynthesisUtterance(text);
-            u.lang = lang;
+            u.lang = lang || 'fr-FR';
             u.rate = 0.9;
             window.speechSynthesis.speak(u);
-        };
+        }
 
-        const playBeep = (type) => {
+        function playBeep(type) {
             const AC = window.AudioContext || window.webkitAudioContext;
             if (!AC) return;
             const ctx = new AC();
@@ -291,35 +588,33 @@
                 osc.start(now);
                 osc.stop(now + 0.35);
             }
-        };
+        }
 
-        const fireConfetti = () => {
+        function fireConfetti() {
             if (!window.confetti) return;
             window.confetti({
                 particleCount: 80,
                 spread: 70,
                 origin: { y: 0.6 }
             });
-        };
+        }
 
-        // XP -> Level
         const levelThresholds = [0, 100, 250, 450, 700, 1000, 1400, 1900, 2500, 3200];
 
-        const getLevelFromXP = (xp) => {
+        function getLevelFromXP(xp) {
             let lvl = 1;
             for (let i = 0; i < levelThresholds.length; i++) {
                 if (xp >= levelThresholds[i]) lvl = i + 1;
             }
             return lvl;
-        };
+        }
 
-        const getNextLevelXP = (lvl) => {
+        function getNextLevelXP(lvl) {
             if (lvl - 1 < levelThresholds.length) return levelThresholds[lvl - 1];
             return levelThresholds[levelThresholds.length - 1];
-        };
+        }
 
-        // Artikel aus deutschem Wort entfernen (für "le/la"-Fehler)
-        const stripArticle = (s) => {
+        function stripArticle(s) {
             if (!s) return '';
             const lower = s.toLowerCase().trim();
             const articles = ["der", "die", "das", "ein", "eine", "le", "la", "les", "un", "une", "des", "l'"];
@@ -328,802 +623,646 @@
                 return parts.slice(1).join(' ');
             }
             return lower;
-        };
+        }
 
-        // --- Modes: Memory, Hör zu, Schreiben, Shop ---
+        function randInt(min, maxInclusive) {
+            return Math.floor(Math.random() * (maxInclusive - min + 1)) + min;
+        }
 
-        const MemoryMode = ({ words, onCorrectGain }) => {
-            const [deck, setDeck] = useState([]);
-            const [flipped, setFlipped] = useState([]);
-            const [matched, setMatched] = useState([]);
-
-            const buildDeck = () => {
-                if (!words || words.length < 4) return;
-                const pool = [...words].sort(() => Math.random() - 0.5).slice(0, 6);
-                const tmp = [];
-                pool.forEach((w, idx) => {
-                    tmp.push({
-                        id: 'fr-' + idx,
-                        key: w.fr,
-                        label: w.fr,
-                        lang: 'fr'
-                    });
-                    tmp.push({
-                        id: 'de-' + idx,
-                        key: w.fr,
-                        label: w.de,
-                        lang: 'de'
-                    });
-                });
-                const shuffled = tmp.sort(() => Math.random() - 0.5);
-                setDeck(shuffled);
-                setFlipped([]);
-                setMatched([]);
-            };
-
-            useEffect(() => {
-                buildDeck();
-            }, [words]);
-
-            const handleClick = (card) => {
-                if (matched.includes(card.id)) return;
-                if (flipped.find((c) => c.id === card.id)) return;
-                if (flipped.length === 2) return;
-
-                const newFlipped = [...flipped, card];
-                setFlipped(newFlipped);
-
-                if (card.lang === 'fr') {
-                    speak(card.label, 'fr-FR');
-                } else {
-                    speak(card.label, 'de-DE');
-                }
-
-                if (newFlipped.length === 2) {
-                    const [a, b] = newFlipped;
-                    if (a.key === b.key && a.lang !== b.lang) {
-                        // Match
-                        setTimeout(() => {
-                            setMatched((m) => [...m, a.id, b.id]);
-                            setFlipped([]);
-                            playBeep('good');
-                            onCorrectGain(10, 5); // XP, Coins
-                            if (matched.length + 2 === deck.length) {
-                                fireConfetti();
-                                setTimeout(buildDeck, 800);
-                            }
-                        }, 500);
-                    } else {
-                        // Kein Match
-                        setTimeout(() => {
-                            playBeep('bad');
-                            setFlipped([]);
-                        }, 800);
-                    }
-                }
-            };
-
-            return (
-                <div className="space-y-4">
-                    <h2 className="font-game text-2xl md:text-3xl font-black text-indigo-300 text-center">
-                        🧠 Memory – Paare finden
-                    </h2>
-                    <p className="text-sm text-slate-300 text-center">
-                        Tipp: Klick zuerst auf Französisch (🇫🇷), höre zu, merk dir das Wort – dann suche die deutsche Karte (🇩🇪).
-                    </p>
-                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-3">
-                        {deck.map((card) => {
-                            const isFlipped =
-                                flipped.find((c) => c.id === card.id) || matched.includes(card.id);
-                            return (
-                                <div
-                                    key={card.id}
-                                    className="memory-scene"
-                                    onClick={() => handleClick(card)}
-                                >
-                                    <div className={'memory-card ' + (isFlipped ? 'flipped' : '')}>
-                                        <div className="memory-face memory-front">?</div>
-                                        <div
-                                            className={
-                                                'memory-face memory-back ' +
-                                                (card.lang === 'fr' ? 'fr' : 'de')
-                                            }
-                                        >
-                                            <span className="text-xs opacity-70 mb-1 block">
-                                                {card.lang === 'fr' ? 'FR' : 'DE'}
-                                            </span>
-                                            <span className="text-base sm:text-lg leading-tight">
-                                                {card.label}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                    <div className="flex justify-center mt-2">
-                        <button
-                            onClick={buildDeck}
-                            className="big-btn btn-gray text-xs px-4 py-2"
-                        >
-                            Neu mischen
-                        </button>
-                    </div>
-                </div>
-            );
-        };
-
-        const ListenMode = ({ words, onCorrectGain }) => {
-            const [current, setCurrent] = useState(null);
-            const [options, setOptions] = useState([]);
-            const [status, setStatus] = useState(null); // 'ok' | 'fail'
-            const [attempts, setAttempts] = useState(0);
-
-            const buildQuestion = () => {
-                if (!words || words.length < 4) return;
-                const all = [...words];
-                const correct = all[Math.floor(Math.random() * all.length)];
-                const others = all.filter((w) => w !== correct).sort(() => Math.random() - 0.5).slice(0, 3);
-                const opts = [...others, correct].sort(() => Math.random() - 0.5);
-                setCurrent(correct);
-                setOptions(opts);
-                setStatus(null);
-                setAttempts(0);
-                setTimeout(() => speak(correct.fr, 'fr-FR'), 100);
-            };
-
-            useEffect(() => {
-                buildQuestion();
-            }, [words]);
-
-            const handleChoose = (opt) => {
-                if (!current) return;
-                const newAttempts = attempts + 1;
-                setAttempts(newAttempts);
-
-                if (opt.de === current.de) {
-                    // Richtig
-                    playBeep('good');
-                    if (newAttempts === 1) {
-                        onCorrectGain(8, 4); // Punkte nur bei 1. Versuch
-                        setStatus({ type: 'ok', text: 'Richtig! Volle Punkte. 👌' });
-                    } else {
-                        setStatus({
-                            type: 'ok',
-                            text: 'Richtig – aber ohne Punkte, weil du geraten hast.'
-                        });
-                    }
-                    setTimeout(buildQuestion, 900);
-                } else {
-                    playBeep('bad');
-                    setStatus({
-                        type: 'fail',
-                        text: 'Falsch. Hör nochmals gut hin und versuch es erneut.'
-                    });
-                }
-            };
-
-            if (!current) {
-                return <p className="text-center text-slate-300">Lade Wörter...</p>;
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                const tmp = array[i];
+                array[i] = array[j];
+                array[j] = tmp;
             }
+            return array;
+        }
 
-            return (
-                <div className="space-y-4">
-                    <h2 className="font-game text-2xl md:text-3xl font-black text-sky-300 text-center">
-                        👂 Hör zu & wähle die Bedeutung
-                    </h2>
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <div className="text-sm text-slate-300">
-                            <p>Höre das französische Wort (🇫🇷) und wähle die richtige deutsche Bedeutung.</p>
-                            <p className="mt-1 text-xs text-slate-400">
-                                Punkte gibt es nur, wenn du beim <strong>ersten Versuch</strong> richtig liegst.
-                            </p>
-                        </div>
-                        <button
-                            className="big-btn btn-blue text-xs"
-                            onClick={() => speak(current.fr, 'fr-FR')}
-                        >
-                            Nochmal anhören <span>🔊</span>
-                        </button>
-                    </div>
+        // ---------- Globaler State ----------
 
-                    <div className="glass-panel p-4 flex flex-col items-center gap-2">
-                        <span className="uppercase text-xs tracking-[0.2em] text-slate-400">
-                            Französisches Wort
-                        </span>
-                        <div className="flex items-center gap-2">
-                            <div className="px-4 py-2 rounded-full bg-indigo-600/30 border border-indigo-400/60 text-indigo-100 font-bold">
-                                {current.fr}
-                            </div>
-                            <button
-                                onClick={() => speak(current.fr, 'fr-FR')}
-                                className="w-9 h-9 rounded-full bg-indigo-700 flex items-center justify-center text-white text-lg"
-                            >
-                                🔊
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {options.map((w, idx) => (
-                            <button
-                                key={idx}
-                                onClick={() => handleChoose(w)}
-                                className="w-full text-left shop-card shop-common flex items-center justify-between"
-                            >
-                                <div className="text-sm sm:text-base font-semibold">
-                                    {w.de}
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        speak(w.de, 'de-DE');
-                                    }}
-                                    className="ml-3 w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center text-xs"
-                                >
-                                    🔊
-                                </button>
-                            </button>
-                        ))}
-                    </div>
-
-                    {status && (
-                        <div
-                            className={
-                                'mt-2 text-sm text-center font-semibold ' +
-                                (status.type === 'ok' ? 'text-emerald-300' : 'text-rose-300')
-                            }
-                        >
-                            {status.text}
-                        </div>
-                    )}
-                </div>
-            );
-        };
-
-        const WriteMode = ({ words, onCorrectGain }) => {
-            const [current, setCurrent] = useState(null);
-            const [input, setInput] = useState('');
-            const [feedback, setFeedback] = useState(null);
-            const [attempts, setAttempts] = useState(0);
-            const [showSolutionCost] = useState(5); // Münzen-Kosten für Lösung
-
-            const buildQuestion = () => {
-                if (!words || words.length === 0) return;
-                const w = words[Math.floor(Math.random() * words.length)];
-                setCurrent(w);
-                setInput('');
-                setFeedback(null);
-                setAttempts(0);
-            };
-
-            useEffect(() => {
-                buildQuestion();
-            }, [words]);
-
-            const handleCheck = () => {
-                if (!current) return;
-                const user = input.trim();
-                if (!user) return;
-
-                const correct = current.de;
-                const normUser = user.toLowerCase();
-                const normCorrect = correct.toLowerCase();
-
-                const strippedUser = stripArticle(user);
-                const strippedCorrect = stripArticle(correct);
-
-                const sameMainWord = strippedUser === strippedCorrect;
-
-                let msg = '';
-                let ok = false;
-
-                if (normUser === normCorrect) {
-                    ok = true;
-                    msg = 'Perfekt geschrieben! ✅';
-                } else if (sameMainWord) {
-                    ok = true;
-                    msg =
-                        'Das Hauptwort ist richtig, aber der Artikel ist nicht ganz korrekt. Trotzdem zählt es als richtig – achte auf der/die/das.';
-                } else {
-                    ok = false;
-                    msg = 'Nicht ganz. Prüfe nochmal Rechtschreibung und Bedeutung.';
-                }
-
-                const newAttempts = attempts + 1;
-                setAttempts(newAttempts);
-
-                if (ok) {
-                    playBeep('good');
-                    if (newAttempts === 1) {
-                        onCorrectGain(10, 5);
-                        msg += ' (Volle Punkte, 1. Versuch 👏)';
-                    } else {
-                        msg += ' (Richtig, aber ohne Punkte – du hast probiert.)';
-                    }
-                } else {
-                    playBeep('bad');
-                }
-
-                setFeedback({ ok, text: msg });
-
-                if (ok) {
-                    setTimeout(buildQuestion, 1200);
-                }
-            };
-
-            const handleSolution = () => {
-                // Nur Info anzeigen – Münzabzug wird im App-State gemacht
-                if (!current) return;
-                setFeedback({
-                    ok: false,
-                    text: `Lösung: "${current.de}". Versuche beim nächsten Mal wieder ohne Hilfe.`
-                });
-            };
-
-            if (!current) {
-                return <p className="text-center text-slate-300">Lade Wörter...</p>;
+        const state = {
+            mode: 'menu',
+            xp: 0,
+            coins: 0,
+            ownedAvatars: ['cat'],
+            activeAvatar: 'cat',
+            words: [],
+            memory: {
+                deck: [],
+                flipped: [],
+                matched: []
+            },
+            listen: {
+                current: null,
+                options: [],
+                attempts: 0
+            },
+            write: {
+                current: null,
+                attempts: 0
             }
-
-            return (
-                <div className="space-y-4">
-                    <h2 className="font-game text-2xl md:text-3xl font-black text-rose-300 text-center">
-                        ✏️ Schreiben – Deutsch zum französischen Wort
-                    </h2>
-                    <p className="text-sm text-slate-300 text-center max-w-xl mx-auto">
-                        Du siehst das <span className="font-semibold text-indigo-200">französische Wort</span> und schreibst das deutsche Wort.
-                        Gross-/Kleinschreibung ist egal, aber versuch sie richtig zu schreiben.
-                    </p>
-
-                    <div className="glass-panel p-4 flex flex-col items-center gap-3">
-                        <span className="uppercase text-xs tracking-[0.2em] text-slate-400">
-                            Französisches Wort
-                        </span>
-                        <div className="flex items-center gap-2 flex-wrap justify-center">
-                            <div className="px-4 py-2 rounded-full bg-rose-600/30 border border-rose-400/60 text-rose-100 font-bold">
-                                {current.fr}
-                            </div>
-                            <button
-                                onClick={() => speak(current.fr, 'fr-FR')}
-                                className="w-9 h-9 rounded-full bg-rose-700 flex items-center justify-center text-white text-lg"
-                            >
-                                🔊
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="space-y-3">
-                        <input
-                            className="input-field"
-                            placeholder="Schreibe hier das deutsche Wort..."
-                            value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') handleCheck();
-                            }}
-                        />
-                        <div className="flex flex-wrap gap-3 justify-center">
-                            <button
-                                onClick={handleCheck}
-                                className="big-btn btn-purple text-xs px-6"
-                            >
-                                Prüfen
-                            </button>
-                            <button
-                                onClick={handleSolution}
-                                className="big-btn btn-gray text-[0.68rem] px-4"
-                            >
-                                Lösung anzeigen (nur zur Kontrolle)
-                            </button>
-                        </div>
-                    </div>
-
-                    {feedback && (
-                        <div
-                            className={
-                                'mt-1 text-sm text-center font-semibold ' +
-                                (feedback.ok ? 'text-emerald-300' : 'text-amber-200')
-                            }
-                        >
-                            {feedback.text}
-                        </div>
-                    )}
-                </div>
-            );
         };
 
-        const ShopMode = ({ coins, owned, activeId, onBuy, onSelect }) => {
-            const items = [
-                { id: 'cat',    name: 'Katze',       emoji: '🐱', cost: 20,  rarity: 'common' },
-                { id: 'turtle', name: 'Schildkröte', emoji: '🐢', cost: 25,  rarity: 'common' },
-                { id: 'panda',  name: 'Panda',       emoji: '🐼', cost: 40,  rarity: 'rare'   },
-                { id: 'owl',    name: 'Eule',        emoji: '🦉', cost: 50,  rarity: 'rare'   },
-                { id: 'dragon', name: 'Drache',      emoji: '🐲', cost: 80,  rarity: 'epic'   },
-                { id: 'alien',  name: 'Alien',       emoji: '👽', cost: 120, rarity: 'epic'   },
-                // Fuchs & Bär bewusst am Schluss (Special)
-                { id: 'fox',    name: 'Fuchs',       emoji: '🦊', cost: 160, rarity: 'legendary' },
-                { id: 'bear',   name: 'Bär',         emoji: '🐻', cost: 200, rarity: 'legendary' }
-            ];
-
-            const rarityLabel = {
-                common: 'Normal',
-                rare: 'Selten',
-                epic: 'Episch',
-                legendary: 'Legendär'
-            };
-
-            const rarityClass = {
-                common: 'shop-common',
-                rare: 'shop-rare',
-                epic: 'shop-epic',
-                legendary: 'shop-legendary'
-            };
-
-            return (
-                <div className="space-y-4">
-                    <h2 className="font-game text-2xl md:text-3xl font-black text-amber-300 text-center">
-                        🛒 Tier-Shop & Avatar
-                    </h2>
-                    <p className="text-sm text-slate-300 text-center max-w-xl mx-auto">
-                        Gib deine Münzen für Avatare aus. Legendäre Tiere sind teuer und damit
-                        etwas Besonderes. Kinder können den aktiven Avatar selbst auswählen.
-                    </p>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-3">
-                        {items.map((it) => {
-                            const isOwned = owned.includes(it.id);
-                            const isActive = activeId === it.id;
-                            return (
-                                <div
-                                    key={it.id}
-                                    className={
-                                        'shop-card flex flex-col items-center text-center ' +
-                                        rarityClass[it.rarity]
-                                    }
-                                    onClick={() => {
-                                        if (isOwned) {
-                                            onSelect(it.id);
-                                        } else {
-                                            onBuy(it);
-                                        }
-                                    }}
-                                >
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <span className="text-3xl">{it.emoji}</span>
-                                        {isActive && (
-                                            <span className="pill bg-emerald-500 text-xs text-slate-900">
-                                                Aktiv
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div className="font-bold text-sm">{it.name}</div>
-                                    <div className="text-[0.7rem] text-slate-200 mt-1">
-                                        {rarityLabel[it.rarity]}
-                                    </div>
-                                    <div className="mt-2 flex items-center gap-1 text-xs">
-                                        <span className="text-amber-300 font-semibold">
-                                            {it.cost}
-                                        </span>
-                                        <span>🪙</span>
-                                    </div>
-                                    <div className="mt-1">
-                                        {isOwned ? (
-                                            <span className="owned-badge">Gekauft</span>
-                                        ) : null}
-                                    </div>
-                                    <div className="mt-2 text-[0.68rem] text-slate-300">
-                                        Klick zum {isOwned ? 'Auswählen' : 'Kaufen'}.
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-            );
+        const avatarMap = {
+            cat: '🐱',
+            turtle: '🐢',
+            panda: '🐼',
+            owl: '🦉',
+            dragon: '🐲',
+            alien: '👽',
+            fox: '🦊',
+            bear: '🐻'
         };
 
-        // --- Haupt-App ---
+        // Shop-Items
+        const shopItems = [
+            { id: 'cat',    name: 'Katze',       emoji: '🐱', cost: 20,  rarity: 'common' },
+            { id: 'turtle', name: 'Schildkröte', emoji: '🐢', cost: 25,  rarity: 'common' },
+            { id: 'panda',  name: 'Panda',       emoji: '🐼', cost: 40,  rarity: 'rare'   },
+            { id: 'owl',    name: 'Eule',        emoji: '🦉', cost: 50,  rarity: 'rare'   },
+            { id: 'dragon', name: 'Drache',      emoji: '🐲', cost: 80,  rarity: 'epic'   },
+            { id: 'alien',  name: 'Alien',       emoji: '👽', cost: 120, rarity: 'epic'   },
+            { id: 'fox',    name: 'Fuchs',       emoji: '🦊', cost: 160, rarity: 'legendary' },
+            { id: 'bear',   name: 'Bär',         emoji: '🐻', cost: 200, rarity: 'legendary' }
+        ];
 
-        const App = () => {
-            const [words, setWords] = useState([]);
-            const [loading, setLoading] = useState(true);
-            const [mode, setMode] = useState('menu'); // menu | memory | listen | write | shop
+        function rarityClass(r) {
+            if (r === 'rare') return 'shop-rare';
+            if (r === 'epic') return 'shop-epic';
+            if (r === 'legendary') return 'shop-legendary';
+            return 'shop-common';
+        }
 
-            const [xp, setXP] = useState(0);
-            const [coins, setCoins] = useState(0);
-            const [ownedAvatars, setOwnedAvatars] = useState(['cat']);
-            const [activeAvatar, setActiveAvatar] = useState('cat');
+        function rarityLabel(r) {
+            if (r === 'rare') return 'Selten';
+            if (r === 'epic') return 'Episch';
+            if (r === 'legendary') return 'Legendär';
+            return 'Normal';
+        }
 
-            const level = getLevelFromXP(xp);
+        // ---------- UI Updates ----------
+
+        function applyProgressUI() {
+            const level = getLevelFromXP(state.xp);
             const nextXP = getNextLevelXP(level);
             const prevXP = level > 1 ? getNextLevelXP(level - 1) : 0;
-            const relXP = Math.max(xp - prevXP, 0);
+            const relXP = Math.max(state.xp - prevXP, 0);
             const spanXP = Math.max(nextXP - prevXP, 1);
             const xpPercent = Math.min(100, (relXP / spanXP) * 100);
 
-            // Laden aus JSON
-            useEffect(() => {
-                fetch('data/franz_words.json')
-                    .then((res) => res.json())
-                    .then((data) => {
-                        setWords(data);
-                        setLoading(false);
-                    })
-                    .catch((err) => {
-                        console.error(err);
-                        setLoading(false);
-                    });
-            }, []);
+            const levelDisplay = document.getElementById('levelDisplay');
+            const coinsDisplay = document.getElementById('coinsDisplay');
+            const xpFill = document.getElementById('xpFill');
+            const relXpLabel = document.getElementById('relXpLabel');
+            const nextXpLabel = document.getElementById('nextXpLabel');
+            const avatarEmojiEl = document.getElementById('avatarEmoji');
 
-            // Lokale Speicherung
-            useEffect(() => {
-                const saved = localStorage.getItem('franzProgressV1');
-                if (saved) {
-                    try {
-                        const obj = JSON.parse(saved);
-                        if (typeof obj.xp === 'number') setXP(obj.xp);
-                        if (typeof obj.coins === 'number') setCoins(obj.coins);
-                        if (Array.isArray(obj.ownedAvatars) && obj.ownedAvatars.length > 0)
-                            setOwnedAvatars(obj.ownedAvatars);
-                        if (obj.activeAvatar) setActiveAvatar(obj.activeAvatar);
-                    } catch (e) {
-                        console.warn('Konnte gespeicherten Fortschritt nicht lesen.');
-                    }
+            if (levelDisplay) levelDisplay.textContent = level;
+            if (coinsDisplay) coinsDisplay.textContent = state.coins;
+            if (xpFill) xpFill.style.width = xpPercent + '%';
+            if (relXpLabel) relXpLabel.textContent = relXP + ' XP';
+            if (nextXpLabel) nextXpLabel.textContent = 'bis ' + nextXP + ' XP';
+            if (avatarEmojiEl) avatarEmojiEl.textContent = avatarMap[state.activeAvatar] || '🐱';
+        }
+
+        function setMode(newMode) {
+            state.mode = newMode;
+            const panels = ['menu', 'memory', 'listen', 'write', 'shop'];
+            panels.forEach(m => {
+                const panel = document.getElementById('panel-' + m);
+                if (!panel) return;
+                if (m === newMode) panel.classList.remove('hidden');
+                else panel.classList.add('hidden');
+            });
+
+            const tabEls = document.querySelectorAll('.mode-tab');
+            tabEls.forEach(btn => {
+                const dataMode = btn.getAttribute('data-mode');
+                if (!dataMode) return;
+                if (dataMode === newMode) {
+                    btn.classList.add('active');
+                    btn.classList.remove('inactive');
+                } else {
+                    btn.classList.remove('active');
+                    btn.classList.add('inactive');
                 }
-            }, []);
+            });
 
-            useEffect(() => {
-                const obj = {
-                    xp,
-                    coins,
-                    ownedAvatars,
-                    activeAvatar
-                };
+            // Panel-spezifische Initialisierung
+            if (newMode === 'memory') {
+                buildMemoryDeck();
+            } else if (newMode === 'listen') {
+                buildListenQuestion();
+            } else if (newMode === 'write') {
+                buildWriteQuestion();
+            } else if (newMode === 'shop') {
+                renderShop();
+            }
+        }
+
+        function addReward(xpGain, coinGain) {
+            if (xpGain > 0) {
+                const oldLvl = getLevelFromXP(state.xp);
+                state.xp += xpGain;
+                const newLvl = getLevelFromXP(state.xp);
+                if (newLvl > oldLvl) fireConfetti();
+            }
+            if (coinGain > 0) {
+                state.coins += coinGain;
+            }
+            applyProgressUI();
+            persistProgress();
+        }
+
+        function persistProgress() {
+            const obj = {
+                xp: state.xp,
+                coins: state.coins,
+                ownedAvatars: state.ownedAvatars,
+                activeAvatar: state.activeAvatar
+            };
+            try {
                 localStorage.setItem('franzProgressV1', JSON.stringify(obj));
-            }, [xp, coins, ownedAvatars, activeAvatar]);
+            } catch (e) {
+                // ignorieren
+            }
+        }
 
-            const addReward = (xpGain, coinGain) => {
-                if (xpGain > 0) {
-                    const newXP = xp + xpGain;
-                    const oldLevel = getLevelFromXP(xp);
-                    const newLevel = getLevelFromXP(newXP);
-                    setXP(newXP);
-                    if (newLevel > oldLevel) {
-                        fireConfetti();
-                    }
+        function loadProgress() {
+            try {
+                const saved = localStorage.getItem('franzProgressV1');
+                if (!saved) return;
+                const obj = JSON.parse(saved);
+                if (typeof obj.xp === 'number') state.xp = obj.xp;
+                if (typeof obj.coins === 'number') state.coins = obj.coins;
+                if (Array.isArray(obj.ownedAvatars) && obj.ownedAvatars.length > 0) {
+                    state.ownedAvatars = obj.ownedAvatars;
                 }
-                if (coinGain > 0) {
-                    setCoins((c) => c + coinGain);
+                if (obj.activeAvatar && avatarMap[obj.activeAvatar]) {
+                    state.activeAvatar = obj.activeAvatar;
                 }
-            };
+            } catch (e) {
+                // ignorieren
+            }
+        }
 
-            const handleBuyAvatar = (item) => {
-                if (ownedAvatars.includes(item.id)) {
-                    setActiveAvatar(item.id);
-                    return;
-                }
-                if (coins < item.cost) {
-                    alert('Zu wenig Münzen für dieses Tier.');
-                    return;
-                }
-                if (!window.confirm(`"${item.name}" für ${item.cost} Münzen kaufen?`)) return;
-                setCoins((c) => c - item.cost);
-                setOwnedAvatars((arr) => [...arr, item.id]);
-                setActiveAvatar(item.id);
-                playBeep('good');
-            };
-
-            const handleSelectAvatar = (id) => {
-                if (!ownedAvatars.includes(id)) return;
-                setActiveAvatar(id);
-                playBeep('good');
-            };
-
-            const handleResetAll = () => {
-                if (!window.confirm('Wirklich alles zurücksetzen? Level, Münzen, Shop?')) return;
-                setXP(0);
-                setCoins(0);
-                setOwnedAvatars(['cat']);
-                setActiveAvatar('cat');
+        function resetAll() {
+            if (!window.confirm('Wirklich alles zurücksetzen? Level, Münzen, Shop?')) return;
+            state.xp = 0;
+            state.coins = 0;
+            state.ownedAvatars = ['cat'];
+            state.activeAvatar = 'cat';
+            try {
                 localStorage.removeItem('franzProgressV1');
-            };
+            } catch (e) {}
+            applyProgressUI();
+        }
 
-            const avatarEmoji = {
-                cat: '🐱',
-                turtle: '🐢',
-                panda: '🐼',
-                owl: '🦉',
-                dragon: '🐲',
-                alien: '👽',
-                fox: '🦊',
-                bear: '🐻'
-            }[activeAvatar] || '🐱';
+        // ---------- Memory ----------
 
-            return (
-                <div className="w-full max-w-5xl glass-panel p-4 sm:p-6 md:p-8">
-                    {/* Header / Top-Bar */}
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-                        <div className="flex items-center gap-3">
-                            <button
-                                className="big-btn btn-gray text-xs px-3 py-2"
-                                onClick={() => (window.location.href = 'index.html')}
-                            >
-                                ⬅ Zur Startseite
-                            </button>
-                            <div>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-2xl">{avatarEmoji}</span>
-                                    <h1 className="font-game text-2xl sm:text-3xl font-black">
-                                        Französich-Galaxy
-                                    </h1>
-                                </div>
-                                <p className="text-xs text-slate-400">
-                                    4. Klasse – Hörverstehen, Vokabeln, Schreiben & Shop
-                                </p>
-                            </div>
-                        </div>
-                        <div className="flex flex-col items-end gap-2">
-                            <div className="flex items-center gap-3 text-xs">
-                                <div className="flex items-center gap-1 pill bg-slate-900 text-slate-100">
-                                    <span>Level</span>
-                                    <span className="font-bold text-emerald-300">{level}</span>
-                                </div>
-                                <div className="flex items-center gap-1 pill bg-slate-900 text-amber-300">
-                                    <span>{coins}</span>
-                                    <span>🪙</span>
-                                </div>
-                            </div>
-                            <div className="w-40">
-                                <div className="xp-track">
-                                    <div className="xp-fill" style={{ width: xpPercent + '%' }}></div>
-                                </div>
-                                <div className="flex justify-between text-[0.65rem] text-slate-400 mt-1">
-                                    <span>{relXP} XP</span>
-                                    <span>bis {nextXP} XP</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        function buildMemoryDeck() {
+            const grid = document.getElementById('memoryGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
 
-                    {/* Mode Auswahl */}
-                    <div className="mb-4 flex flex-wrap gap-2 justify-center">
-                        <button
-                            className={
-                                'mode-tab ' +
-                                (mode === 'menu' ? 'active' : 'inactive')
-                            }
-                            onClick={() => setMode('menu')}
-                        >
-                            Menü
-                        </button>
-                        <button
-                            className={
-                                'mode-tab ' +
-                                (mode === 'memory' ? 'active' : 'inactive')
-                            }
-                            onClick={() => setMode('memory')}
-                        >
-                            Memory
-                        </button>
-                        <button
-                            className={
-                                'mode-tab ' +
-                                (mode === 'listen' ? 'active' : 'inactive')
-                            }
-                            onClick={() => setMode('listen')}
-                        >
-                            Hör zu
-                        </button>
-                        <button
-                            className={
-                                'mode-tab ' +
-                                (mode === 'write' ? 'active' : 'inactive')
-                            }
-                            onClick={() => setMode('write')}
-                        >
-                            Schreiben
-                        </button>
-                        <button
-                            className={
-                                'mode-tab ' +
-                                (mode === 'shop' ? 'active' : 'inactive')
-                            }
-                            onClick={() => setMode('shop')}
-                        >
-                            Shop
-                        </button>
-                        <button
-                            className="mode-tab inactive"
-                            onClick={handleResetAll}
-                        >
-                            Alles zurücksetzen
-                        </button>
-                    </div>
+            if (!state.words || state.words.length < 4) {
+                grid.innerHTML = '<p class="col-span-full text-center text-sm text-slate-300">Zu wenige Wörter geladen.</p>';
+                return;
+            }
 
-                    {/* Inhalt */}
-                    {loading ? (
-                        <div className="py-10 text-center text-slate-300">
-                            Lade Wörter aus <code>data/franz_words.json</code>...
-                        </div>
-                    ) : words.length === 0 ? (
-                        <div className="py-10 text-center text-rose-300">
-                            Keine Wörter gefunden. Prüfe, ob <code>data/franz_words.json</code> existiert
-                            und gültiges JSON enthält.
-                        </div>
-                    ) : (
-                        <div className="mt-2">
-                            {mode === 'menu' && (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <button
-                                        className="big-btn btn-blue flex-col items-start h-full"
-                                        onClick={() => setMode('memory')}
-                                    >
-                                        <span className="text-xl">🧠 Memory</span>
-                                        <span className="text-xs opacity-90">
-                                            Finde zusammengehörende Paare (FR–DE).
-                                        </span>
-                                    </button>
-                                    <button
-                                        className="big-btn btn-green flex-col items-start h-full"
-                                        onClick={() => setMode('listen')}
-                                    >
-                                        <span className="text-xl">👂 Hör zu</span>
-                                        <span className="text-xs opacity-90">
-                                            Höre Französisch und wähle die richtige Bedeutung.
-                                        </span>
-                                    </button>
-                                    <button
-                                        className="big-btn btn-purple flex-col items-start h-full"
-                                        onClick={() => setMode('write')}
-                                    >
-                                        <span className="text-xl">✏️ Schreiben</span>
-                                        <span className="text-xs opacity-90">
-                                            Schreib das deutsche Wort zum französischen Wort.
-                                        </span>
-                                    </button>
-                                    <button
-                                        className="big-btn btn-yellow flex-col items-start h-full"
-                                        onClick={() => setMode('shop')}
-                                    >
-                                        <span className="text-xl">🛒 Shop</span>
-                                        <span className="text-xs opacity-90">
-                                            Kaufe Avatare mit Münzen aus den Übungen.
-                                        </span>
-                                    </button>
-                                </div>
-                            )}
+            const pool = shuffle(state.words.slice()).slice(0, 6);
+            const deck = [];
 
-                            {mode === 'memory' && (
-                                <MemoryMode words={words} onCorrectGain={addReward} />
-                            )}
-                            {mode === 'listen' && (
-                                <ListenMode words={words} onCorrectGain={addReward} />
-                            )}
-                            {mode === 'write' && (
-                                <WriteMode words={words} onCorrectGain={addReward} />
-                            )}
-                            {mode === 'shop' && (
-                                <ShopMode
-                                    coins={coins}
-                                    owned={ownedAvatars}
-                                    activeId={activeAvatar}
-                                    onBuy={handleBuyAvatar}
-                                    onSelect={handleSelectAvatar}
-                                />
-                            )}
-                        </div>
-                    )}
+            pool.forEach((w, idx) => {
+                deck.push({
+                    id: 'fr-' + idx,
+                    key: w.fr,
+                    label: w.fr,
+                    lang: 'fr'
+                });
+                deck.push({
+                    id: 'de-' + idx,
+                    key: w.fr,
+                    label: w.de,
+                    lang: 'de'
+                });
+            });
 
-                    <div className="mt-6 text-[0.7rem] text-slate-500 text-center">
-                        Tipp für dich: Wenn du später neue Wörter in <code>data/franz_words.json</code>{' '}
-                        einträgst, erscheinen sie automatisch in allen Modi (Memory, Hör zu, Schreiben).
-                    </div>
-                </div>
-            );
-        };
+            state.memory.deck = shuffle(deck);
+            state.memory.flipped = [];
+            state.memory.matched = [];
 
-        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+            state.memory.deck.forEach(card => {
+                const scene = document.createElement('div');
+                scene.className = 'memory-scene';
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'memory-card';
+                wrapper.dataset.cardId = card.id;
+
+                const front = document.createElement('div');
+                front.className = 'memory-face memory-front';
+                front.textContent = '?';
+
+                const back = document.createElement('div');
+                back.className = 'memory-face memory-back ' + (card.lang === 'fr' ? 'fr' : 'de');
+
+                const langSpan = document.createElement('span');
+                langSpan.className = 'text-xs opacity-70 mb-1 block';
+                langSpan.textContent = card.lang === 'fr' ? 'FR' : 'DE';
+
+                const labelSpan = document.createElement('span');
+                labelSpan.className = 'text-base sm:text-lg leading-tight';
+                labelSpan.textContent = card.label;
+
+                back.appendChild(langSpan);
+                back.appendChild(labelSpan);
+
+                wrapper.appendChild(front);
+                wrapper.appendChild(back);
+                scene.appendChild(wrapper);
+                grid.appendChild(scene);
+
+                scene.addEventListener('click', function () {
+                    handleMemoryClick(card.id);
+                });
+            });
+        }
+
+        function handleMemoryClick(cardId) {
+            const deck = state.memory.deck;
+            const flipped = state.memory.flipped;
+            const matched = state.memory.matched;
+
+            if (matched.includes(cardId)) return;
+            if (flipped.includes(cardId)) return;
+            if (flipped.length === 2) return;
+
+            state.memory.flipped.push(cardId);
+            updateMemoryFlips();
+
+            const card = deck.find(c => c.id === cardId);
+            if (card) {
+                speak(card.label, card.lang === 'fr' ? 'fr-FR' : 'de-DE');
+            }
+
+            if (state.memory.flipped.length === 2) {
+                const [aId, bId] = state.memory.flipped;
+                const a = deck.find(c => c.id === aId);
+                const b = deck.find(c => c.id === bId);
+                if (!a || !b) return;
+
+                if (a.key === b.key && a.lang !== b.lang) {
+                    setTimeout(function () {
+                        state.memory.matched.push(aId, bId);
+                        state.memory.flipped = [];
+                        updateMemoryFlips();
+                        playBeep('good');
+                        addReward(10, 5); // XP, Coins
+                        if (state.memory.matched.length === deck.length) {
+                            fireConfetti();
+                            setTimeout(buildMemoryDeck, 800);
+                        }
+                    }, 500);
+                } else {
+                    setTimeout(function () {
+                        playBeep('bad');
+                        state.memory.flipped = [];
+                        updateMemoryFlips();
+                    }, 800);
+                }
+            }
+        }
+
+        function updateMemoryFlips() {
+            const cards = document.querySelectorAll('.memory-card');
+            cards.forEach(cardEl => {
+                const id = cardEl.dataset.cardId;
+                const isFlipped = state.memory.flipped.includes(id) || state.memory.matched.includes(id);
+                if (isFlipped) cardEl.classList.add('flipped');
+                else cardEl.classList.remove('flipped');
+            });
+        }
+
+        // ---------- Hör zu ----------
+
+        function buildListenQuestion() {
+            const feedback = document.getElementById('listenFeedback');
+            if (feedback) feedback.textContent = '';
+
+            if (!state.words || state.words.length < 4) {
+                const optionsContainer = document.getElementById('listenOptions');
+                if (optionsContainer) {
+                    optionsContainer.innerHTML = '<p class="col-span-full text-center text-sm text-slate-300">Zu wenige Wörter geladen.</p>';
+                }
+                return;
+            }
+
+            const all = state.words.slice();
+            const correct = all[Math.floor(Math.random() * all.length)];
+            const others = shuffle(all.filter(w => w !== correct)).slice(0, 3);
+            const opts = shuffle(others.concat([correct]));
+
+            state.listen.current = correct;
+            state.listen.options = opts;
+            state.listen.attempts = 0;
+
+            const frLabel = document.getElementById('listenWordFr');
+            if (frLabel) frLabel.textContent = correct.fr;
+
+            const optionsContainer = document.getElementById('listenOptions');
+            if (!optionsContainer) return;
+            optionsContainer.innerHTML = '';
+
+            opts.forEach((w, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left shop-card shop-common flex items-center justify-between';
+                btn.innerHTML = '<div class="text-sm sm:text-base font-semibold">' +
+                    w.de +
+                    '</div>' +
+                    '<button type="button" class="ml-3 w-9 h-9 rounded-full bg-slate-800 flex items-center justify-center text-xs">🔊</button>';
+
+                btn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    handleListenChoose(w);
+                });
+
+                // kleiner Trick: extra Listener nur für den inneren Button
+                const innerBtn = btn.querySelector('button');
+                innerBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    speak(w.de, 'de-DE');
+                });
+
+                optionsContainer.appendChild(btn);
+            });
+
+            // direkt beim Erstellen abspielen
+            speak(correct.fr, 'fr-FR');
+        }
+
+        function handleListenChoose(opt) {
+            const feedback = document.getElementById('listenFeedback');
+            if (!state.listen.current || !feedback) return;
+
+            state.listen.attempts += 1;
+
+            const correct = state.listen.current;
+            if (opt.de === correct.de) {
+                playBeep('good');
+                if (state.listen.attempts === 1) {
+                    addReward(8, 4);
+                    feedback.className = 'mt-2 text-sm text-center font-semibold text-emerald-300';
+                    feedback.textContent = 'Richtig! Volle Punkte. 👌';
+                } else {
+                    feedback.className = 'mt-2 text-sm text-center font-semibold text-emerald-300';
+                    feedback.textContent = 'Richtig – aber ohne Punkte, weil du geraten hast.';
+                }
+                setTimeout(buildListenQuestion, 900);
+            } else {
+                playBeep('bad');
+                feedback.className = 'mt-2 text-sm text-center font-semibold text-rose-300';
+                feedback.textContent = 'Falsch. Hör nochmals gut hin und versuch es erneut.';
+            }
+        }
+
+        // ---------- Schreiben ----------
+
+        function buildWriteQuestion() {
+            const feedback = document.getElementById('writeFeedback');
+            if (feedback) feedback.textContent = '';
+
+            if (!state.words || state.words.length === 0) {
+                const wordEl = document.getElementById('writeWordFr');
+                if (wordEl) wordEl.textContent = '–';
+                return;
+            }
+
+            const w = state.words[Math.floor(Math.random() * state.words.length)];
+            state.write.current = w;
+            state.write.attempts = 0;
+
+            const wordEl = document.getElementById('writeWordFr');
+            const input = document.getElementById('writeInput');
+            if (wordEl) wordEl.textContent = w.fr;
+            if (input) input.value = '';
+        }
+
+        function handleWriteCheck() {
+            const feedback = document.getElementById('writeFeedback');
+            const input = document.getElementById('writeInput');
+            if (!state.write.current || !feedback || !input) return;
+
+            const user = input.value.trim();
+            if (!user) return;
+
+            const correct = state.write.current.de;
+            const normUser = user.toLowerCase();
+            const normCorrect = correct.toLowerCase();
+            const strippedUser = stripArticle(user);
+            const strippedCorrect = stripArticle(correct);
+            const sameMainWord = strippedUser === strippedCorrect;
+
+            let ok = false;
+            let msg = '';
+
+            if (normUser === normCorrect) {
+                ok = true;
+                msg = 'Perfekt geschrieben! ✅';
+            } else if (sameMainWord) {
+                ok = true;
+                msg = 'Hauptwort richtig, Artikel nicht ganz. Zählt als richtig – achte auf der/die/das.';
+            } else {
+                ok = false;
+                msg = 'Nicht ganz. Prüfe nochmal Rechtschreibung und Bedeutung.';
+            }
+
+            state.write.attempts += 1;
+
+            if (ok) {
+                playBeep('good');
+                if (state.write.attempts === 1) {
+                    addReward(10, 5);
+                    msg += ' (Volle Punkte, 1. Versuch 👏)';
+                } else {
+                    msg += ' (Richtig, aber ohne Punkte – du hast probiert.)';
+                }
+                feedback.className = 'mt-1 text-sm text-center font-semibold text-emerald-300';
+                feedback.textContent = msg;
+                setTimeout(buildWriteQuestion, 1200);
+            } else {
+                playBeep('bad');
+                feedback.className = 'mt-1 text-sm text-center font-semibold text-amber-200';
+                feedback.textContent = msg;
+            }
+        }
+
+        function handleWriteShowSolution() {
+            const feedback = document.getElementById('writeFeedback');
+            if (!state.write.current || !feedback) return;
+            feedback.className = 'mt-1 text-sm text-center font-semibold text-slate-200';
+            feedback.textContent = 'Lösung: "' + state.write.current.de + '". Versuche beim nächsten Mal wieder ohne Hilfe.';
+        }
+
+        // ---------- Shop ----------
+
+        function renderShop() {
+            const grid = document.getElementById('shopGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            shopItems.forEach(it => {
+                const isOwned = state.ownedAvatars.includes(it.id);
+                const isActive = state.activeAvatar === it.id;
+
+                const card = document.createElement('div');
+                card.className = 'shop-card flex flex-col items-center text-center ' + rarityClass(it.rarity);
+
+                card.innerHTML =
+                    '<div class="flex items-center gap-2 mb-1">' +
+                    '<span class="text-3xl">' + it.emoji + '</span>' +
+                    (isActive ? '<span class="pill bg-emerald-500 text-xs text-slate-900">Aktiv</span>' : '') +
+                    '</div>' +
+                    '<div class="font-bold text-sm">' + it.name + '</div>' +
+                    '<div class="text-[0.7rem] text-slate-200 mt-1">' + rarityLabel(it.rarity) + '</div>' +
+                    '<div class="mt-2 flex items-center gap-1 text-xs">' +
+                    '<span class="text-amber-300 font-semibold">' + it.cost + '</span>' +
+                    '<span>🪙</span>' +
+                    '</div>' +
+                    '<div class="mt-1">' +
+                    (isOwned ? '<span class="owned-badge">Gekauft</span>' : '') +
+                    '</div>' +
+                    '<div class="mt-2 text-[0.68rem] text-slate-300">' +
+                    'Klick zum ' + (isOwned ? 'Auswählen' : 'Kaufen') + '.' +
+                    '</div>';
+
+                card.addEventListener('click', function () {
+                    if (isOwned) {
+                        state.activeAvatar = it.id;
+                        playBeep('good');
+                        applyProgressUI();
+                        renderShop();
+                        persistProgress();
+                    } else {
+                        if (state.coins < it.cost) {
+                            alert('Zu wenig Münzen für dieses Tier.');
+                            return;
+                        }
+                            if (!window.confirm('"' + it.name + '" für ' + it.cost + ' Münzen kaufen?')) return;
+                        state.coins -= it.cost;
+                        state.ownedAvatars.push(it.id);
+                        state.activeAvatar = it.id;
+                        playBeep('good');
+                        applyProgressUI();
+                        renderShop();
+                        persistProgress();
+                    }
+                });
+
+                grid.appendChild(card);
+            });
+        }
+
+        // ---------- Init ----------
+
+        document.addEventListener('DOMContentLoaded', function () {
+            createStars();
+            loadProgress();
+            applyProgressUI();
+
+            // Navigation
+            const btnBackHome = document.getElementById('btnBackHome');
+            if (btnBackHome) {
+                btnBackHome.addEventListener('click', function () {
+                    window.location.href = 'index.html';
+                });
+            }
+
+            // Mode-Tabs
+            const modeButtons = document.querySelectorAll('.mode-tab');
+            modeButtons.forEach(btn => {
+                const m = btn.getAttribute('data-mode');
+                if (!m) return;
+                btn.addEventListener('click', function () {
+                    setMode(m);
+                });
+            });
+
+            // Menü-Buttons, die in andere Modi springen
+            const gotoButtons = document.querySelectorAll('[data-goto]');
+            gotoButtons.forEach(btn => {
+                const target = btn.getAttribute('data-goto');
+                btn.addEventListener('click', function () {
+                    setMode(target);
+                });
+            });
+
+            // Reset
+            const btnResetAll = document.getElementById('btnResetAll');
+            if (btnResetAll) {
+                btnResetAll.addEventListener('click', resetAll);
+            }
+
+            // Memory
+            const btnMemoryShuffle = document.getElementById('btnMemoryShuffle');
+            if (btnMemoryShuffle) {
+                btnMemoryShuffle.addEventListener('click', buildMemoryDeck);
+            }
+
+            // Hör zu
+            const btnListenReplay = document.getElementById('btnListenReplay');
+            if (btnListenReplay) {
+                btnListenReplay.addEventListener('click', function () {
+                    if (state.listen.current) speak(state.listen.current.fr, 'fr-FR');
+                });
+            }
+            const btnListenPlayFr = document.getElementById('btnListenPlayFr');
+            if (btnListenPlayFr) {
+                btnListenPlayFr.addEventListener('click', function () {
+                    if (state.listen.current) speak(state.listen.current.fr, 'fr-FR');
+                });
+            }
+
+            // Schreiben
+            const btnWritePlayFr = document.getElementById('btnWritePlayFr');
+            if (btnWritePlayFr) {
+                btnWritePlayFr.addEventListener('click', function () {
+                    if (state.write.current) speak(state.write.current.fr, 'fr-FR');
+                });
+            }
+            const btnWriteCheck = document.getElementById('btnWriteCheck');
+            if (btnWriteCheck) {
+                btnWriteCheck.addEventListener('click', handleWriteCheck);
+            }
+            const btnWriteShowSolution = document.getElementById('btnWriteShowSolution');
+            if (btnWriteShowSolution) {
+                btnWriteShowSolution.addEventListener('click', handleWriteShowSolution);
+            }
+            const writeInput = document.getElementById('writeInput');
+            if (writeInput) {
+                writeInput.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter') handleWriteCheck();
+                });
+            }
+
+            // Wörter laden
+            fetch('data/franz_words.json')
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (!Array.isArray(data)) throw new Error('Kein Array');
+                    state.words = data;
+                    const errEl = document.getElementById('wordsError');
+                    if (errEl) errEl.classList.add('hidden');
+                    // Start im Menü, aber schon mal Memory/Listen/Write vorbereiten
+                    setMode('menu');
+                })
+                .catch(function (err) {
+                    console.error(err);
+                    const errEl = document.getElementById('wordsError');
+                    if (errEl) errEl.classList.remove('hidden');
+                });
+        });
     </script>
 </body>
 </html>
