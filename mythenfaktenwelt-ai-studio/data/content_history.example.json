@@ -1,0 +1,26 @@
+{
+  "_schema": {
+    "description": "Dauerhafte Themen-Datenbank. Kopieren nach data/content_history.json (leeres entries:[] bis echte Videos existieren). Wird vom Themen-Scout vor jeder neuen Themenwahl geprueft, um Wiederholungen zu vermeiden.",
+    "fields": {
+      "id": "fortlaufend, z.B. 'MFW-0001'",
+      "date": "ISO-Datum der Veroeffentlichung",
+      "topic": "Hauptthema",
+      "subtopic": "Unterthema/Blickwinkel",
+      "hook": "verwendeter Einstiegssatz",
+      "key_facts": "Liste der wichtigsten Behauptungen (Kurzform)",
+      "sources": "Liste der Quellen",
+      "length_seconds": "Videolaenge",
+      "generators_used": {"image": null, "video": null},
+      "voice_provider": "z.B. elevenlabs oder local_tts",
+      "performance": {
+        "views": null, "likes": null, "comments": null, "shares": null,
+        "avg_watch_time_seconds": null, "completion_rate": null, "follower_delta": null
+      },
+      "published_at": "Uhrzeit (morgens/mittags/abends)",
+      "title": "TikTok-Titel",
+      "description": "TikTok-Beschreibung",
+      "hashtags": "Liste"
+    }
+  },
+  "entries": []
+}

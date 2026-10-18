@@ -1,0 +1,39 @@
+# Kopiere nach config/settings.yaml und passe an. Keine Zugangsdaten hier
+# (die gehören nach config/.env) — nur Struktur-/Ablaufkonfiguration.
+
+channel:
+  name: "MythenFaktenWelt"
+  language: "de"
+  target_video_length_seconds: [45, 65]
+  aspect_ratio: "9:16"
+
+schedule:
+  # Aus Phase 0 (bisheriger Workflow) übernehmen, nicht neu erfinden.
+  morning: "07:00"
+  noon: "13:00"
+  evening: "19:00"
+  timezone: "Europe/Zurich"
+
+google_drive:
+  target_folder_id: ""   # aus Phase 0 übernehmen, oder neu anlegen und hier eintragen
+
+browser_profile_dir: "~/.mfw-browser-profile"
+
+voice:
+  primary_provider: "elevenlabs"
+  fallback_provider: "local_tts"   # siehe docs/LOCAL_FALLBACKS.md -> FALLBACK_VOICE
+
+local_fallbacks:
+  # Erst nach lokaler Prüfung befüllen (docs/LOCAL_FALLBACKS.md)
+  control_llm: null
+  image_model: null
+  video_model: null
+  tts_model: null
+
+publishing:
+  require_explicit_approval: true   # darf NIE auf false gesetzt werden
+  approval_channel: "hermes_notify" # oder "manual" (Datei-Flag in data/state/)
+
+cost_guard:
+  hard_limit_chf: 0.00
+  block_on_uncertain: true   # bei Unsicherheit lieber blockieren als riskieren

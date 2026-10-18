@@ -1,0 +1,35 @@
+{
+  "_schema": {
+    "description": "Provider-Registry fuer Bild-, Video-, TTS- und Musik-Dienste. Wird vom Free-Video-AI-Scout gepflegt und vom Provider-Router gelesen. Kopieren nach data/provider_registry.json.",
+    "fields": {
+      "id": "eindeutiger Slug, z.B. 'grok', 'google_flow'",
+      "type": "image | image_to_video | tts | music",
+      "status": "APPROVED | CANDIDATE | REJECTED",
+      "existing_subscription": "true, wenn im Rahmen eines bereits bezahlten Abos nutzbar",
+      "supports_9_16": "true | false | null (null = nicht geprueft)",
+      "watermark": "true | false | null",
+      "commercial_use_ok": "true | false | null",
+      "automatable_via": "api | browser | none",
+      "quota": "READY | LIMIT | UNKNOWN",
+      "quota_detail": "Freitext, z.B. 'ca. 20 Clips/Tag laut Kontoseite' oder null",
+      "last_checked": "ISO-Datum oder null",
+      "notes": "Freitext, z.B. Testergebnis-Zusammenfassung"
+    }
+  },
+  "entries": [
+    {
+      "id": "grok",
+      "type": "image_to_video",
+      "status": "CANDIDATE",
+      "existing_subscription": true,
+      "supports_9_16": null,
+      "watermark": null,
+      "commercial_use_ok": null,
+      "automatable_via": "none",
+      "quota": "UNKNOWN",
+      "quota_detail": null,
+      "last_checked": null,
+      "notes": "Bestehendes Abo, aber noch nicht durch den Free Video AI Scout live verifiziert. Nicht als APPROVED behandeln, bis ein Test durchgefuehrt wurde."
+    }
+  ]
+}
