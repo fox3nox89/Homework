@@ -19,6 +19,7 @@ data/provider_registry.json
 data/content_history.json
 data/failure_memory.json
 data/music_log.json
+data/benchmark_videos.json
 
 # Python
 __pycache__/

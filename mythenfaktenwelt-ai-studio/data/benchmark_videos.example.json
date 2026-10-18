@@ -1,0 +1,21 @@
+{
+  "_schema": {
+    "description": "Fremde Top-Videos (Benchmark) im selben Themenfeld. Kopieren nach data/benchmark_videos.json. Dient nur der Musteranalyse, keine Inhalte werden uebernommen.",
+    "fields": {
+      "id": "fortlaufend, z.B. 'BM-0001'",
+      "platform": "youtube | tiktok",
+      "channel_name": "oeffentlicher Kanalname",
+      "video_url": "oeffentliche URL",
+      "topic_cluster": "z.B. 'Mythen', 'Weltraum', ...",
+      "views": "Zahl, nur wenn tatsaechlich angezeigt",
+      "likes": null,
+      "comments": null,
+      "length_seconds": null,
+      "hook_text": "erste 1-2 Saetze / Transkript-Anfang, falls verfuegbar",
+      "structure_notes": "manuelle/visuelle Beobachtungen, z.B. Schnittfrequenz, Textoverlay-Stil -- nur wenn tatsaechlich gesichtet, sonst null",
+      "analyzed_at": "ISO-Datum",
+      "analysis_method": "metadata_only | keyframes | live_device_view"
+    }
+  },
+  "entries": []
+}

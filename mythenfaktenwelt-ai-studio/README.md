@@ -12,8 +12,16 @@ Workflow nachbilden und robuster machen:
 
 Themen-Scout → Faktenchecker → Skript-Autor → Visual Director →
 Image Generator → Video Generator (Provider-Router) → Voice Agent →
-Music Agent → Video Editor → Quality Control → Publishing Optimizer →
-Google Drive Upload → **Freigabe durch dich** → (erst dann) Veröffentlichung.
+Music Agent → Video Editor (DaVinci Resolve Studio, Fallback FFmpeg) →
+Quality Control → Publishing Optimizer → Google Drive Upload →
+**Freigabe durch dich** → (erst dann) Veröffentlichung — auf TikTok und,
+im gleichen 9:16-Kurzformat, als YouTube Short.
+
+Zusätzlich laufen periodisch zwei Analyse-Bots, die den Themen-Scout
+füttern: der **TikTok/YouTube Analyst** (eigene Kanalzahlen, nur echte
+API-/Studio-Daten) und der **Benchmark Analyst** (strukturelle Muster
+aus fremden Top-Videos mit sehr grosser Reichweite im selben Themenfeld —
+siehe `docs/BENCHMARK_INSIGHTS.md`).
 
 ## Was dieses System NICHT tut
 

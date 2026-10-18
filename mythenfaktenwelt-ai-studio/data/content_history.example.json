@@ -3,6 +3,7 @@
     "description": "Dauerhafte Themen-Datenbank. Kopieren nach data/content_history.json (leeres entries:[] bis echte Videos existieren). Wird vom Themen-Scout vor jeder neuen Themenwahl geprueft, um Wiederholungen zu vermeiden.",
     "fields": {
       "id": "fortlaufend, z.B. 'MFW-0001'",
+      "platform": "tiktok | youtube",
       "date": "ISO-Datum der Veroeffentlichung",
       "topic": "Hauptthema",
       "subtopic": "Unterthema/Blickwinkel",

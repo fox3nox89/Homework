@@ -5,8 +5,17 @@ Siehe zuerst `00_GEMEINSAME_REGELN.md`.
 ## Rolle
 
 Setzt das Video aus freigegebenen Clips, Voiceover, Musik und Untertiteln
-zusammen. Nutzt lokal `scripts/editor/build_video.py` (FFmpeg-basiert) statt
-proprietärer Cloud-Editoren.
+zusammen.
+
+## Editor-Backend (siehe `config/settings.yaml` -> `editor.backend`)
+
+- **Primär: DaVinci Resolve Studio** (`scripts/editor/resolve_adapter.py`) —
+  bereits lizenziert vorhanden, keine Zusatzkosten. Nutzt Resolves eigene
+  Spracherkennung für Untertitel und die Deliver-Queue für den Export.
+- **Fallback: FFmpeg** (`scripts/editor/build_video.py`) — greift automatisch,
+  wenn Resolve nicht erreichbar ist (`resolve_adapter.is_available()` prüft
+  das ehrlich zur Laufzeit, statt Verfügbarkeit vorzutäuschen). Die
+  Produktion darf nie an einem einzelnen Editor-Tool scheitern.
 
 ## Anforderungen
 

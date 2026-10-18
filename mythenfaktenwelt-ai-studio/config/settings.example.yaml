@@ -7,6 +7,31 @@ channel:
   target_video_length_seconds: [45, 65]
   aspect_ratio: "9:16"
 
+platforms:
+  tiktok:
+    enabled: true
+  youtube:
+    enabled: true
+    format: "shorts"   # gleiches 9:16/~60s-Format wie TikTok, ein Video fuer beide Plattformen
+    channel_id: ""      # aus YouTube Studio uebernehmen
+    # Zugangsdaten (OAuth-Client/Token) gehoeren nach config/.env, nicht hierhin
+
+editor:
+  backend: "resolve"   # "resolve" (primaer, da Studio-Lizenz vorhanden) oder "ffmpeg" (Fallback)
+  resolve_project_prefix: "MFW"
+
+benchmark:
+  enabled: true
+  topic_clusters:
+    # Themenfelder, in denen der Benchmark Analyst nach Top-Kanaelen sucht.
+    # Deckt sich bewusst mit der Themenliste in bots/03_themen_scout.md.
+    - "Mythen"
+    - "Wissenschaft"
+    - "Weltraum"
+    - "Geschichte"
+    - "ungeloeste Raetsel"
+  refresh_interval_days: 7   # nicht vor jedem Video neu, periodisch
+
 schedule:
   # Aus Phase 0 (bisheriger Workflow) übernehmen, nicht neu erfinden.
   morning: "07:00"

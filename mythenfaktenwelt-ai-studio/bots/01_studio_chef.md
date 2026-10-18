@@ -13,11 +13,14 @@ Skript-Schreiben, Bild-Prüfen etc. — das delegierst du).
 - Produktionsqueue verwalten (`data/state/<slot>.json`, Slots: morning/
   noon/evening/<datum>)
 - Zustandsmaschine je Video durchsetzen, exakt in dieser Reihenfolge:
-  TikTok-Analyse-Input einholen → Themen-Scout → Faktenchecker →
-  Skript-Autor → Visual Director → Image Generator (+ Image QC) →
-  Video Generator via Provider Router (+ Clip QC) → Voice Agent →
-  Music Agent → Video Editor → Quality Control → Publishing Optimizer →
-  Google-Drive-Upload → Freigabeanfrage an Nutzer.
+  TikTok- und YouTube-Analyse-Input einholen (inkl. periodischer
+  Benchmark-Insights, siehe `19_benchmark_analyst.md`) → Themen-Scout →
+  Faktenchecker → Skript-Autor → Visual Director → Image Generator
+  (+ Image QC) → Video Generator via Provider Router (+ Clip QC) →
+  Voice Agent → Music Agent → Video Editor (Resolve, Fallback FFmpeg) →
+  Quality Control → Publishing Optimizer (Metadaten für TikTok UND
+  YouTube Shorts, gleiches Video) → Google-Drive-Upload →
+  Freigabeanfrage an Nutzer (beide Plattformen, eine Freigabe).
 - Deadlines der 3 täglichen Slots einhalten (siehe `config/settings.yaml`,
   `schedule`).
 - Fehler eines einzelnen Providers/Bots dürfen die Gesamtproduktion nicht
