@@ -1,0 +1,13 @@
+{
+  "_schema": {
+    "description": "Faktencheck-Ergebnisse pro Video. Kopieren nach data/facts/<video_id>.json.",
+    "fields": {
+      "claim": "die geprüfte Behauptung",
+      "status": "TRUE | FALSE | PARTLY_TRUE | UNCERTAIN",
+      "sources": "Liste von URLs/Referenzen, bevorzugt Primärquellen/Institutionen",
+      "confidence": "0.0 - 1.0, subjektive Einschätzung des Faktencheckers",
+      "notes": "Freitext, z.B. Einschraenkungen oder gegensaetzliche Quellen"
+    }
+  },
+  "claims": []
+}

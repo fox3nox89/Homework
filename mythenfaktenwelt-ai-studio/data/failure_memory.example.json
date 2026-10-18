@@ -1,0 +1,15 @@
+{
+  "_schema": {
+    "description": "Dauerhaftes Fehler-Gedaechtnis. Kopieren nach data/failure_memory.json. Bots (v.a. Visual Director, Image Generator, Video Generator, Provider Router) sollen dies vor Prompt-/Provider-Wahl konsultieren.",
+    "fields": {
+      "provider": "betroffener Dienst",
+      "error": "Kurzbeschreibung des Fehlers/Musters",
+      "context": "z.B. Szenentyp, historisches Setting, Kamerabewegung",
+      "prompt": "verwendeter Prompt (gekuerzt falls sehr lang)",
+      "solution": "was geholfen hat, oder null falls noch ungeloest",
+      "date": "ISO-Datum",
+      "resolved": "true | false"
+    }
+  },
+  "entries": []
+}

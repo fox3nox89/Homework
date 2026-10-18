@@ -1,0 +1,11 @@
+{
+  "_schema": {
+    "description": "Aktueller Kontingent-Status aller limitierten Dienste. Nie Werte erfinden - wenn nicht zuverlaessig auslesbar, UNKNOWN verwenden.",
+    "status_values": ["READY", "LIMIT", "UNKNOWN"]
+  },
+  "services": {
+    "grok": {"status": "UNKNOWN", "credits_remaining": null, "resets_at": null, "checked_at": null},
+    "elevenlabs": {"status": "UNKNOWN", "credits_remaining": null, "resets_at": null, "checked_at": null},
+    "google_flow": {"status": "UNKNOWN", "credits_remaining": null, "resets_at": null, "checked_at": null}
+  }
+}

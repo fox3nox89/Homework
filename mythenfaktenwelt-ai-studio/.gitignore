@@ -1,0 +1,37 @@
+# Zugangsdaten -- niemals committen
+config/.env
+config/settings.yaml
+
+# Laufzeitdaten (lokal, geraetespezifisch) -- Ordnerstruktur bleibt erhalten (.gitkeep)
+data/state/*
+!data/state/.gitkeep
+data/approvals/*
+!data/approvals/.gitkeep
+data/legacy_backup/*
+!data/legacy_backup/.gitkeep
+data/logs/*
+!data/logs/.gitkeep
+data/facts/*
+!data/facts/.gitkeep
+data/cost_guard.log
+data/quota_status.json
+data/provider_registry.json
+data/content_history.json
+data/failure_memory.json
+data/music_log.json
+data/benchmark_videos.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# Medien (gross, lokal, nicht ins Repo)
+*.mp4
+*.mp3
+*.wav
+*.png
+*.jpg
+*.jpeg
+!docs/**/*.png
